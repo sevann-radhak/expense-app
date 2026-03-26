@@ -135,6 +135,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language, currency, and card profiles will be configured here.'**
   String get settingsPlaceholder;
+
+  /// Section title for the Phase 1.1 debug list of categories from Drift.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories (database)'**
+  String get categoriesDebugHeading;
+
+  /// Shown when the user tries to delete the system Other row.
+  ///
+  /// In en, this message translates to:
+  /// **'This subcategory cannot be deleted.'**
+  String get cannotDeleteReservedSubcategory;
 }
 
 class _AppLocalizationsDelegate

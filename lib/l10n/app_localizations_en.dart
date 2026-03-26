@@ -30,4 +30,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsPlaceholder =>
       'Language, currency, and card profiles will be configured here.';
+
+  @override
+  String get categoriesDebugHeading => 'Categories (database)';
+
+  @override
+  String get cannotDeleteReservedSubcategory =>
+      'This subcategory cannot be deleted.';
 }

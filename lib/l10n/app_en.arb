@@ -27,5 +27,13 @@
   "settingsPlaceholder": "Language, currency, and card profiles will be configured here.",
   "@settingsPlaceholder": {
     "description": "Placeholder body on the settings screen."
+  },
+  "categoriesDebugHeading": "Categories (database)",
+  "@categoriesDebugHeading": {
+    "description": "Section title for the Phase 1.1 debug list of categories from Drift."
+  },
+  "cannotDeleteReservedSubcategory": "This subcategory cannot be deleted.",
+  "@cannotDeleteReservedSubcategory": {
+    "description": "Shown when the user tries to delete the system Other row."
   }
 }

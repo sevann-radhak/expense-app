@@ -1,14 +1,45 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import 'package:expense_app/data/local/category_seed.dart';
+
 part 'app_database.g.dart';
 
-/// Minimal anchor table so schema v1 exists and migrations have a target.
-class SchemaAnchors extends Table {
-  IntColumn get id => integer().autoIncrement()();
+@DataClassName('CategoryRow')
+class Categories extends Table {
+  TextColumn get id => text()();
+
+  TextColumn get name => text()();
+
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [SchemaAnchors])
+@DataClassName('SubcategoryRow')
+class Subcategories extends Table {
+  TextColumn get id => text()();
+
+  TextColumn get categoryId => text().references(
+        Categories,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
+
+  TextColumn get name => text()();
+
+  TextColumn get slug => text()();
+
+  BoolColumn get isSystemReserved => boolean().withDefault(const Constant(false))();
+
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [Categories, Subcategories])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
@@ -25,14 +56,23 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (Migrator m) async {
-      await m.createAll();
-    },
-  );
+        onCreate: (Migrator m) async {
+          await m.createAll();
+          await CategorySeeder.ensureSeedData(this);
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from < 2) {
+            await m.createTable(categories);
+            await m.createTable(subcategories);
+            await CategorySeeder.ensureSeedData(this);
+            await customStatement('DROP TABLE IF EXISTS schema_anchors');
+          }
+        },
+      );
 }
 
 AppDatabase? _appDatabase;

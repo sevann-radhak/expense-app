@@ -1,0 +1,47 @@
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:expense_app/data/local/app_database.dart';
+import 'package:expense_app/data/local/drift_category_repository.dart';
+import 'package:expense_app/domain/domain.dart';
+
+void main() {
+  late AppDatabase db;
+  late DriftCategoryRepository repo;
+
+  setUp(() async {
+    db = AppDatabase(NativeDatabase.memory());
+    await db.customSelect('SELECT 1').getSingle();
+    repo = DriftCategoryRepository(db);
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
+  test('seed creates eight categories each with Other subcategory', () async {
+    final cats = await db.select(db.categories).get();
+    expect(cats.length, 8);
+
+    for (final c in cats) {
+      final subs = await (db.select(db.subcategories)
+            ..where((t) => t.categoryId.equals(c.id)))
+          .get();
+      expect(subs.length, 1);
+      expect(subs.single.slug, kOtherSubcategorySlug);
+      expect(subs.single.isSystemReserved, isTrue);
+    }
+  });
+
+  test('deleteSubcategory throws for system Other', () async {
+    final row = await (db.select(db.subcategories)
+          ..where((t) => t.slug.equals(kOtherSubcategorySlug))
+          ..limit(1))
+        .getSingle();
+
+    expect(
+      () => repo.deleteSubcategory(row.id),
+      throwsA(isA<ReservedSubcategoryException>()),
+    );
+  });
+}

@@ -1,0 +1,5 @@
+# Local Cursor AI config and rules (not shared via this repo)
+.cursor/
+
+# Project docs kept local to this clone (master plan, prompts, templates)
+docs/

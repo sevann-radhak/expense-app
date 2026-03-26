@@ -27,9 +27,7 @@ class _PlaceholderHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Expense Tracker')),
-      body: const Center(
-        child: Text('Expense Tracker — web target ready.'),
-      ),
+      body: const Center(child: Text('Expense Tracker — web target ready.')),
     );
   }
 }

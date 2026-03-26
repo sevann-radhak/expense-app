@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:expense_app/main.dart';
+import 'package:expense_app/presentation/app.dart';
 
 void main() {
   testWidgets('shows placeholder home', (WidgetTester tester) async {

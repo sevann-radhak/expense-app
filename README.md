@@ -10,6 +10,16 @@ This repository contains the **Flutter** app (package `expense_app`) plus planni
 
 For a release build: `flutter build web`.
 
+### `lib/` layout (clean architecture)
+
+| Folder | Role |
+|--------|------|
+| `lib/domain/` | Entities, value objects, repository **interfaces** — **pure Dart** (no `package:flutter`). |
+| `lib/application/` | Use cases / orchestration — no Flutter UI. |
+| `lib/data/` | Repository implementations, Drift, mappers (Phase 0.4+). |
+| `lib/presentation/` | Widgets, themes, navigation shell. |
+| `lib/main.dart` | Entrypoint: `runApp` only. |
+
 ### Web-first Git scope
 
 Native project trees **`android/`**, **`ios/`**, **`linux/`**, **`macos/`**, and **`windows/`** are listed in `.gitignore` so the repository stays focused on **Dart + web** sources. They are standard Flutter templates, not your app logic; you can recreate them anytime.
@@ -28,6 +38,7 @@ Then remove those lines from `.gitignore` (or stop ignoring the folders you need
 |------|---------|
 | [docs/PROJECT_MASTER_PLAN.md](docs/PROJECT_MASTER_PLAN.md) | Phased roadmap, stack choice, domain summary, open questions |
 | [docs/01-implementation-initial-plan.md](docs/01-implementation-initial-plan.md) | Step-by-step implementation plan 01 (foundation → MVP entry) |
+| [docs/_templates/implementation-plan-template.md](docs/_templates/implementation-plan-template.md) | Template for `02-…` / `03-…` implementation plans (status + phases) |
 | [Plantilla-2025-agent-prompt.mdc](docs/Plantilla-2025-agent-prompt.mdc) | Legacy Excel workbook structure (parity reference) |
 | [Plantilla 2025.xlsx](docs/Plantilla%202025.xlsx) | Source Excel workbook (same folder as spec) |
 | [.cursor/rules/](.cursor/rules/) | Implementation rules for the AI agent |

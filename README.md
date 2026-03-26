@@ -10,13 +10,25 @@ This repository contains the **Flutter** app (package `expense_app`) plus planni
 
 For a release build: `flutter build web`.
 
+**Docker / CI vs your machine:** If you (or a tool) run `flutter pub get` inside Linux Docker while this folder is bind-mounted from Windows, `.dart_tool/package_config.json` can end up with Linux paths (`file:///root/.pub-cache/...`). Your local `flutter run` will then fail with “cannot find path” for `widgets.dart` or `drift.dart`. Fix: delete `.dart_tool` (and optionally `build/`), then run **`flutter pub get` again on your PC** so paths point at your Flutter SDK and `%LOCALAPPDATA%\Pub\Cache`.
+
+After changing Drift tables or queries, regenerate code:
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+### Drift on web
+
+The files `web/sqlite3.wasm` and `web/drift_worker.js` are required for SQLite in the browser. They are pinned to the **`sqlite3`** and **`drift`** versions resolved in `pubspec.lock` (see releases: [sqlite3.dart](https://github.com/simolus3/sqlite3.dart/releases), [drift](https://github.com/simolus3/drift/releases)). After upgrading those packages, download the matching assets again and replace the files in `web/`. In production, serve `*.wasm` with `Content-Type: application/wasm`. Some browsers may use slower storage (e.g. private mode or without COOP/COEP); see [Drift web docs](https://drift.simonbinder.eu/web/).
+
 ### `lib/` layout (clean architecture)
 
 | Folder | Role |
 |--------|------|
 | `lib/domain/` | Entities, value objects, repository **interfaces** — **pure Dart** (no `package:flutter`). |
 | `lib/application/` | Use cases / orchestration — no Flutter UI. |
-| `lib/data/` | Repository implementations, Drift, mappers (Phase 0.4+). |
+| `lib/data/` | Repository implementations, Drift (`lib/data/local/app_database.dart`), mappers. |
 | `lib/presentation/` | Widgets, themes, navigation shell. |
 | `lib/main.dart` | Entrypoint: `runApp` only. |
 

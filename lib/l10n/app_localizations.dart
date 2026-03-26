@@ -100,11 +100,41 @@ abstract class AppLocalizations {
   /// **'Expense Tracker'**
   String get appTitle;
 
-  /// Placeholder on the home screen until expense features exist.
+  /// Bottom navigation / rail label for home.
   ///
   /// In en, this message translates to:
-  /// **'Expense Tracker — web target ready.'**
-  String get placeholderHomeBody;
+  /// **'Home'**
+  String get navHome;
+
+  /// Bottom navigation / rail label for settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// App bar title on the home route.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get homeTitle;
+
+  /// Empty state on the home screen before expense data exists.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses for this month yet. Lists and filters will appear here.'**
+  String get homeEmptyState;
+
+  /// App bar title on the settings route.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// Placeholder body on the settings screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Language, currency, and card profiles will be configured here.'**
+  String get settingsPlaceholder;
 }
 
 class _AppLocalizationsDelegate

@@ -4,8 +4,28 @@
   "@appTitle": {
     "description": "Application title (window switcher, toolbars)."
   },
-  "placeholderHomeBody": "Expense Tracker — web target ready.",
-  "@placeholderHomeBody": {
-    "description": "Placeholder on the home screen until expense features exist."
+  "navHome": "Home",
+  "@navHome": {
+    "description": "Bottom navigation / rail label for home."
+  },
+  "navSettings": "Settings",
+  "@navSettings": {
+    "description": "Bottom navigation / rail label for settings."
+  },
+  "homeTitle": "Home",
+  "@homeTitle": {
+    "description": "App bar title on the home route."
+  },
+  "homeEmptyState": "No expenses for this month yet. Lists and filters will appear here.",
+  "@homeEmptyState": {
+    "description": "Empty state on the home screen before expense data exists."
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "App bar title on the settings route."
+  },
+  "settingsPlaceholder": "Language, currency, and card profiles will be configured here.",
+  "@settingsPlaceholder": {
+    "description": "Placeholder body on the settings screen."
   }
 }

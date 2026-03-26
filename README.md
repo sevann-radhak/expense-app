@@ -36,7 +36,7 @@ The files `web/sqlite3.wasm` and `web/drift_worker.js` are required for SQLite i
 | `lib/domain/` | Entities, value objects, repository **interfaces** — **pure Dart** (no `package:flutter`). |
 | `lib/application/` | Use cases / orchestration — no Flutter UI. |
 | `lib/data/` | Repository implementations, Drift (`lib/data/local/app_database.dart`), mappers. |
-| `lib/presentation/` | Widgets, themes, navigation shell. |
+| `lib/presentation/` | Widgets, themes, [`go_router`](https://pub.dev/packages/go_router) config (`router/`), responsive shell (`shell/`), feature stubs (`home/`, `settings/`). |
 | `lib/main.dart` | Entrypoint: `runApp` only. |
 
 ### Web-first Git scope

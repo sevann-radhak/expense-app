@@ -12,5 +12,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Expense Tracker';
 
   @override
-  String get placeholderHomeBody => 'Expense Tracker — web target ready.';
+  String get navHome => 'Home';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get homeTitle => 'Home';
+
+  @override
+  String get homeEmptyState =>
+      'No expenses for this month yet. Lists and filters will appear here.';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsPlaceholder =>
+      'Language, currency, and card profiles will be configured here.';
 }

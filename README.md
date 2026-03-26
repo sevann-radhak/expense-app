@@ -18,6 +18,13 @@ After changing Drift tables or queries, regenerate code:
 dart run build_runner build --delete-conflicting-outputs
 ```
 
+### Internationalization (l10n)
+
+- **Template locale:** English strings live in [`lib/l10n/app_en.arb`](lib/l10n/app_en.arb). Configuration is in [`l10n.yaml`](l10n.yaml) at the repo root; `pubspec.yaml` sets `flutter: generate: true` so `flutter pub get` / build runs code generation.
+- **In widgets:** import `package:expense_app/l10n/app_localizations.dart`, set `MaterialApp.localizationsDelegates` and `supportedLocales` to `AppLocalizations.*`, and read strings with `AppLocalizations.of(context)!`. Generated files under `lib/l10n/` are checked in; run `flutter gen-l10n` after ARB edits (or rely on `flutter pub get` / build with `generate: true`).
+- **Adding a string:** Add a key and value to `app_en.arb` (optional `"@key": { "description": "..." }` for translators). Use [ICU placeholders](https://docs.flutter.dev/ui/accessibility-and-localization/internationalization#placeholders-plurals-and-selects) when you need variables (`{name}`, plurals, `select`).
+- **New locale:** Add `app_<lang>.arb` beside `app_en.arb` with the same keys, run `flutter gen-l10n` (or `flutter pub get`), then include the locale in your app’s locale resolution logic when you add a language picker (later phase).
+
 ### Drift on web
 
 The files `web/sqlite3.wasm` and `web/drift_worker.js` are required for SQLite in the browser. They are pinned to the **`sqlite3`** and **`drift`** versions resolved in `pubspec.lock` (see releases: [sqlite3.dart](https://github.com/simolus3/sqlite3.dart/releases), [drift](https://github.com/simolus3/drift/releases)). After upgrading those packages, download the matching assets again and replace the files in `web/`. In production, serve `*.wasm` with `Content-Type: application/wasm`. Some browsers may use slower storage (e.g. private mode or without COOP/COEP); see [Drift web docs](https://drift.simonbinder.eu/web/).

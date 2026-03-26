@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 
+import 'package:expense_app/l10n/app_localizations.dart';
+
 class ExpenseApp extends StatelessWidget {
   const ExpenseApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Expense Tracker',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -21,9 +25,10 @@ class PlaceholderHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Expense Tracker')),
-      body: const Center(child: Text('Expense Tracker — web target ready.')),
+      appBar: AppBar(title: Text(l10n.appTitle)),
+      body: Center(child: Text(l10n.placeholderHomeBody)),
     );
   }
 }

@@ -1,0 +1,11 @@
+{
+  "@@locale": "en",
+  "appTitle": "Expense Tracker",
+  "@appTitle": {
+    "description": "Application title (window switcher, toolbars)."
+  },
+  "placeholderHomeBody": "Expense Tracker — web target ready.",
+  "@placeholderHomeBody": {
+    "description": "Placeholder on the home screen until expense features exist."
+  }
+}

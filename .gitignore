@@ -1,5 +1,75 @@
-# Local Cursor AI config and rules (not shared via this repo)
-.cursor/
+# =============================================================================
+# What belongs in Git: Dart/app code under lib/, tests, web/, pubspec, analysis
+# options, README. Platform folders below are ignored on purpose (web-first);
+# regenerate locally when you need mobile/desktop (see README).
+# =============================================================================
 
-# Project docs kept local to this clone (master plan, prompts, templates)
+# --- This repo (local-only) ---
+.cursor/
 docs/
+
+# --- Flutter tool metadata (SDK revision/channel; regenerated per machine) ---
+.metadata
+
+# --- Native/desktop shells (reproducible with `flutter create`) ---
+/android/
+/ios/
+/linux/
+/macos/
+/windows/
+
+# --- Flutter SDK default (stable app template) ---
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Flutter / Dart / Pub
+**/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+coverage/
+
+# Symbolication / obfuscation
+app.*.symbols
+app.*.map.json
+
+# --- Local machine, caches, secrets ---
+.dart_tool/chrome-device/
+**/.gradle/
+**/.kotlin/
+**/.cxx/
+**/android/captures/
+*.hprof
+pubspec_overrides.yaml
+
+# Environment / secrets (keep .env.example if you add one)
+.env
+.env.*
+!.env.example
+
+Thumbs.db
+
+# Signing (if you re-enable android/ in Git later)
+**/android/key.properties
+**/*.jks
+**/*.keystore

@@ -75,10 +75,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseAmountLabel => 'Amount';
 
   @override
-  String get expenseCurrencyLabel => 'Currency code';
+  String get expenseCurrencyLabel => 'Currency';
 
   @override
-  String get expenseFxToUsdLabel => 'FX to USD (multiply amount by this)';
+  String expenseCurrencyCustom(String code) {
+    return '$code (not in default table)';
+  }
+
+  @override
+  String expenseFxTableAsOf(String asOf) {
+    return 'Default rates as of: $asOf';
+  }
+
+  @override
+  String get expenseFxHelper =>
+      'How many units of this currency equal 1 USD (e.g. 1 USD = 1050 ARS). You can override the default.';
+
+  @override
+  String get expenseFxToUsdLabel => 'Units of this currency per 1 USD';
 
   @override
   String expenseUsdComputedLabel(String amount) {
@@ -110,7 +124,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseFxRequired => 'Enter an FX rate.';
 
   @override
-  String get expenseFxInvalid => 'FX rate must be a positive number.';
+  String get expenseFxInvalid => 'Enter a positive number (units per 1 USD).';
 
   @override
   String get invalidSubcategoryPairing =>
@@ -140,4 +154,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get monthPickerNext => 'Next month';
+
+  @override
+  String get settingsResetDataTitle => 'Reset all local data?';
+
+  @override
+  String get settingsResetDataMessage =>
+      'This deletes every expense and resets categories to the built-in list (including Other). This cannot be undone.';
+
+  @override
+  String get settingsResetDataButton => 'Reset database (dev)';
+
+  @override
+  String get settingsResetDataConfirm => 'Reset everything';
+
+  @override
+  String get settingsResetDataSuccess =>
+      'Local database reset to initial seed.';
 }

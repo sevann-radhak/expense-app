@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-03-27",
+  "note": "Indicative quotes: how many units of each currency equal 1 USD (human-readable). Not investment advice. Replace with a live FX API when ready.",
+  "defaultCurrencyCode": "ARS",
+  "currencies": [
+    {
+      "code": "ARS",
+      "nameEn": "Argentine peso",
+      "localUnitsPerUsd": 1400
+    },
+    {
+      "code": "USD",
+      "nameEn": "US dollar",
+      "localUnitsPerUsd": 1
+    },
+    {
+      "code": "EUR",
+      "nameEn": "Euro",
+      "localUnitsPerUsd": 0.892592
+    },
+    {
+      "code": "BRL",
+      "nameEn": "Brazilian real",
+      "localUnitsPerUsd": 5.268181
+    },
+    {
+      "code": "COP",
+      "nameEn": "Colombian peso",
+      "localUnitsPerUsd": 3663
+    },
+    {
+      "code": "CLP",
+      "nameEn": "Chilean peso",
+      "localUnitsPerUsd": 930
+    },
+    {
+      "code": "UYU",
+      "nameEn": "Uruguayan peso",
+      "localUnitsPerUsd": 42
+    },
+    {
+      "code": "PYG",
+      "nameEn": "Paraguayan guaraní",
+      "localUnitsPerUsd": 6538.86
+    },
+    {
+      "code": "PEN",
+      "nameEn": "Peruvian sol",
+      "localUnitsPerUsd": 3.65
+    },
+    {
+      "code": "MXN",
+      "nameEn": "Mexican peso",
+      "localUnitsPerUsd": 18.12
+    }
+  ]
+}

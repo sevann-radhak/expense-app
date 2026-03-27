@@ -3,26 +3,50 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 
-class ExpenseFormDialog extends ConsumerStatefulWidget {
+class ExpenseFormDialog extends ConsumerWidget {
   const ExpenseFormDialog({super.key, this.initial});
 
   final Expense? initial;
 
   @override
-  ConsumerState<ExpenseFormDialog> createState() => _ExpenseFormDialogState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(defaultFxCatalogProvider);
+    return async.when(
+      data: (catalog) => _ExpenseFormLoaded(catalog: catalog, initial: initial),
+      loading: () => const AlertDialog(
+        content: SizedBox(
+          width: 200,
+          height: 120,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (e, _) => AlertDialog(content: Text('$e')),
+    );
+  }
 }
 
-class _ExpenseFormDialogState extends ConsumerState<ExpenseFormDialog> {
+class _ExpenseFormLoaded extends ConsumerStatefulWidget {
+  const _ExpenseFormLoaded({required this.catalog, this.initial});
+
+  final DefaultFxCatalog catalog;
+  final Expense? initial;
+
+  @override
+  ConsumerState<_ExpenseFormLoaded> createState() => _ExpenseFormLoadedState();
+}
+
+class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
-  final _currencyController = TextEditingController(text: 'USD');
-  final _fxController = TextEditingController(text: '1');
+  final _fxController = TextEditingController();
 
   late DateTime _occurredOn;
+  late String _currencyCode;
   String? _categoryId;
   String? _subcategoryId;
   bool _paidWithCreditCard = false;
@@ -31,17 +55,25 @@ class _ExpenseFormDialogState extends ConsumerState<ExpenseFormDialog> {
   void initState() {
     super.initState();
     final i = widget.initial;
+    final catalog = widget.catalog;
     if (i != null) {
       _occurredOn = DateTime(i.occurredOn.year, i.occurredOn.month, i.occurredOn.day);
       _categoryId = i.categoryId;
       _subcategoryId = i.subcategoryId;
       _amountController.text = _formatAmount(i.amountOriginal);
-      _currencyController.text = i.currencyCode;
-      _fxController.text = _formatAmount(i.manualFxRateToUsd);
+      _currencyCode = i.currencyCode.toUpperCase();
+      final m = i.manualFxRateToUsd;
+      _fxController.text = m > 0
+          ? formatLocalUnitsPerUsdForField(1.0 / m)
+          : formatLocalUnitsPerUsdForField(catalog.localUnitsPerUsdFor(_currencyCode));
       _paidWithCreditCard = i.paidWithCreditCard;
     } else {
       final n = DateTime.now();
       _occurredOn = DateTime(n.year, n.month, n.day);
+      _currencyCode = catalog.defaultCurrencyCode;
+      _fxController.text = formatLocalUnitsPerUsdForField(
+        catalog.localUnitsPerUsdFor(_currencyCode),
+      );
     }
   }
 
@@ -55,7 +87,6 @@ class _ExpenseFormDialogState extends ConsumerState<ExpenseFormDialog> {
   @override
   void dispose() {
     _amountController.dispose();
-    _currencyController.dispose();
     _fxController.dispose();
     super.dispose();
   }
@@ -80,12 +111,49 @@ class _ExpenseFormDialogState extends ConsumerState<ExpenseFormDialog> {
   }
 
   double get _previewUsd {
-    final a = _parseAmount(_amountController.text);
-    final fx = _parseAmount(_fxController.text);
-    if (a == null || fx == null) {
+    final amount = _parseAmount(_amountController.text);
+    final localPerUsd = _parseAmount(_fxController.text);
+    if (amount == null || localPerUsd == null || localPerUsd <= 0) {
       return 0;
     }
-    return Expense.computeUsd(a, fx);
+    return amount / localPerUsd;
+  }
+
+  List<DropdownMenuItem<String>> _currencyMenuItems(AppLocalizations l10n) {
+    final catalog = widget.catalog;
+    final inCatalog = catalog.currencies.map((c) => c.code).toSet();
+    final items = catalog.currencies
+        .map(
+          (c) => DropdownMenuItem<String>(
+            value: c.code,
+            child: Text(c.menuLabel),
+          ),
+        )
+        .toList();
+    final code = _currencyCode;
+    if (!inCatalog.contains(code)) {
+      items.insert(
+        0,
+        DropdownMenuItem<String>(
+          value: code,
+          child: Text(l10n.expenseCurrencyCustom(code)),
+        ),
+      );
+    }
+    return items;
+  }
+
+  void _onCurrencyChanged(String? code) {
+    if (code == null) {
+      return;
+    }
+    setState(() {
+      _currencyCode = code;
+      final opt = widget.catalog.optionForCode(code);
+      if (opt != null) {
+        _fxController.text = formatLocalUnitsPerUsdForField(opt.localUnitsPerUsd);
+      }
+    });
   }
 
   Future<void> _save() async {
@@ -94,8 +162,8 @@ class _ExpenseFormDialogState extends ConsumerState<ExpenseFormDialog> {
       return;
     }
     final amount = _parseAmount(_amountController.text);
-    final fx = _parseAmount(_fxController.text);
-    if (amount == null || fx == null) {
+    final localPerUsd = _parseAmount(_fxController.text);
+    if (amount == null || localPerUsd == null || localPerUsd <= 0) {
       return;
     }
     if (_categoryId == null || _subcategoryId == null) {
@@ -104,14 +172,8 @@ class _ExpenseFormDialogState extends ConsumerState<ExpenseFormDialog> {
       );
       return;
     }
-    final currency = _currencyController.text.trim().toUpperCase();
-    if (currency.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.expenseCurrencyRequired)),
-      );
-      return;
-    }
 
+    final manualFx = 1.0 / localPerUsd;
     final repo = ref.read(expenseRepositoryProvider);
     final expense = Expense(
       id: widget.initial?.id ?? Uuid().v4(),
@@ -119,9 +181,9 @@ class _ExpenseFormDialogState extends ConsumerState<ExpenseFormDialog> {
       categoryId: _categoryId!,
       subcategoryId: _subcategoryId!,
       amountOriginal: amount,
-      currencyCode: currency,
-      manualFxRateToUsd: fx,
-      amountUsd: Expense.computeUsd(amount, fx),
+      currencyCode: _currencyCode,
+      manualFxRateToUsd: manualFx,
+      amountUsd: Expense.computeUsd(amount, manualFx),
       paidWithCreditCard: _paidWithCreditCard,
     );
 
@@ -239,7 +301,6 @@ class _ExpenseFormDialogState extends ConsumerState<ExpenseFormDialog> {
                   ),
                 ),
                 DropdownButtonFormField<String>(
-                  // Controlled selection; `initialValue` does not track parent updates here.
                   // ignore: deprecated_member_use
                   value: _categoryId != null &&
                           categories.any((c) => c.id == _categoryId)
@@ -315,22 +376,22 @@ class _ExpenseFormDialogState extends ConsumerState<ExpenseFormDialog> {
                     return null;
                   },
                 ),
-                TextFormField(
-                  controller: _currencyController,
-                  decoration: InputDecoration(labelText: l10n.expenseCurrencyLabel),
-                  textCapitalization: TextCapitalization.characters,
-                  onChanged: (_) => setState(() {}),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return l10n.expenseCurrencyRequired;
-                    }
-                    return null;
-                  },
+                DropdownButtonFormField<String>(
+                  // ignore: deprecated_member_use
+                  value: _currencyCode,
+                  decoration: InputDecoration(
+                    labelText: l10n.expenseCurrencyLabel,
+                    helperText: l10n.expenseFxTableAsOf(widget.catalog.asOf),
+                  ),
+                  items: _currencyMenuItems(l10n),
+                  onChanged: _onCurrencyChanged,
                 ),
                 TextFormField(
                   controller: _fxController,
-                  decoration:
-                      InputDecoration(labelText: l10n.expenseFxToUsdLabel),
+                  decoration: InputDecoration(
+                    labelText: l10n.expenseFxToUsdLabel,
+                    helperText: l10n.expenseFxHelper,
+                  ),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),

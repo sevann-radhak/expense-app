@@ -48,8 +48,25 @@
   "expenseCategoryLabel": "Category",
   "expenseSubcategoryLabel": "Subcategory",
   "expenseAmountLabel": "Amount",
-  "expenseCurrencyLabel": "Currency code",
-  "expenseFxToUsdLabel": "FX to USD (multiply amount by this)",
+  "expenseCurrencyLabel": "Currency",
+  "expenseCurrencyCustom": "{code} (not in default table)",
+  "@expenseCurrencyCustom": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseFxTableAsOf": "Default rates as of: {asOf}",
+  "@expenseFxTableAsOf": {
+    "placeholders": {
+      "asOf": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseFxHelper": "How many units of this currency equal 1 USD (e.g. 1 USD = 1050 ARS). You can override the default.",
+  "expenseFxToUsdLabel": "Units of this currency per 1 USD",
   "expenseUsdComputedLabel": "Computed USD: {amount}",
   "@expenseUsdComputedLabel": {
     "description": "Shows recomputed USD from amount and FX.",
@@ -67,7 +84,7 @@
   "expenseAmountInvalid": "Invalid number.",
   "expenseCurrencyRequired": "Enter a currency code.",
   "expenseFxRequired": "Enter an FX rate.",
-  "expenseFxInvalid": "FX rate must be a positive number.",
+  "expenseFxInvalid": "Enter a positive number (units per 1 USD).",
   "invalidSubcategoryPairing": "That subcategory does not belong to the selected category.",
   "addExpenseTooltip": "Add expense",
   "expenseListUsd": "USD {amount}",
@@ -92,5 +109,10 @@
   "expenseListCardBadge": "Card",
   "expensesThisMonthHeading": "This month",
   "monthPickerPrevious": "Previous month",
-  "monthPickerNext": "Next month"
+  "monthPickerNext": "Next month",
+  "settingsResetDataTitle": "Reset all local data?",
+  "settingsResetDataMessage": "This deletes every expense and resets categories to the built-in list (including Other). This cannot be undone.",
+  "settingsResetDataButton": "Reset database (dev)",
+  "settingsResetDataConfirm": "Reset everything",
+  "settingsResetDataSuccess": "Local database reset to initial seed."
 }

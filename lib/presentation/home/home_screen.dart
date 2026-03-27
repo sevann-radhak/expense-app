@@ -151,26 +151,61 @@ class _ExpenseTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     final dateStr = ExpenseDates.toStorageDate(expense.occurredOn);
     final usdStr = expense.amountUsd.toStringAsFixed(2);
     final origStr = expense.amountOriginal.toStringAsFixed(2);
-    final subtitle = StringBuffer(dateStr);
-    if (expense.currencyCode.toUpperCase() != 'USD') {
-      subtitle.write(' · ${l10n.expenseListOriginal(origStr, expense.currencyCode)}');
-    }
-    if (expense.paidWithCreditCard) {
-      subtitle.write(' · ${l10n.expenseListCardBadge}');
-    }
+    final originalLabel = l10n.expenseListOriginal(origStr, expense.currencyCode);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
+      child: InkWell(
         onTap: onTap,
-        title: Text('$categoryName — $subcategoryName'),
-        subtitle: Text(subtitle.toString()),
-        trailing: Text(
-          l10n.expenseListUsd(usdStr),
-          style: Theme.of(context).textTheme.titleSmall,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    style: theme.textTheme.bodyMedium,
+                    children: [
+                      TextSpan(
+                        text: '$categoryName — $subcategoryName · $dateStr',
+                      ),
+                      if (expense.paidWithCreditCard)
+                        TextSpan(
+                          text: ' · ${l10n.expenseListCardBadge}',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    originalLabel,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    l10n.expenseListUsd(usdStr),
+                    style: theme.textTheme.titleSmall,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -45,7 +45,8 @@ class Expense {
   final double amountOriginal;
   final String currencyCode;
 
-  /// Multiply [amountOriginal] by this rate to get USD (manual override).
+  /// Multiplier to USD: `amountUsd = amountOriginal * manualFxRateToUsd`.
+  /// If the UI uses “1 USD = X local units”, then `manualFxRateToUsd = 1 / X`.
   final double manualFxRateToUsd;
 
   /// Stored snapshot: `amountOriginal * manualFxRateToUsd` at save time.

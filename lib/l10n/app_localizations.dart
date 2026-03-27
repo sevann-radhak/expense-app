@@ -223,13 +223,31 @@ abstract class AppLocalizations {
   /// No description provided for @expenseCurrencyLabel.
   ///
   /// In en, this message translates to:
-  /// **'Currency code'**
+  /// **'Currency'**
   String get expenseCurrencyLabel;
+
+  /// No description provided for @expenseCurrencyCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'{code} (not in default table)'**
+  String expenseCurrencyCustom(String code);
+
+  /// No description provided for @expenseFxTableAsOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Default rates as of: {asOf}'**
+  String expenseFxTableAsOf(String asOf);
+
+  /// No description provided for @expenseFxHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'How many units of this currency equal 1 USD (e.g. 1 USD = 1050 ARS). You can override the default.'**
+  String get expenseFxHelper;
 
   /// No description provided for @expenseFxToUsdLabel.
   ///
   /// In en, this message translates to:
-  /// **'FX to USD (multiply amount by this)'**
+  /// **'Units of this currency per 1 USD'**
   String get expenseFxToUsdLabel;
 
   /// Shows recomputed USD from amount and FX.
@@ -289,7 +307,7 @@ abstract class AppLocalizations {
   /// No description provided for @expenseFxInvalid.
   ///
   /// In en, this message translates to:
-  /// **'FX rate must be a positive number.'**
+  /// **'Enter a positive number (units per 1 USD).'**
   String get expenseFxInvalid;
 
   /// No description provided for @invalidSubcategoryPairing.
@@ -339,6 +357,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next month'**
   String get monthPickerNext;
+
+  /// No description provided for @settingsResetDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset all local data?'**
+  String get settingsResetDataTitle;
+
+  /// No description provided for @settingsResetDataMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This deletes every expense and resets categories to the built-in list (including Other). This cannot be undone.'**
+  String get settingsResetDataMessage;
+
+  /// No description provided for @settingsResetDataButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset database (dev)'**
+  String get settingsResetDataButton;
+
+  /// No description provided for @settingsResetDataConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset everything'**
+  String get settingsResetDataConfirm;
+
+  /// No description provided for @settingsResetDataSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Local database reset to initial seed.'**
+  String get settingsResetDataSuccess;
 }
 
 class _AppLocalizationsDelegate

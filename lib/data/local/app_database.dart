@@ -39,7 +39,40 @@ class Subcategories extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Categories, Subcategories])
+@DataClassName('ExpenseRow')
+class Expenses extends Table {
+  TextColumn get id => text()();
+
+  /// `YYYY-MM-DD` (local calendar date).
+  TextColumn get occurredOn => text()();
+
+  TextColumn get categoryId => text().references(
+        Categories,
+        #id,
+        onDelete: KeyAction.restrict,
+      )();
+
+  TextColumn get subcategoryId => text().references(
+        Subcategories,
+        #id,
+        onDelete: KeyAction.restrict,
+      )();
+
+  RealColumn get amountOriginal => real()();
+
+  TextColumn get currencyCode => text().withDefault(const Constant('USD'))();
+
+  RealColumn get manualFxRateToUsd => real().withDefault(const Constant(1.0))();
+
+  RealColumn get amountUsd => real()();
+
+  BoolColumn get paidWithCreditCard => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [Categories, Subcategories, Expenses])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
@@ -56,7 +89,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -70,6 +103,9 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(subcategories);
             await CategorySeeder.ensureSeedData(this);
             await customStatement('DROP TABLE IF EXISTS schema_anchors');
+          }
+          if (from < 3) {
+            await m.createTable(expenses);
           }
         },
       );

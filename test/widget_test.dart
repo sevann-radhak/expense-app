@@ -36,7 +36,10 @@ void main() {
       );
       await tester.pumpAndSettle();
       final l10n = await AppLocalizations.delegate.load(const Locale('en'));
+      expect(find.byKey(const ValueKey<String>('selected-month-label')), findsOneWidget);
       expect(find.text(l10n.categoriesDebugHeading), findsOneWidget);
+      await tester.tap(find.text(l10n.categoriesDebugHeading));
+      await tester.pumpAndSettle();
       expect(find.text('Formation'), findsOneWidget);
     } finally {
       await disposeUiAndDb(tester, db);

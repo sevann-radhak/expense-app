@@ -4,6 +4,9 @@ import 'package:expense_app/domain/category.dart';
 abstract class CategoryRepository {
   Stream<List<Category>> watchCategories();
 
+  /// All subcategories (for resolving labels in expense lists).
+  Stream<List<Subcategory>> watchAllSubcategories();
+
   Stream<List<Subcategory>> watchSubcategories(String categoryId);
 
   /// Deletes a user-defined subcategory. Throws [ReservedSubcategoryException]

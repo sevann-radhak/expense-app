@@ -3,3 +3,5 @@ library;
 
 export 'category.dart';
 export 'category_repository.dart';
+export 'expense.dart';
+export 'expense_repository.dart';

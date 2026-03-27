@@ -9,6 +9,27 @@ class DriftCategoryRepository implements CategoryRepository {
   final AppDatabase _db;
 
   @override
+  Stream<List<Subcategory>> watchAllSubcategories() {
+    return (_db.select(_db.subcategories)
+          ..orderBy([(t) => OrderingTerm.asc(t.categoryId), (t) => OrderingTerm.asc(t.sortOrder)]))
+        .watch()
+        .map(
+          (rows) => rows
+              .map(
+                (r) => Subcategory(
+                  id: r.id,
+                  categoryId: r.categoryId,
+                  name: r.name,
+                  slug: r.slug,
+                  isSystemReserved: r.isSystemReserved,
+                  sortOrder: r.sortOrder,
+                ),
+              )
+              .toList(),
+        );
+  }
+
+  @override
   Stream<List<Category>> watchCategories() {
     return (_db.select(_db.categories)
           ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))

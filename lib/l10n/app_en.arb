@@ -35,5 +35,62 @@
   "cannotDeleteReservedSubcategory": "This subcategory cannot be deleted.",
   "@cannotDeleteReservedSubcategory": {
     "description": "Shown when the user tries to delete the system Other row."
-  }
+  },
+  "addExpenseTitle": "Add expense",
+  "editExpenseTitle": "Edit expense",
+  "saveExpenseAction": "Save",
+  "deleteExpenseAction": "Delete",
+  "cancel": "Cancel",
+  "confirmDelete": "Delete",
+  "deleteExpenseConfirmTitle": "Delete expense?",
+  "deleteExpenseConfirmMessage": "This cannot be undone.",
+  "expenseDateLabel": "Date",
+  "expenseCategoryLabel": "Category",
+  "expenseSubcategoryLabel": "Subcategory",
+  "expenseAmountLabel": "Amount",
+  "expenseCurrencyLabel": "Currency code",
+  "expenseFxToUsdLabel": "FX to USD (multiply amount by this)",
+  "expenseUsdComputedLabel": "Computed USD: {amount}",
+  "@expenseUsdComputedLabel": {
+    "description": "Shows recomputed USD from amount and FX.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expensePaidWithCardLabel": "Paid with credit card",
+  "expenseCategoryRequired": "Choose a category.",
+  "expenseSubcategoryRequired": "Choose a subcategory.",
+  "expenseNoSubcategories": "No subcategories for this category.",
+  "expenseAmountRequired": "Enter an amount.",
+  "expenseAmountInvalid": "Invalid number.",
+  "expenseCurrencyRequired": "Enter a currency code.",
+  "expenseFxRequired": "Enter an FX rate.",
+  "expenseFxInvalid": "FX rate must be a positive number.",
+  "invalidSubcategoryPairing": "That subcategory does not belong to the selected category.",
+  "addExpenseTooltip": "Add expense",
+  "expenseListUsd": "USD {amount}",
+  "@expenseListUsd": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseListOriginal": "{amount} {currency}",
+  "@expenseListOriginal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseListCardBadge": "Card",
+  "expensesThisMonthHeading": "This month",
+  "monthPickerPrevious": "Previous month",
+  "monthPickerNext": "Next month"
 }

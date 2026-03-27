@@ -37,4 +37,107 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cannotDeleteReservedSubcategory =>
       'This subcategory cannot be deleted.';
+
+  @override
+  String get addExpenseTitle => 'Add expense';
+
+  @override
+  String get editExpenseTitle => 'Edit expense';
+
+  @override
+  String get saveExpenseAction => 'Save';
+
+  @override
+  String get deleteExpenseAction => 'Delete';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get confirmDelete => 'Delete';
+
+  @override
+  String get deleteExpenseConfirmTitle => 'Delete expense?';
+
+  @override
+  String get deleteExpenseConfirmMessage => 'This cannot be undone.';
+
+  @override
+  String get expenseDateLabel => 'Date';
+
+  @override
+  String get expenseCategoryLabel => 'Category';
+
+  @override
+  String get expenseSubcategoryLabel => 'Subcategory';
+
+  @override
+  String get expenseAmountLabel => 'Amount';
+
+  @override
+  String get expenseCurrencyLabel => 'Currency code';
+
+  @override
+  String get expenseFxToUsdLabel => 'FX to USD (multiply amount by this)';
+
+  @override
+  String expenseUsdComputedLabel(String amount) {
+    return 'Computed USD: $amount';
+  }
+
+  @override
+  String get expensePaidWithCardLabel => 'Paid with credit card';
+
+  @override
+  String get expenseCategoryRequired => 'Choose a category.';
+
+  @override
+  String get expenseSubcategoryRequired => 'Choose a subcategory.';
+
+  @override
+  String get expenseNoSubcategories => 'No subcategories for this category.';
+
+  @override
+  String get expenseAmountRequired => 'Enter an amount.';
+
+  @override
+  String get expenseAmountInvalid => 'Invalid number.';
+
+  @override
+  String get expenseCurrencyRequired => 'Enter a currency code.';
+
+  @override
+  String get expenseFxRequired => 'Enter an FX rate.';
+
+  @override
+  String get expenseFxInvalid => 'FX rate must be a positive number.';
+
+  @override
+  String get invalidSubcategoryPairing =>
+      'That subcategory does not belong to the selected category.';
+
+  @override
+  String get addExpenseTooltip => 'Add expense';
+
+  @override
+  String expenseListUsd(String amount) {
+    return 'USD $amount';
+  }
+
+  @override
+  String expenseListOriginal(String amount, String currency) {
+    return '$amount $currency';
+  }
+
+  @override
+  String get expenseListCardBadge => 'Card';
+
+  @override
+  String get expensesThisMonthHeading => 'This month';
+
+  @override
+  String get monthPickerPrevious => 'Previous month';
+
+  @override
+  String get monthPickerNext => 'Next month';
 }

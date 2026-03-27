@@ -675,11 +675,607 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
   }
 }
 
+class $ExpensesTable extends Expenses
+    with TableInfo<$ExpensesTable, ExpenseRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExpensesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _occurredOnMeta = const VerificationMeta(
+    'occurredOn',
+  );
+  @override
+  late final GeneratedColumn<String> occurredOn = GeneratedColumn<String>(
+    'occurred_on',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES categories (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _subcategoryIdMeta = const VerificationMeta(
+    'subcategoryId',
+  );
+  @override
+  late final GeneratedColumn<String> subcategoryId = GeneratedColumn<String>(
+    'subcategory_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES subcategories (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _amountOriginalMeta = const VerificationMeta(
+    'amountOriginal',
+  );
+  @override
+  late final GeneratedColumn<double> amountOriginal = GeneratedColumn<double>(
+    'amount_original',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currencyCodeMeta = const VerificationMeta(
+    'currencyCode',
+  );
+  @override
+  late final GeneratedColumn<String> currencyCode = GeneratedColumn<String>(
+    'currency_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('USD'),
+  );
+  static const VerificationMeta _manualFxRateToUsdMeta = const VerificationMeta(
+    'manualFxRateToUsd',
+  );
+  @override
+  late final GeneratedColumn<double> manualFxRateToUsd =
+      GeneratedColumn<double>(
+        'manual_fx_rate_to_usd',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(1.0),
+      );
+  static const VerificationMeta _amountUsdMeta = const VerificationMeta(
+    'amountUsd',
+  );
+  @override
+  late final GeneratedColumn<double> amountUsd = GeneratedColumn<double>(
+    'amount_usd',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _paidWithCreditCardMeta =
+      const VerificationMeta('paidWithCreditCard');
+  @override
+  late final GeneratedColumn<bool> paidWithCreditCard = GeneratedColumn<bool>(
+    'paid_with_credit_card',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("paid_with_credit_card" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    occurredOn,
+    categoryId,
+    subcategoryId,
+    amountOriginal,
+    currencyCode,
+    manualFxRateToUsd,
+    amountUsd,
+    paidWithCreditCard,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'expenses';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExpenseRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('occurred_on')) {
+      context.handle(
+        _occurredOnMeta,
+        occurredOn.isAcceptableOrUnknown(data['occurred_on']!, _occurredOnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_occurredOnMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('subcategory_id')) {
+      context.handle(
+        _subcategoryIdMeta,
+        subcategoryId.isAcceptableOrUnknown(
+          data['subcategory_id']!,
+          _subcategoryIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_subcategoryIdMeta);
+    }
+    if (data.containsKey('amount_original')) {
+      context.handle(
+        _amountOriginalMeta,
+        amountOriginal.isAcceptableOrUnknown(
+          data['amount_original']!,
+          _amountOriginalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_amountOriginalMeta);
+    }
+    if (data.containsKey('currency_code')) {
+      context.handle(
+        _currencyCodeMeta,
+        currencyCode.isAcceptableOrUnknown(
+          data['currency_code']!,
+          _currencyCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('manual_fx_rate_to_usd')) {
+      context.handle(
+        _manualFxRateToUsdMeta,
+        manualFxRateToUsd.isAcceptableOrUnknown(
+          data['manual_fx_rate_to_usd']!,
+          _manualFxRateToUsdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('amount_usd')) {
+      context.handle(
+        _amountUsdMeta,
+        amountUsd.isAcceptableOrUnknown(data['amount_usd']!, _amountUsdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountUsdMeta);
+    }
+    if (data.containsKey('paid_with_credit_card')) {
+      context.handle(
+        _paidWithCreditCardMeta,
+        paidWithCreditCard.isAcceptableOrUnknown(
+          data['paid_with_credit_card']!,
+          _paidWithCreditCardMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ExpenseRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExpenseRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      occurredOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}occurred_on'],
+      )!,
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      )!,
+      subcategoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subcategory_id'],
+      )!,
+      amountOriginal: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount_original'],
+      )!,
+      currencyCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency_code'],
+      )!,
+      manualFxRateToUsd: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}manual_fx_rate_to_usd'],
+      )!,
+      amountUsd: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount_usd'],
+      )!,
+      paidWithCreditCard: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}paid_with_credit_card'],
+      )!,
+    );
+  }
+
+  @override
+  $ExpensesTable createAlias(String alias) {
+    return $ExpensesTable(attachedDatabase, alias);
+  }
+}
+
+class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
+  final String id;
+
+  /// `YYYY-MM-DD` (local calendar date).
+  final String occurredOn;
+  final String categoryId;
+  final String subcategoryId;
+  final double amountOriginal;
+  final String currencyCode;
+  final double manualFxRateToUsd;
+  final double amountUsd;
+  final bool paidWithCreditCard;
+  const ExpenseRow({
+    required this.id,
+    required this.occurredOn,
+    required this.categoryId,
+    required this.subcategoryId,
+    required this.amountOriginal,
+    required this.currencyCode,
+    required this.manualFxRateToUsd,
+    required this.amountUsd,
+    required this.paidWithCreditCard,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['occurred_on'] = Variable<String>(occurredOn);
+    map['category_id'] = Variable<String>(categoryId);
+    map['subcategory_id'] = Variable<String>(subcategoryId);
+    map['amount_original'] = Variable<double>(amountOriginal);
+    map['currency_code'] = Variable<String>(currencyCode);
+    map['manual_fx_rate_to_usd'] = Variable<double>(manualFxRateToUsd);
+    map['amount_usd'] = Variable<double>(amountUsd);
+    map['paid_with_credit_card'] = Variable<bool>(paidWithCreditCard);
+    return map;
+  }
+
+  ExpensesCompanion toCompanion(bool nullToAbsent) {
+    return ExpensesCompanion(
+      id: Value(id),
+      occurredOn: Value(occurredOn),
+      categoryId: Value(categoryId),
+      subcategoryId: Value(subcategoryId),
+      amountOriginal: Value(amountOriginal),
+      currencyCode: Value(currencyCode),
+      manualFxRateToUsd: Value(manualFxRateToUsd),
+      amountUsd: Value(amountUsd),
+      paidWithCreditCard: Value(paidWithCreditCard),
+    );
+  }
+
+  factory ExpenseRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExpenseRow(
+      id: serializer.fromJson<String>(json['id']),
+      occurredOn: serializer.fromJson<String>(json['occurredOn']),
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+      subcategoryId: serializer.fromJson<String>(json['subcategoryId']),
+      amountOriginal: serializer.fromJson<double>(json['amountOriginal']),
+      currencyCode: serializer.fromJson<String>(json['currencyCode']),
+      manualFxRateToUsd: serializer.fromJson<double>(json['manualFxRateToUsd']),
+      amountUsd: serializer.fromJson<double>(json['amountUsd']),
+      paidWithCreditCard: serializer.fromJson<bool>(json['paidWithCreditCard']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'occurredOn': serializer.toJson<String>(occurredOn),
+      'categoryId': serializer.toJson<String>(categoryId),
+      'subcategoryId': serializer.toJson<String>(subcategoryId),
+      'amountOriginal': serializer.toJson<double>(amountOriginal),
+      'currencyCode': serializer.toJson<String>(currencyCode),
+      'manualFxRateToUsd': serializer.toJson<double>(manualFxRateToUsd),
+      'amountUsd': serializer.toJson<double>(amountUsd),
+      'paidWithCreditCard': serializer.toJson<bool>(paidWithCreditCard),
+    };
+  }
+
+  ExpenseRow copyWith({
+    String? id,
+    String? occurredOn,
+    String? categoryId,
+    String? subcategoryId,
+    double? amountOriginal,
+    String? currencyCode,
+    double? manualFxRateToUsd,
+    double? amountUsd,
+    bool? paidWithCreditCard,
+  }) => ExpenseRow(
+    id: id ?? this.id,
+    occurredOn: occurredOn ?? this.occurredOn,
+    categoryId: categoryId ?? this.categoryId,
+    subcategoryId: subcategoryId ?? this.subcategoryId,
+    amountOriginal: amountOriginal ?? this.amountOriginal,
+    currencyCode: currencyCode ?? this.currencyCode,
+    manualFxRateToUsd: manualFxRateToUsd ?? this.manualFxRateToUsd,
+    amountUsd: amountUsd ?? this.amountUsd,
+    paidWithCreditCard: paidWithCreditCard ?? this.paidWithCreditCard,
+  );
+  ExpenseRow copyWithCompanion(ExpensesCompanion data) {
+    return ExpenseRow(
+      id: data.id.present ? data.id.value : this.id,
+      occurredOn: data.occurredOn.present
+          ? data.occurredOn.value
+          : this.occurredOn,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      subcategoryId: data.subcategoryId.present
+          ? data.subcategoryId.value
+          : this.subcategoryId,
+      amountOriginal: data.amountOriginal.present
+          ? data.amountOriginal.value
+          : this.amountOriginal,
+      currencyCode: data.currencyCode.present
+          ? data.currencyCode.value
+          : this.currencyCode,
+      manualFxRateToUsd: data.manualFxRateToUsd.present
+          ? data.manualFxRateToUsd.value
+          : this.manualFxRateToUsd,
+      amountUsd: data.amountUsd.present ? data.amountUsd.value : this.amountUsd,
+      paidWithCreditCard: data.paidWithCreditCard.present
+          ? data.paidWithCreditCard.value
+          : this.paidWithCreditCard,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpenseRow(')
+          ..write('id: $id, ')
+          ..write('occurredOn: $occurredOn, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('subcategoryId: $subcategoryId, ')
+          ..write('amountOriginal: $amountOriginal, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('manualFxRateToUsd: $manualFxRateToUsd, ')
+          ..write('amountUsd: $amountUsd, ')
+          ..write('paidWithCreditCard: $paidWithCreditCard')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    occurredOn,
+    categoryId,
+    subcategoryId,
+    amountOriginal,
+    currencyCode,
+    manualFxRateToUsd,
+    amountUsd,
+    paidWithCreditCard,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExpenseRow &&
+          other.id == this.id &&
+          other.occurredOn == this.occurredOn &&
+          other.categoryId == this.categoryId &&
+          other.subcategoryId == this.subcategoryId &&
+          other.amountOriginal == this.amountOriginal &&
+          other.currencyCode == this.currencyCode &&
+          other.manualFxRateToUsd == this.manualFxRateToUsd &&
+          other.amountUsd == this.amountUsd &&
+          other.paidWithCreditCard == this.paidWithCreditCard);
+}
+
+class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
+  final Value<String> id;
+  final Value<String> occurredOn;
+  final Value<String> categoryId;
+  final Value<String> subcategoryId;
+  final Value<double> amountOriginal;
+  final Value<String> currencyCode;
+  final Value<double> manualFxRateToUsd;
+  final Value<double> amountUsd;
+  final Value<bool> paidWithCreditCard;
+  final Value<int> rowid;
+  const ExpensesCompanion({
+    this.id = const Value.absent(),
+    this.occurredOn = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.subcategoryId = const Value.absent(),
+    this.amountOriginal = const Value.absent(),
+    this.currencyCode = const Value.absent(),
+    this.manualFxRateToUsd = const Value.absent(),
+    this.amountUsd = const Value.absent(),
+    this.paidWithCreditCard = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExpensesCompanion.insert({
+    required String id,
+    required String occurredOn,
+    required String categoryId,
+    required String subcategoryId,
+    required double amountOriginal,
+    this.currencyCode = const Value.absent(),
+    this.manualFxRateToUsd = const Value.absent(),
+    required double amountUsd,
+    this.paidWithCreditCard = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       occurredOn = Value(occurredOn),
+       categoryId = Value(categoryId),
+       subcategoryId = Value(subcategoryId),
+       amountOriginal = Value(amountOriginal),
+       amountUsd = Value(amountUsd);
+  static Insertable<ExpenseRow> custom({
+    Expression<String>? id,
+    Expression<String>? occurredOn,
+    Expression<String>? categoryId,
+    Expression<String>? subcategoryId,
+    Expression<double>? amountOriginal,
+    Expression<String>? currencyCode,
+    Expression<double>? manualFxRateToUsd,
+    Expression<double>? amountUsd,
+    Expression<bool>? paidWithCreditCard,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (occurredOn != null) 'occurred_on': occurredOn,
+      if (categoryId != null) 'category_id': categoryId,
+      if (subcategoryId != null) 'subcategory_id': subcategoryId,
+      if (amountOriginal != null) 'amount_original': amountOriginal,
+      if (currencyCode != null) 'currency_code': currencyCode,
+      if (manualFxRateToUsd != null) 'manual_fx_rate_to_usd': manualFxRateToUsd,
+      if (amountUsd != null) 'amount_usd': amountUsd,
+      if (paidWithCreditCard != null)
+        'paid_with_credit_card': paidWithCreditCard,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExpensesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? occurredOn,
+    Value<String>? categoryId,
+    Value<String>? subcategoryId,
+    Value<double>? amountOriginal,
+    Value<String>? currencyCode,
+    Value<double>? manualFxRateToUsd,
+    Value<double>? amountUsd,
+    Value<bool>? paidWithCreditCard,
+    Value<int>? rowid,
+  }) {
+    return ExpensesCompanion(
+      id: id ?? this.id,
+      occurredOn: occurredOn ?? this.occurredOn,
+      categoryId: categoryId ?? this.categoryId,
+      subcategoryId: subcategoryId ?? this.subcategoryId,
+      amountOriginal: amountOriginal ?? this.amountOriginal,
+      currencyCode: currencyCode ?? this.currencyCode,
+      manualFxRateToUsd: manualFxRateToUsd ?? this.manualFxRateToUsd,
+      amountUsd: amountUsd ?? this.amountUsd,
+      paidWithCreditCard: paidWithCreditCard ?? this.paidWithCreditCard,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (occurredOn.present) {
+      map['occurred_on'] = Variable<String>(occurredOn.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (subcategoryId.present) {
+      map['subcategory_id'] = Variable<String>(subcategoryId.value);
+    }
+    if (amountOriginal.present) {
+      map['amount_original'] = Variable<double>(amountOriginal.value);
+    }
+    if (currencyCode.present) {
+      map['currency_code'] = Variable<String>(currencyCode.value);
+    }
+    if (manualFxRateToUsd.present) {
+      map['manual_fx_rate_to_usd'] = Variable<double>(manualFxRateToUsd.value);
+    }
+    if (amountUsd.present) {
+      map['amount_usd'] = Variable<double>(amountUsd.value);
+    }
+    if (paidWithCreditCard.present) {
+      map['paid_with_credit_card'] = Variable<bool>(paidWithCreditCard.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpensesCompanion(')
+          ..write('id: $id, ')
+          ..write('occurredOn: $occurredOn, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('subcategoryId: $subcategoryId, ')
+          ..write('amountOriginal: $amountOriginal, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('manualFxRateToUsd: $manualFxRateToUsd, ')
+          ..write('amountUsd: $amountUsd, ')
+          ..write('paidWithCreditCard: $paidWithCreditCard, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $SubcategoriesTable subcategories = $SubcategoriesTable(this);
+  late final $ExpensesTable expenses = $ExpensesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -687,6 +1283,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     categories,
     subcategories,
+    expenses,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -739,6 +1336,24 @@ final class $$CategoriesTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$ExpensesTable, List<ExpenseRow>>
+  _expensesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.expenses,
+    aliasName: $_aliasNameGenerator(db.categories.id, db.expenses.categoryId),
+  );
+
+  $$ExpensesTableProcessedTableManager get expensesRefs {
+    final manager = $$ExpensesTableTableManager(
+      $_db,
+      $_db.expenses,
+    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_expensesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$CategoriesTableFilterComposer
@@ -781,6 +1396,31 @@ class $$CategoriesTableFilterComposer
           }) => $$SubcategoriesTableFilterComposer(
             $db: $db,
             $table: $db.subcategories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> expensesRefs(
+    Expression<bool> Function($$ExpensesTableFilterComposer f) f,
+  ) {
+    final $$ExpensesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableFilterComposer(
+            $db: $db,
+            $table: $db.expenses,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -858,6 +1498,31 @@ class $$CategoriesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> expensesRefs<T extends Object>(
+    Expression<T> Function($$ExpensesTableAnnotationComposer a) f,
+  ) {
+    final $$ExpensesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CategoriesTableTableManager
@@ -873,7 +1538,7 @@ class $$CategoriesTableTableManager
           $$CategoriesTableUpdateCompanionBuilder,
           (CategoryRow, $$CategoriesTableReferences),
           CategoryRow,
-          PrefetchHooks Function({bool subcategoriesRefs})
+          PrefetchHooks Function({bool subcategoriesRefs, bool expensesRefs})
         > {
   $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
     : super(
@@ -918,38 +1583,63 @@ class $$CategoriesTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({subcategoriesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (subcategoriesRefs) db.subcategories,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (subcategoriesRefs)
-                    await $_getPrefetchedData<
-                      CategoryRow,
-                      $CategoriesTable,
-                      SubcategoryRow
-                    >(
-                      currentTable: table,
-                      referencedTable: $$CategoriesTableReferences
-                          ._subcategoriesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$CategoriesTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).subcategoriesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.categoryId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({subcategoriesRefs = false, expensesRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (subcategoriesRefs) db.subcategories,
+                    if (expensesRefs) db.expenses,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (subcategoriesRefs)
+                        await $_getPrefetchedData<
+                          CategoryRow,
+                          $CategoriesTable,
+                          SubcategoryRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CategoriesTableReferences
+                              ._subcategoriesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CategoriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).subcategoriesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.categoryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (expensesRefs)
+                        await $_getPrefetchedData<
+                          CategoryRow,
+                          $CategoriesTable,
+                          ExpenseRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CategoriesTableReferences
+                              ._expensesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CategoriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).expensesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.categoryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -966,7 +1656,7 @@ typedef $$CategoriesTableProcessedTableManager =
       $$CategoriesTableUpdateCompanionBuilder,
       (CategoryRow, $$CategoriesTableReferences),
       CategoryRow,
-      PrefetchHooks Function({bool subcategoriesRefs})
+      PrefetchHooks Function({bool subcategoriesRefs, bool expensesRefs})
     >;
 typedef $$SubcategoriesTableCreateCompanionBuilder =
     SubcategoriesCompanion Function({
@@ -1013,6 +1703,27 @@ final class $$SubcategoriesTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$ExpensesTable, List<ExpenseRow>>
+  _expensesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.expenses,
+    aliasName: $_aliasNameGenerator(
+      db.subcategories.id,
+      db.expenses.subcategoryId,
+    ),
+  );
+
+  $$ExpensesTableProcessedTableManager get expensesRefs {
+    final manager = $$ExpensesTableTableManager(
+      $_db,
+      $_db.expenses,
+    ).filter((f) => f.subcategoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_expensesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -1072,6 +1783,31 @@ class $$SubcategoriesTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> expensesRefs(
+    Expression<bool> Function($$ExpensesTableFilterComposer f) f,
+  ) {
+    final $$ExpensesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.subcategoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableFilterComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -1181,6 +1917,31 @@ class $$SubcategoriesTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> expensesRefs<T extends Object>(
+    Expression<T> Function($$ExpensesTableAnnotationComposer a) f,
+  ) {
+    final $$ExpensesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.subcategoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$SubcategoriesTableTableManager
@@ -1196,7 +1957,7 @@ class $$SubcategoriesTableTableManager
           $$SubcategoriesTableUpdateCompanionBuilder,
           (SubcategoryRow, $$SubcategoriesTableReferences),
           SubcategoryRow,
-          PrefetchHooks Function({bool categoryId})
+          PrefetchHooks Function({bool categoryId, bool expensesRefs})
         > {
   $$SubcategoriesTableTableManager(_$AppDatabase db, $SubcategoriesTable table)
     : super(
@@ -1253,10 +2014,10 @@ class $$SubcategoriesTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({categoryId = false}) {
+          prefetchHooksCallback: ({categoryId = false, expensesRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [],
+              explicitlyWatchedTables: [if (expensesRefs) db.expenses],
               addJoins:
                   <
                     T extends TableManagerState<
@@ -1290,7 +2051,29 @@ class $$SubcategoriesTableTableManager
                     return state;
                   },
               getPrefetchedDataCallback: (items) async {
-                return [];
+                return [
+                  if (expensesRefs)
+                    await $_getPrefetchedData<
+                      SubcategoryRow,
+                      $SubcategoriesTable,
+                      ExpenseRow
+                    >(
+                      currentTable: table,
+                      referencedTable: $$SubcategoriesTableReferences
+                          ._expensesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$SubcategoriesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).expensesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.subcategoryId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
               },
             );
           },
@@ -1310,7 +2093,500 @@ typedef $$SubcategoriesTableProcessedTableManager =
       $$SubcategoriesTableUpdateCompanionBuilder,
       (SubcategoryRow, $$SubcategoriesTableReferences),
       SubcategoryRow,
-      PrefetchHooks Function({bool categoryId})
+      PrefetchHooks Function({bool categoryId, bool expensesRefs})
+    >;
+typedef $$ExpensesTableCreateCompanionBuilder =
+    ExpensesCompanion Function({
+      required String id,
+      required String occurredOn,
+      required String categoryId,
+      required String subcategoryId,
+      required double amountOriginal,
+      Value<String> currencyCode,
+      Value<double> manualFxRateToUsd,
+      required double amountUsd,
+      Value<bool> paidWithCreditCard,
+      Value<int> rowid,
+    });
+typedef $$ExpensesTableUpdateCompanionBuilder =
+    ExpensesCompanion Function({
+      Value<String> id,
+      Value<String> occurredOn,
+      Value<String> categoryId,
+      Value<String> subcategoryId,
+      Value<double> amountOriginal,
+      Value<String> currencyCode,
+      Value<double> manualFxRateToUsd,
+      Value<double> amountUsd,
+      Value<bool> paidWithCreditCard,
+      Value<int> rowid,
+    });
+
+final class $$ExpensesTableReferences
+    extends BaseReferences<_$AppDatabase, $ExpensesTable, ExpenseRow> {
+  $$ExpensesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
+      db.categories.createAlias(
+        $_aliasNameGenerator(db.expenses.categoryId, db.categories.id),
+      );
+
+  $$CategoriesTableProcessedTableManager get categoryId {
+    final $_column = $_itemColumn<String>('category_id')!;
+
+    final manager = $$CategoriesTableTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $SubcategoriesTable _subcategoryIdTable(_$AppDatabase db) =>
+      db.subcategories.createAlias(
+        $_aliasNameGenerator(db.expenses.subcategoryId, db.subcategories.id),
+      );
+
+  $$SubcategoriesTableProcessedTableManager get subcategoryId {
+    final $_column = $_itemColumn<String>('subcategory_id')!;
+
+    final manager = $$SubcategoriesTableTableManager(
+      $_db,
+      $_db.subcategories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_subcategoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ExpensesTableFilterComposer
+    extends Composer<_$AppDatabase, $ExpensesTable> {
+  $$ExpensesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get occurredOn => $composableBuilder(
+    column: $table.occurredOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amountOriginal => $composableBuilder(
+    column: $table.amountOriginal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get manualFxRateToUsd => $composableBuilder(
+    column: $table.manualFxRateToUsd,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amountUsd => $composableBuilder(
+    column: $table.amountUsd,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get paidWithCreditCard => $composableBuilder(
+    column: $table.paidWithCreditCard,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CategoriesTableFilterComposer get categoryId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SubcategoriesTableFilterComposer get subcategoryId {
+    final $$SubcategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.subcategoryId,
+      referencedTable: $db.subcategories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SubcategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.subcategories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExpensesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExpensesTable> {
+  $$ExpensesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get occurredOn => $composableBuilder(
+    column: $table.occurredOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amountOriginal => $composableBuilder(
+    column: $table.amountOriginal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get manualFxRateToUsd => $composableBuilder(
+    column: $table.manualFxRateToUsd,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amountUsd => $composableBuilder(
+    column: $table.amountUsd,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get paidWithCreditCard => $composableBuilder(
+    column: $table.paidWithCreditCard,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CategoriesTableOrderingComposer get categoryId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SubcategoriesTableOrderingComposer get subcategoryId {
+    final $$SubcategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.subcategoryId,
+      referencedTable: $db.subcategories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SubcategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.subcategories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExpensesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExpensesTable> {
+  $$ExpensesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get occurredOn => $composableBuilder(
+    column: $table.occurredOn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get amountOriginal => $composableBuilder(
+    column: $table.amountOriginal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get manualFxRateToUsd => $composableBuilder(
+    column: $table.manualFxRateToUsd,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get amountUsd =>
+      $composableBuilder(column: $table.amountUsd, builder: (column) => column);
+
+  GeneratedColumn<bool> get paidWithCreditCard => $composableBuilder(
+    column: $table.paidWithCreditCard,
+    builder: (column) => column,
+  );
+
+  $$CategoriesTableAnnotationComposer get categoryId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SubcategoriesTableAnnotationComposer get subcategoryId {
+    final $$SubcategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.subcategoryId,
+      referencedTable: $db.subcategories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SubcategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.subcategories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExpensesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExpensesTable,
+          ExpenseRow,
+          $$ExpensesTableFilterComposer,
+          $$ExpensesTableOrderingComposer,
+          $$ExpensesTableAnnotationComposer,
+          $$ExpensesTableCreateCompanionBuilder,
+          $$ExpensesTableUpdateCompanionBuilder,
+          (ExpenseRow, $$ExpensesTableReferences),
+          ExpenseRow,
+          PrefetchHooks Function({bool categoryId, bool subcategoryId})
+        > {
+  $$ExpensesTableTableManager(_$AppDatabase db, $ExpensesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExpensesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExpensesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExpensesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> occurredOn = const Value.absent(),
+                Value<String> categoryId = const Value.absent(),
+                Value<String> subcategoryId = const Value.absent(),
+                Value<double> amountOriginal = const Value.absent(),
+                Value<String> currencyCode = const Value.absent(),
+                Value<double> manualFxRateToUsd = const Value.absent(),
+                Value<double> amountUsd = const Value.absent(),
+                Value<bool> paidWithCreditCard = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExpensesCompanion(
+                id: id,
+                occurredOn: occurredOn,
+                categoryId: categoryId,
+                subcategoryId: subcategoryId,
+                amountOriginal: amountOriginal,
+                currencyCode: currencyCode,
+                manualFxRateToUsd: manualFxRateToUsd,
+                amountUsd: amountUsd,
+                paidWithCreditCard: paidWithCreditCard,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String occurredOn,
+                required String categoryId,
+                required String subcategoryId,
+                required double amountOriginal,
+                Value<String> currencyCode = const Value.absent(),
+                Value<double> manualFxRateToUsd = const Value.absent(),
+                required double amountUsd,
+                Value<bool> paidWithCreditCard = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExpensesCompanion.insert(
+                id: id,
+                occurredOn: occurredOn,
+                categoryId: categoryId,
+                subcategoryId: subcategoryId,
+                amountOriginal: amountOriginal,
+                currencyCode: currencyCode,
+                manualFxRateToUsd: manualFxRateToUsd,
+                amountUsd: amountUsd,
+                paidWithCreditCard: paidWithCreditCard,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ExpensesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({categoryId = false, subcategoryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (categoryId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.categoryId,
+                                referencedTable: $$ExpensesTableReferences
+                                    ._categoryIdTable(db),
+                                referencedColumn: $$ExpensesTableReferences
+                                    ._categoryIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+                    if (subcategoryId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.subcategoryId,
+                                referencedTable: $$ExpensesTableReferences
+                                    ._subcategoryIdTable(db),
+                                referencedColumn: $$ExpensesTableReferences
+                                    ._subcategoryIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ExpensesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExpensesTable,
+      ExpenseRow,
+      $$ExpensesTableFilterComposer,
+      $$ExpensesTableOrderingComposer,
+      $$ExpensesTableAnnotationComposer,
+      $$ExpensesTableCreateCompanionBuilder,
+      $$ExpensesTableUpdateCompanionBuilder,
+      (ExpenseRow, $$ExpensesTableReferences),
+      ExpenseRow,
+      PrefetchHooks Function({bool categoryId, bool subcategoryId})
     >;
 
 class $AppDatabaseManager {
@@ -1320,4 +2596,6 @@ class $AppDatabaseManager {
       $$CategoriesTableTableManager(_db, _db.categories);
   $$SubcategoriesTableTableManager get subcategories =>
       $$SubcategoriesTableTableManager(_db, _db.subcategories);
+  $$ExpensesTableTableManager get expenses =>
+      $$ExpensesTableTableManager(_db, _db.expenses);
 }

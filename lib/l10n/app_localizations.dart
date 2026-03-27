@@ -147,6 +147,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This subcategory cannot be deleted.'**
   String get cannotDeleteReservedSubcategory;
+
+  /// No description provided for @addExpenseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add expense'**
+  String get addExpenseTitle;
+
+  /// No description provided for @editExpenseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit expense'**
+  String get editExpenseTitle;
+
+  /// No description provided for @saveExpenseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveExpenseAction;
+
+  /// No description provided for @deleteExpenseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteExpenseAction;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @confirmDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get confirmDelete;
+
+  /// No description provided for @deleteExpenseConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete expense?'**
+  String get deleteExpenseConfirmTitle;
+
+  /// No description provided for @deleteExpenseConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone.'**
+  String get deleteExpenseConfirmMessage;
+
+  /// No description provided for @expenseDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get expenseDateLabel;
+
+  /// No description provided for @expenseCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get expenseCategoryLabel;
+
+  /// No description provided for @expenseSubcategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subcategory'**
+  String get expenseSubcategoryLabel;
+
+  /// No description provided for @expenseAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get expenseAmountLabel;
+
+  /// No description provided for @expenseCurrencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency code'**
+  String get expenseCurrencyLabel;
+
+  /// No description provided for @expenseFxToUsdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'FX to USD (multiply amount by this)'**
+  String get expenseFxToUsdLabel;
+
+  /// Shows recomputed USD from amount and FX.
+  ///
+  /// In en, this message translates to:
+  /// **'Computed USD: {amount}'**
+  String expenseUsdComputedLabel(String amount);
+
+  /// No description provided for @expensePaidWithCardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid with credit card'**
+  String get expensePaidWithCardLabel;
+
+  /// No description provided for @expenseCategoryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a category.'**
+  String get expenseCategoryRequired;
+
+  /// No description provided for @expenseSubcategoryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a subcategory.'**
+  String get expenseSubcategoryRequired;
+
+  /// No description provided for @expenseNoSubcategories.
+  ///
+  /// In en, this message translates to:
+  /// **'No subcategories for this category.'**
+  String get expenseNoSubcategories;
+
+  /// No description provided for @expenseAmountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount.'**
+  String get expenseAmountRequired;
+
+  /// No description provided for @expenseAmountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid number.'**
+  String get expenseAmountInvalid;
+
+  /// No description provided for @expenseCurrencyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a currency code.'**
+  String get expenseCurrencyRequired;
+
+  /// No description provided for @expenseFxRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an FX rate.'**
+  String get expenseFxRequired;
+
+  /// No description provided for @expenseFxInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'FX rate must be a positive number.'**
+  String get expenseFxInvalid;
+
+  /// No description provided for @invalidSubcategoryPairing.
+  ///
+  /// In en, this message translates to:
+  /// **'That subcategory does not belong to the selected category.'**
+  String get invalidSubcategoryPairing;
+
+  /// No description provided for @addExpenseTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add expense'**
+  String get addExpenseTooltip;
+
+  /// No description provided for @expenseListUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'USD {amount}'**
+  String expenseListUsd(String amount);
+
+  /// No description provided for @expenseListOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} {currency}'**
+  String expenseListOriginal(String amount, String currency);
+
+  /// No description provided for @expenseListCardBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get expenseListCardBadge;
+
+  /// No description provided for @expensesThisMonthHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get expensesThisMonthHeading;
+
+  /// No description provided for @monthPickerPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get monthPickerPrevious;
+
+  /// No description provided for @monthPickerNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get monthPickerNext;
 }
 
 class _AppLocalizationsDelegate

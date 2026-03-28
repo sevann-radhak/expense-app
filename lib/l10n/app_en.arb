@@ -16,6 +16,34 @@
   "@navCategories": {
     "description": "Bottom navigation / rail label for the categories screen."
   },
+  "navReports": "Reports",
+  "@navReports": {
+    "description": "Bottom navigation / rail label for the reports screen."
+  },
+  "reportsTitle": "Reports",
+  "@reportsTitle": {
+    "description": "App bar title on the reports route."
+  },
+  "reportsYearSummaryTitle": "Year totals",
+  "@reportsYearSummaryTitle": {
+    "description": "Heading for the annual spend summary card on Reports."
+  },
+  "reportsYearNoExpenses": "No expenses recorded for this year yet.",
+  "@reportsYearNoExpenses": {
+    "description": "Empty copy inside the year totals card."
+  },
+  "reportsYearPickerPrevious": "Previous year",
+  "reportsYearPickerNext": "Next year",
+  "reportsByMonthHeading": "Spend by month",
+  "@reportsByMonthHeading": {
+    "description": "Section title above the 12-month USD table."
+  },
+  "reportsMonthColumnMonth": "Month",
+  "reportsMonthColumnUsdTotal": "USD (total)",
+  "reportsFxFootnote": "USD uses each expense’s stored FX snapshot; original-currency chips are for reference.",
+  "@reportsFxFootnote": {
+    "description": "Short note under the year summary when expenses exist."
+  },
   "categoriesScreenSubtitle": "Taxonomy from your local database (debug / admin).",
   "@categoriesScreenSubtitle": {
     "description": "Short intro under the categories screen app bar."

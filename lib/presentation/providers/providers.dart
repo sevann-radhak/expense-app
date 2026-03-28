@@ -36,6 +36,11 @@ final selectedMonthProvider = StateProvider<DateTime>((ref) {
   return DateTime(n.year, n.month);
 });
 
+/// Calendar year for the Reports annual hub (local).
+final selectedReportYearProvider = StateProvider<int>((ref) {
+  return DateTime.now().year;
+});
+
 final categoriesStreamProvider = StreamProvider<List<Category>>((ref) {
   return ref.watch(categoryRepositoryProvider).watchCategories();
 });
@@ -49,6 +54,12 @@ final expensesForSelectedMonthProvider = StreamProvider<List<Expense>>((ref) {
   return ref
       .watch(expenseRepositoryProvider)
       .watchForMonth(m.year, m.month);
+});
+
+final expensesForSelectedReportYearProvider =
+    StreamProvider<List<Expense>>((ref) {
+  final year = ref.watch(selectedReportYearProvider);
+  return ref.watch(expenseRepositoryProvider).watchForYear(year);
 });
 
 final subcategoriesForCategoryProvider =

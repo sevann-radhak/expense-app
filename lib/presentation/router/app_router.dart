@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:expense_app/presentation/categories/categories_screen.dart';
 import 'package:expense_app/presentation/home/home_screen.dart';
+import 'package:expense_app/presentation/reports/reports_screen.dart';
 import 'package:expense_app/presentation/settings/settings_screen.dart';
 import 'package:expense_app/presentation/shell/app_shell.dart';
 
@@ -22,6 +23,15 @@ final GoRouter appRouter = GoRouter(
               path: '/home',
               pageBuilder: (context, state) =>
                   const NoTransitionPage<void>(child: HomeScreen()),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/reports',
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage<void>(child: ReportsScreen()),
             ),
           ],
         ),

@@ -21,6 +21,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navCategories => 'Categories';
 
   @override
+  String get navReports => 'Reports';
+
+  @override
+  String get reportsTitle => 'Reports';
+
+  @override
+  String get reportsYearSummaryTitle => 'Year totals';
+
+  @override
+  String get reportsYearNoExpenses => 'No expenses recorded for this year yet.';
+
+  @override
+  String get reportsYearPickerPrevious => 'Previous year';
+
+  @override
+  String get reportsYearPickerNext => 'Next year';
+
+  @override
+  String get reportsByMonthHeading => 'Spend by month';
+
+  @override
+  String get reportsMonthColumnMonth => 'Month';
+
+  @override
+  String get reportsMonthColumnUsdTotal => 'USD (total)';
+
+  @override
+  String get reportsFxFootnote =>
+      'USD uses each expense’s stored FX snapshot; original-currency chips are for reference.';
+
+  @override
   String get categoriesScreenSubtitle =>
       'Taxonomy from your local database (debug / admin).';
 

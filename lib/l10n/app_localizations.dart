@@ -118,6 +118,66 @@ abstract class AppLocalizations {
   /// **'Categories'**
   String get navCategories;
 
+  /// Bottom navigation / rail label for the reports screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get navReports;
+
+  /// App bar title on the reports route.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get reportsTitle;
+
+  /// Heading for the annual spend summary card on Reports.
+  ///
+  /// In en, this message translates to:
+  /// **'Year totals'**
+  String get reportsYearSummaryTitle;
+
+  /// Empty copy inside the year totals card.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses recorded for this year yet.'**
+  String get reportsYearNoExpenses;
+
+  /// No description provided for @reportsYearPickerPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous year'**
+  String get reportsYearPickerPrevious;
+
+  /// No description provided for @reportsYearPickerNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next year'**
+  String get reportsYearPickerNext;
+
+  /// Section title above the 12-month USD table.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend by month'**
+  String get reportsByMonthHeading;
+
+  /// No description provided for @reportsMonthColumnMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get reportsMonthColumnMonth;
+
+  /// No description provided for @reportsMonthColumnUsdTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'USD (total)'**
+  String get reportsMonthColumnUsdTotal;
+
+  /// Short note under the year summary when expenses exist.
+  ///
+  /// In en, this message translates to:
+  /// **'USD uses each expense’s stored FX snapshot; original-currency chips are for reference.'**
+  String get reportsFxFootnote;
+
   /// Short intro under the categories screen app bar.
   ///
   /// In en, this message translates to:

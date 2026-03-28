@@ -81,6 +81,23 @@ void main() {
     expect(feb.map((e) => e.id).toList(), ['e_feb']);
   });
 
+  test('watchForYear uses local calendar year boundaries', () async {
+    await repo.create(
+      sample(id: 'e_dec_prev', occurredOn: DateTime(2024, 12, 31)),
+    );
+    await repo.create(
+      sample(id: 'e_jan', occurredOn: DateTime(2025, 1, 1)),
+    );
+    await repo.create(
+      sample(id: 'e_dec', occurredOn: DateTime(2025, 12, 31)),
+    );
+    await repo.create(
+      sample(id: 'e_jan_next', occurredOn: DateTime(2026, 1, 1)),
+    );
+    final y2025 = await repo.watchForYear(2025).first;
+    expect(y2025.map((e) => e.id).toList()..sort(), ['e_dec', 'e_jan']);
+  });
+
   test('update recomputes USD and enforces pairing', () async {
     await repo.create(
       sample(id: 'e1', occurredOn: DateTime(2025, 3, 5)),

@@ -18,6 +18,12 @@ class DriftExpenseRepository implements ExpenseRepository {
     return (start, end);
   }
 
+  static (String startInclusive, String endExclusive) _yearRangeIso(int year) {
+    final start = ExpenseDates.toStorageDate(DateTime(year, 1, 1));
+    final end = ExpenseDates.toStorageDate(DateTime(year + 1, 1, 1));
+    return (start, end);
+  }
+
   @override
   Stream<List<Expense>> watchForMonth(int year, int month) {
     final range = _monthRangeIso(year, month);
@@ -32,6 +38,25 @@ class DriftExpenseRepository implements ExpenseRepository {
           ..orderBy([
             (e) => OrderingTerm.desc(e.occurredOn),
             (e) => OrderingTerm.desc(e.id),
+          ]))
+        .watch()
+        .map((rows) => rows.map(_toDomain).toList());
+  }
+
+  @override
+  Stream<List<Expense>> watchForYear(int year) {
+    final range = _yearRangeIso(year);
+    final start = range.$1;
+    final endExclusive = range.$2;
+    return (_db.select(_db.expenses)
+          ..where(
+            (e) =>
+                e.occurredOn.isBiggerOrEqualValue(start) &
+                e.occurredOn.isSmallerThanValue(endExclusive),
+          )
+          ..orderBy([
+            (e) => OrderingTerm.asc(e.occurredOn),
+            (e) => OrderingTerm.asc(e.id),
           ]))
         .watch()
         .map((rows) => rows.map(_toDomain).toList());

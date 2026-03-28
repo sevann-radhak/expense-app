@@ -41,6 +41,10 @@ class ReportsScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: _ReportYearStrip(),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: _ReportExpenseInclusionStrip(),
+            ),
             const Divider(height: 1),
             Expanded(
               child: TabBarView(
@@ -54,6 +58,47 @@ class ReportsScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ReportExpenseInclusionStrip extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final selected = ref.watch(reportExpenseInclusionProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SegmentedButton<ExpenseInclusion>(
+          segments: [
+            ButtonSegment<ExpenseInclusion>(
+              value: ExpenseInclusion.all,
+              label: Text(l10n.reportsExpenseInclusionAll),
+            ),
+            ButtonSegment<ExpenseInclusion>(
+              value: ExpenseInclusion.realizedOnly,
+              label: Text(l10n.reportsExpenseInclusionRealized),
+            ),
+            ButtonSegment<ExpenseInclusion>(
+              value: ExpenseInclusion.scheduledOnly,
+              label: Text(l10n.reportsExpenseInclusionScheduled),
+            ),
+          ],
+          selected: {selected},
+          onSelectionChanged: (next) {
+            ref.read(reportExpenseInclusionProvider.notifier).state = next.single;
+          },
+        ),
+        const SizedBox(height: 6),
+        Text(
+          l10n.reportsExpenseInclusionFootnote,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
+      ],
     );
   }
 }

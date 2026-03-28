@@ -54,27 +54,36 @@ final reportCategoryPeriodScopeProvider =
       return ReportCategoryPeriodScope.fullYear;
     });
 
+/// Realized vs scheduled filter for Reports (local calendar date; see ARB footnote).
+final reportExpenseInclusionProvider =
+    StateProvider<ExpenseInclusion>((ref) => ExpenseInclusion.all);
+
 /// Expenses for the selected report year and detail month (same bounds as Home month list).
 final expensesForReportDetailMonthProvider = StreamProvider<List<Expense>>((
   ref,
 ) {
   final year = ref.watch(selectedReportYearProvider);
   final month = ref.watch(selectedReportDetailMonthProvider);
-  return ref.watch(expenseRepositoryProvider).watchForMonth(year, month);
+  final inc = ref.watch(reportExpenseInclusionProvider);
+  return ref.watch(expenseRepositoryProvider).watchForMonth(year, month).map(
+        (list) => applyExpenseInclusion(list, inc, calendarTodayLocal()),
+      );
 });
 
 /// Expenses driving the category / % table (year vs single month).
 final expensesForReportCategoryScopeProvider = StreamProvider<List<Expense>>((
   ref,
 ) {
+  final inc = ref.watch(reportExpenseInclusionProvider);
   final scope = ref.watch(reportCategoryPeriodScopeProvider);
   final year = ref.watch(selectedReportYearProvider);
   final repo = ref.watch(expenseRepositoryProvider);
-  if (scope == ReportCategoryPeriodScope.fullYear) {
-    return repo.watchForYear(year);
-  }
-  final month = ref.watch(selectedReportDetailMonthProvider);
-  return repo.watchForMonth(year, month);
+  final Stream<List<Expense>> base = scope == ReportCategoryPeriodScope.fullYear
+      ? repo.watchForYear(year)
+      : repo.watchForMonth(year, ref.watch(selectedReportDetailMonthProvider));
+  return base.map(
+    (list) => applyExpenseInclusion(list, inc, calendarTodayLocal()),
+  );
 });
 
 final categoriesStreamProvider = StreamProvider<List<Category>>((ref) {
@@ -94,7 +103,10 @@ final expensesForSelectedReportYearProvider = StreamProvider<List<Expense>>((
   ref,
 ) {
   final year = ref.watch(selectedReportYearProvider);
-  return ref.watch(expenseRepositoryProvider).watchForYear(year);
+  final inc = ref.watch(reportExpenseInclusionProvider);
+  return ref.watch(expenseRepositoryProvider).watchForYear(year).map(
+        (list) => applyExpenseInclusion(list, inc, calendarTodayLocal()),
+      );
 });
 
 final subcategoriesForCategoryProvider =

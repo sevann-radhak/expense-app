@@ -104,6 +104,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Doughnut chart of USD share by category for the selected period, with a text legend.';
 
   @override
+  String get reportsExpenseInclusionAll => 'All';
+
+  @override
+  String get reportsExpenseInclusionRealized => 'Realized';
+
+  @override
+  String get reportsExpenseInclusionScheduled => 'Scheduled';
+
+  @override
+  String get reportsExpenseInclusionFootnote =>
+      'Realized = occurred on or before today; scheduled = after today, using your device’s local calendar date (time ignored). Totals refresh when data changes; they do not auto-update at midnight.';
+
+  @override
   String get categoriesScreenSubtitle =>
       'Taxonomy from your local database (debug / admin).';
 

@@ -274,6 +274,30 @@ abstract class AppLocalizations {
   /// **'Doughnut chart of USD share by category for the selected period, with a text legend.'**
   String get reportsChartCategorySemanticLabel;
 
+  /// Reports filter: include every expense in the period.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get reportsExpenseInclusionAll;
+
+  /// Reports filter: expenses with date on or before local today.
+  ///
+  /// In en, this message translates to:
+  /// **'Realized'**
+  String get reportsExpenseInclusionRealized;
+
+  /// Reports filter: expenses with date after local today (projected).
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get reportsExpenseInclusionScheduled;
+
+  /// Explains realized vs scheduled rules under the Reports segmented control.
+  ///
+  /// In en, this message translates to:
+  /// **'Realized = occurred on or before today; scheduled = after today, using your device’s local calendar date (time ignored). Totals refresh when data changes; they do not auto-update at midnight.'**
+  String get reportsExpenseInclusionFootnote;
+
   /// Short intro under the categories screen app bar.
   ///
   /// In en, this message translates to:

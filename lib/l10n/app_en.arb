@@ -90,6 +90,22 @@
   "@reportsChartCategorySemanticLabel": {
     "description": "Screen reader summary for the category chart."
   },
+  "reportsExpenseInclusionAll": "All",
+  "@reportsExpenseInclusionAll": {
+    "description": "Reports filter: include every expense in the period."
+  },
+  "reportsExpenseInclusionRealized": "Realized",
+  "@reportsExpenseInclusionRealized": {
+    "description": "Reports filter: expenses with date on or before local today."
+  },
+  "reportsExpenseInclusionScheduled": "Scheduled",
+  "@reportsExpenseInclusionScheduled": {
+    "description": "Reports filter: expenses with date after local today (projected)."
+  },
+  "reportsExpenseInclusionFootnote": "Realized = occurred on or before today; scheduled = after today, using your device’s local calendar date (time ignored). Totals refresh when data changes; they do not auto-update at midnight.",
+  "@reportsExpenseInclusionFootnote": {
+    "description": "Explains realized vs scheduled rules under the Reports segmented control."
+  },
   "categoriesScreenSubtitle": "Taxonomy from your local database (debug / admin).",
   "@categoriesScreenSubtitle": {
     "description": "Short intro under the categories screen app bar."

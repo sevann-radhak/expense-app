@@ -12,6 +12,14 @@
   "@navSettings": {
     "description": "Bottom navigation / rail label for settings."
   },
+  "navCategories": "Categories",
+  "@navCategories": {
+    "description": "Bottom navigation / rail label for the categories screen."
+  },
+  "categoriesScreenSubtitle": "Taxonomy from your local database (debug / admin).",
+  "@categoriesScreenSubtitle": {
+    "description": "Short intro under the categories screen app bar."
+  },
   "homeTitle": "Home",
   "@homeTitle": {
     "description": "App bar title on the home route."
@@ -27,10 +35,6 @@
   "settingsPlaceholder": "Language, currency, and card profiles will be configured here.",
   "@settingsPlaceholder": {
     "description": "Placeholder body on the settings screen."
-  },
-  "categoriesDebugHeading": "Categories (database)",
-  "@categoriesDebugHeading": {
-    "description": "Section title for the Phase 1.1 debug list of categories from Drift."
   },
   "cannotDeleteReservedSubcategory": "This subcategory cannot be deleted.",
   "@cannotDeleteReservedSubcategory": {

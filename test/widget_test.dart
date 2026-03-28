@@ -23,7 +23,12 @@ void main() {
     await db.close();
   }
 
-  testWidgets('home shows seeded categories from database', (WidgetTester tester) async {
+  testWidgets('categories screen lists seeded taxonomy', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     final db = await openTestDatabase();
     try {
       await tester.pumpWidget(
@@ -37,8 +42,12 @@ void main() {
       await tester.pumpAndSettle();
       final l10n = await AppLocalizations.delegate.load(const Locale('en'));
       expect(find.byKey(const ValueKey<String>('selected-month-label')), findsOneWidget);
-      expect(find.text(l10n.categoriesDebugHeading), findsOneWidget);
-      await tester.tap(find.text(l10n.categoriesDebugHeading));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text(l10n.navCategories),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.text('Formation'), findsOneWidget);
     } finally {

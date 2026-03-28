@@ -18,6 +18,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSettings => 'Settings';
 
   @override
+  String get navCategories => 'Categories';
+
+  @override
+  String get categoriesScreenSubtitle =>
+      'Taxonomy from your local database (debug / admin).';
+
+  @override
   String get homeTitle => 'Home';
 
   @override
@@ -30,9 +37,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsPlaceholder =>
       'Language, currency, and card profiles will be configured here.';
-
-  @override
-  String get categoriesDebugHeading => 'Categories (database)';
 
   @override
   String get cannotDeleteReservedSubcategory =>

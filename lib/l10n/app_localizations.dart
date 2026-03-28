@@ -112,6 +112,18 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get navSettings;
 
+  /// Bottom navigation / rail label for the categories screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get navCategories;
+
+  /// Short intro under the categories screen app bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxonomy from your local database (debug / admin).'**
+  String get categoriesScreenSubtitle;
+
   /// App bar title on the home route.
   ///
   /// In en, this message translates to:
@@ -135,12 +147,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language, currency, and card profiles will be configured here.'**
   String get settingsPlaceholder;
-
-  /// Section title for the Phase 1.1 debug list of categories from Drift.
-  ///
-  /// In en, this message translates to:
-  /// **'Categories (database)'**
-  String get categoriesDebugHeading;
 
   /// Shown when the user tries to delete the system Other row.
   ///

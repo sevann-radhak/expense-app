@@ -21,8 +21,6 @@ class HomeScreen extends ConsumerWidget {
     final expensesAsync = ref.watch(expensesForSelectedMonthProvider);
     final categories = ref.watch(categoriesStreamProvider).valueOrNull ?? [];
     final allSubs = ref.watch(allSubcategoriesStreamProvider).valueOrNull ?? [];
-    final categoriesAsync = ref.watch(categoriesStreamProvider);
-
     final categoryName = {for (final c in categories) c.id: c.name};
     final subcategoryName = {for (final s in allSubs) s.id: s.name};
 
@@ -113,23 +111,6 @@ class HomeScreen extends ConsumerWidget {
               padding: EdgeInsets.all(32),
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (e, _) => Text('$e'),
-          ),
-          const SizedBox(height: 24),
-          categoriesAsync.when(
-            data: (cats) => ExpansionTile(
-              initiallyExpanded: false,
-              title: Text(l10n.categoriesDebugHeading),
-              children: [
-                ...cats.map(
-                  (c) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: _CategoryExpansionTile(category: c),
-                  ),
-                ),
-              ],
-            ),
-            loading: () => const LinearProgressIndicator(),
             error: (e, _) => Text('$e'),
           ),
         ],
@@ -459,73 +440,6 @@ class _ExpenseTile extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CategoryExpansionTile extends ConsumerWidget {
-  const _CategoryExpansionTile({required this.category});
-
-  final Category category;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final subsAsync = ref.watch(
-      subcategoriesForCategoryProvider(category.id),
-    );
-
-    return Card(
-      margin: EdgeInsets.zero,
-      child: ExpansionTile(
-        title: Text(category.name),
-        subtitle: Text(
-          category.id,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        children: subsAsync.when(
-          data: (subs) => subs
-              .map(
-                (s) => ListTile(
-                  dense: true,
-                  title: Text(s.name),
-                  subtitle: Text('${s.slug} · ${s.id}'),
-                  trailing: s.isSystemReserved
-                      ? null
-                      : IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () async {
-                            try {
-                              await ref
-                                  .read(categoryRepositoryProvider)
-                                  .deleteSubcategory(s.id);
-                            } on ReservedSubcategoryException {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      l10n.cannotDeleteReservedSubcategory,
-                                    ),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                        ),
-                ),
-              )
-              .toList(),
-          loading: () => [
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          ],
-          error: (e, _) => [
-            ListTile(title: Text('$e')),
-          ],
         ),
       ),
     );

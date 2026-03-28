@@ -68,6 +68,8 @@ class Expenses extends Table {
 
   BoolColumn get paidWithCreditCard => boolean().withDefault(const Constant(false))();
 
+  TextColumn get description => text().withDefault(const Constant(''))();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -89,7 +91,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -107,8 +109,34 @@ class AppDatabase extends _$AppDatabase {
           if (from < 3) {
             await m.createTable(expenses);
           }
+          if (from < 5) {
+            await ensureExpenseDescriptionColumn();
+          }
+        },
+        beforeOpen: (OpeningDetails details) async {
+          await ensureExpenseDescriptionColumn();
         },
       );
+
+  /// Ensures [Expenses.description] exists (WASM/web can report schema v4+ without the column).
+  /// Safe to call repeatedly: ignores duplicate-column and missing-table errors.
+  Future<void> ensureExpenseDescriptionColumn() async {
+    try {
+      await customStatement(
+        "ALTER TABLE expenses ADD COLUMN description TEXT NOT NULL DEFAULT ''",
+      );
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('duplicate column') ||
+          msg.contains('already exists')) {
+        return;
+      }
+      if (msg.contains('no such table')) {
+        return;
+      }
+      rethrow;
+    }
+  }
 }
 
 AppDatabase? _appDatabase;
@@ -120,6 +148,7 @@ Future<AppDatabase> initializeAppDatabase() async {
   }
   final db = AppDatabase.openDefault();
   await db.customSelect('SELECT 1').getSingle();
+  await db.ensureExpenseDescriptionColumn();
   _appDatabase = db;
   return db;
 }

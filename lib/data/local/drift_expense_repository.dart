@@ -48,6 +48,7 @@ class DriftExpenseRepository implements ExpenseRepository {
       manualFxRateToUsd: r.manualFxRateToUsd,
       amountUsd: r.amountUsd,
       paidWithCreditCard: r.paidWithCreditCard,
+      description: r.description,
     );
   }
 
@@ -98,6 +99,7 @@ class DriftExpenseRepository implements ExpenseRepository {
             manualFxRateToUsd: Value(e.manualFxRateToUsd),
             amountUsd: e.amountUsd,
             paidWithCreditCard: Value(e.paidWithCreditCard),
+            description: Value(e.description),
           ),
         );
   }
@@ -127,6 +129,7 @@ class DriftExpenseRepository implements ExpenseRepository {
         manualFxRateToUsd: Value(e.manualFxRateToUsd),
         amountUsd: Value(e.amountUsd),
         paidWithCreditCard: Value(e.paidWithCreditCard),
+        description: Value(e.description),
       ),
     );
     if (updated == 0) {

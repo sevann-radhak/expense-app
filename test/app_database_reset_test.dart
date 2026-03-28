@@ -12,10 +12,13 @@ void main() {
     addTearDown(() async => db.close());
     await db.customSelect('SELECT 1').getSingle();
     final repo = DriftExpenseRepository(db);
-    final cat = await db.select(db.categories).getSingle();
-    final sub = await (db.select(db.subcategories)
+    final catsForExpense = await db.select(db.categories).get();
+    expect(catsForExpense, isNotEmpty);
+    final cat = catsForExpense.first;
+    final subs = await (db.select(db.subcategories)
           ..where((s) => s.categoryId.equals(cat.id)))
-        .getSingle();
+        .get();
+    final sub = subs.firstWhere((s) => s.slug == kOtherSubcategorySlug);
     await repo.create(
       Expense(
         id: 'x1',

@@ -48,6 +48,10 @@
   "expenseCategoryLabel": "Category",
   "expenseSubcategoryLabel": "Subcategory",
   "expenseAmountLabel": "Amount",
+  "expenseNotesLabel": "Notes (optional)",
+  "@expenseNotesLabel": {
+    "description": "Optional free-text note on an expense."
+  },
   "expenseCurrencyLabel": "Currency",
   "expenseCurrencyCustom": "{code} (not in default table)",
   "@expenseCurrencyCustom": {
@@ -57,16 +61,15 @@
       }
     }
   },
-  "expenseFxTableAsOf": "Default rates as of: {asOf}",
-  "@expenseFxTableAsOf": {
+  "expenseFxPresetHint": "Built-in rate ({asOf}). Change the field below if yours differs.",
+  "@expenseFxPresetHint": {
     "placeholders": {
       "asOf": {
         "type": "String"
       }
     }
   },
-  "expenseFxHelper": "How many units of this currency equal 1 USD (e.g. 1 USD = 1050 ARS). You can override the default.",
-  "expenseFxToUsdLabel": "Units of this currency per 1 USD",
+  "expenseFxFieldLabel": "Local units per 1 USD",
   "expenseUsdComputedLabel": "Computed USD: {amount}",
   "@expenseUsdComputedLabel": {
     "description": "Shows recomputed USD from amount and FX.",
@@ -107,7 +110,23 @@
     }
   },
   "expenseListCardBadge": "Card",
-  "expensesThisMonthHeading": "This month",
+  "expensesThisMonthHeading": "Transactions",
+  "monthSummaryTitle": "Month totals",
+  "@monthSummaryTitle": {
+    "description": "Heading for per-currency spend summary on the home screen."
+  },
+  "monthSummaryUsdTotal": "USD total: {amount}",
+  "@monthSummaryUsdTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "monthSummaryNoExpenses": "No expenses this month yet.",
+  "@monthSummaryNoExpenses": {
+    "description": "Short empty copy inside the month totals card."
+  },
   "monthPickerPrevious": "Previous month",
   "monthPickerNext": "Next month",
   "settingsResetDataTitle": "Reset all local data?",

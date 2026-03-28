@@ -220,6 +220,12 @@ abstract class AppLocalizations {
   /// **'Amount'**
   String get expenseAmountLabel;
 
+  /// Optional free-text note on an expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get expenseNotesLabel;
+
   /// No description provided for @expenseCurrencyLabel.
   ///
   /// In en, this message translates to:
@@ -232,23 +238,17 @@ abstract class AppLocalizations {
   /// **'{code} (not in default table)'**
   String expenseCurrencyCustom(String code);
 
-  /// No description provided for @expenseFxTableAsOf.
+  /// No description provided for @expenseFxPresetHint.
   ///
   /// In en, this message translates to:
-  /// **'Default rates as of: {asOf}'**
-  String expenseFxTableAsOf(String asOf);
+  /// **'Built-in rate ({asOf}). Change the field below if yours differs.'**
+  String expenseFxPresetHint(String asOf);
 
-  /// No description provided for @expenseFxHelper.
+  /// No description provided for @expenseFxFieldLabel.
   ///
   /// In en, this message translates to:
-  /// **'How many units of this currency equal 1 USD (e.g. 1 USD = 1050 ARS). You can override the default.'**
-  String get expenseFxHelper;
-
-  /// No description provided for @expenseFxToUsdLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Units of this currency per 1 USD'**
-  String get expenseFxToUsdLabel;
+  /// **'Local units per 1 USD'**
+  String get expenseFxFieldLabel;
 
   /// Shows recomputed USD from amount and FX.
   ///
@@ -343,8 +343,26 @@ abstract class AppLocalizations {
   /// No description provided for @expensesThisMonthHeading.
   ///
   /// In en, this message translates to:
-  /// **'This month'**
+  /// **'Transactions'**
   String get expensesThisMonthHeading;
+
+  /// Heading for per-currency spend summary on the home screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Month totals'**
+  String get monthSummaryTitle;
+
+  /// No description provided for @monthSummaryUsdTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'USD total: {amount}'**
+  String monthSummaryUsdTotal(String amount);
+
+  /// Short empty copy inside the month totals card.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses this month yet.'**
+  String get monthSummaryNoExpenses;
 
   /// No description provided for @monthPickerPrevious.
   ///

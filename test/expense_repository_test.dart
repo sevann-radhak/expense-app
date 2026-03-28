@@ -21,14 +21,14 @@ void main() {
     expect(cats.length, greaterThanOrEqualTo(2));
     categoryAId = cats.first.id;
     categoryBId = cats.last.id;
-    subcategoryAId = (await (db.select(db.subcategories)
-              ..where((s) => s.categoryId.equals(categoryAId)))
-            .getSingle())
-        .id;
-    subcategoryBId = (await (db.select(db.subcategories)
-              ..where((s) => s.categoryId.equals(categoryBId)))
-            .getSingle())
-        .id;
+    final subsA = await (db.select(db.subcategories)
+          ..where((s) => s.categoryId.equals(categoryAId)))
+        .get();
+    subcategoryAId = subsA.firstWhere((s) => s.slug == kOtherSubcategorySlug).id;
+    final subsB = await (db.select(db.subcategories)
+          ..where((s) => s.categoryId.equals(categoryBId)))
+        .get();
+    subcategoryBId = subsB.firstWhere((s) => s.slug == kOtherSubcategorySlug).id;
   });
 
   tearDown(() async {
@@ -113,5 +113,18 @@ void main() {
     await repo.delete('e_del');
     final rows = await db.select(db.expenses).get();
     expect(rows.where((r) => r.id == 'e_del'), isEmpty);
+  });
+
+  test('create and update persist description', () async {
+    await repo.create(
+      sample(id: 'e_note', occurredOn: DateTime(2025, 7, 2)).copyWith(
+        description: 'Team lunch',
+      ),
+    );
+    var list = await repo.watchForMonth(2025, 7).first;
+    expect(list.single.description, 'Team lunch');
+    await repo.update(list.single.copyWith(description: 'Updated note'));
+    list = await repo.watchForMonth(2025, 7).first;
+    expect(list.single.description, 'Updated note');
   });
 }

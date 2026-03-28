@@ -75,6 +75,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseAmountLabel => 'Amount';
 
   @override
+  String get expenseNotesLabel => 'Notes (optional)';
+
+  @override
   String get expenseCurrencyLabel => 'Currency';
 
   @override
@@ -83,16 +86,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String expenseFxTableAsOf(String asOf) {
-    return 'Default rates as of: $asOf';
+  String expenseFxPresetHint(String asOf) {
+    return 'Built-in rate ($asOf). Change the field below if yours differs.';
   }
 
   @override
-  String get expenseFxHelper =>
-      'How many units of this currency equal 1 USD (e.g. 1 USD = 1050 ARS). You can override the default.';
-
-  @override
-  String get expenseFxToUsdLabel => 'Units of this currency per 1 USD';
+  String get expenseFxFieldLabel => 'Local units per 1 USD';
 
   @override
   String expenseUsdComputedLabel(String amount) {
@@ -147,7 +146,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseListCardBadge => 'Card';
 
   @override
-  String get expensesThisMonthHeading => 'This month';
+  String get expensesThisMonthHeading => 'Transactions';
+
+  @override
+  String get monthSummaryTitle => 'Month totals';
+
+  @override
+  String monthSummaryUsdTotal(String amount) {
+    return 'USD total: $amount';
+  }
+
+  @override
+  String get monthSummaryNoExpenses => 'No expenses this month yet.';
 
   @override
   String get monthPickerPrevious => 'Previous month';

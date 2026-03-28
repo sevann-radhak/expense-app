@@ -42,6 +42,7 @@ class _ExpenseFormLoaded extends ConsumerStatefulWidget {
 
 class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
   final _formKey = GlobalKey<FormState>();
+  final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
   final _fxController = TextEditingController();
 
@@ -67,6 +68,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
           ? formatLocalUnitsPerUsdForField(1.0 / m)
           : formatLocalUnitsPerUsdForField(catalog.localUnitsPerUsdFor(_currencyCode));
       _paidWithCreditCard = i.paidWithCreditCard;
+      _descriptionController.text = i.description;
     } else {
       final n = DateTime.now();
       _occurredOn = DateTime(n.year, n.month, n.day);
@@ -86,6 +88,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
 
   @override
   void dispose() {
+    _descriptionController.dispose();
     _amountController.dispose();
     _fxController.dispose();
     super.dispose();
@@ -185,6 +188,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
       manualFxRateToUsd: manualFx,
       amountUsd: Expense.computeUsd(amount, manualFx),
       paidWithCreditCard: _paidWithCreditCard,
+      description: _descriptionController.text.trim(),
     );
 
     try {
@@ -355,6 +359,17 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                   loading: () => const LinearProgressIndicator(),
                   error: (e, _) => Text('$e'),
                 ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(
+                    labelText: l10n.expenseNotesLabel,
+                    alignLabelWithHint: true,
+                  ),
+                  maxLength: 500,
+                  maxLines: 3,
+                  textCapitalization: TextCapitalization.sentences,
+                ),
                 TextFormField(
                   controller: _amountController,
                   decoration: InputDecoration(labelText: l10n.expenseAmountLabel),
@@ -376,21 +391,24 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                     return null;
                   },
                 ),
+                Text(
+                  l10n.expenseFxPresetHint(widget.catalog.asOf),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   // ignore: deprecated_member_use
                   value: _currencyCode,
-                  decoration: InputDecoration(
-                    labelText: l10n.expenseCurrencyLabel,
-                    helperText: l10n.expenseFxTableAsOf(widget.catalog.asOf),
-                  ),
+                  decoration: InputDecoration(labelText: l10n.expenseCurrencyLabel),
                   items: _currencyMenuItems(l10n),
                   onChanged: _onCurrencyChanged,
                 ),
                 TextFormField(
                   controller: _fxController,
                   decoration: InputDecoration(
-                    labelText: l10n.expenseFxToUsdLabel,
-                    helperText: l10n.expenseFxHelper,
+                    labelText: l10n.expenseFxFieldLabel,
                   ),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,

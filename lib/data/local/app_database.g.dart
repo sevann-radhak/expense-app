@@ -790,6 +790,18 @@ class $ExpensesTable extends Expenses
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -801,6 +813,7 @@ class $ExpensesTable extends Expenses
     manualFxRateToUsd,
     amountUsd,
     paidWithCreditCard,
+    description,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -892,6 +905,15 @@ class $ExpensesTable extends Expenses
         ),
       );
     }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -937,6 +959,10 @@ class $ExpensesTable extends Expenses
         DriftSqlType.bool,
         data['${effectivePrefix}paid_with_credit_card'],
       )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
     );
   }
 
@@ -958,6 +984,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
   final double manualFxRateToUsd;
   final double amountUsd;
   final bool paidWithCreditCard;
+  final String description;
   const ExpenseRow({
     required this.id,
     required this.occurredOn,
@@ -968,6 +995,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     required this.manualFxRateToUsd,
     required this.amountUsd,
     required this.paidWithCreditCard,
+    required this.description,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -981,6 +1009,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     map['manual_fx_rate_to_usd'] = Variable<double>(manualFxRateToUsd);
     map['amount_usd'] = Variable<double>(amountUsd);
     map['paid_with_credit_card'] = Variable<bool>(paidWithCreditCard);
+    map['description'] = Variable<String>(description);
     return map;
   }
 
@@ -995,6 +1024,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       manualFxRateToUsd: Value(manualFxRateToUsd),
       amountUsd: Value(amountUsd),
       paidWithCreditCard: Value(paidWithCreditCard),
+      description: Value(description),
     );
   }
 
@@ -1013,6 +1043,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       manualFxRateToUsd: serializer.fromJson<double>(json['manualFxRateToUsd']),
       amountUsd: serializer.fromJson<double>(json['amountUsd']),
       paidWithCreditCard: serializer.fromJson<bool>(json['paidWithCreditCard']),
+      description: serializer.fromJson<String>(json['description']),
     );
   }
   @override
@@ -1028,6 +1059,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       'manualFxRateToUsd': serializer.toJson<double>(manualFxRateToUsd),
       'amountUsd': serializer.toJson<double>(amountUsd),
       'paidWithCreditCard': serializer.toJson<bool>(paidWithCreditCard),
+      'description': serializer.toJson<String>(description),
     };
   }
 
@@ -1041,6 +1073,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     double? manualFxRateToUsd,
     double? amountUsd,
     bool? paidWithCreditCard,
+    String? description,
   }) => ExpenseRow(
     id: id ?? this.id,
     occurredOn: occurredOn ?? this.occurredOn,
@@ -1051,6 +1084,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     manualFxRateToUsd: manualFxRateToUsd ?? this.manualFxRateToUsd,
     amountUsd: amountUsd ?? this.amountUsd,
     paidWithCreditCard: paidWithCreditCard ?? this.paidWithCreditCard,
+    description: description ?? this.description,
   );
   ExpenseRow copyWithCompanion(ExpensesCompanion data) {
     return ExpenseRow(
@@ -1077,6 +1111,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       paidWithCreditCard: data.paidWithCreditCard.present
           ? data.paidWithCreditCard.value
           : this.paidWithCreditCard,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
     );
   }
 
@@ -1091,7 +1128,8 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
           ..write('currencyCode: $currencyCode, ')
           ..write('manualFxRateToUsd: $manualFxRateToUsd, ')
           ..write('amountUsd: $amountUsd, ')
-          ..write('paidWithCreditCard: $paidWithCreditCard')
+          ..write('paidWithCreditCard: $paidWithCreditCard, ')
+          ..write('description: $description')
           ..write(')'))
         .toString();
   }
@@ -1107,6 +1145,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     manualFxRateToUsd,
     amountUsd,
     paidWithCreditCard,
+    description,
   );
   @override
   bool operator ==(Object other) =>
@@ -1120,7 +1159,8 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
           other.currencyCode == this.currencyCode &&
           other.manualFxRateToUsd == this.manualFxRateToUsd &&
           other.amountUsd == this.amountUsd &&
-          other.paidWithCreditCard == this.paidWithCreditCard);
+          other.paidWithCreditCard == this.paidWithCreditCard &&
+          other.description == this.description);
 }
 
 class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
@@ -1133,6 +1173,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
   final Value<double> manualFxRateToUsd;
   final Value<double> amountUsd;
   final Value<bool> paidWithCreditCard;
+  final Value<String> description;
   final Value<int> rowid;
   const ExpensesCompanion({
     this.id = const Value.absent(),
@@ -1144,6 +1185,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     this.manualFxRateToUsd = const Value.absent(),
     this.amountUsd = const Value.absent(),
     this.paidWithCreditCard = const Value.absent(),
+    this.description = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ExpensesCompanion.insert({
@@ -1156,6 +1198,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     this.manualFxRateToUsd = const Value.absent(),
     required double amountUsd,
     this.paidWithCreditCard = const Value.absent(),
+    this.description = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        occurredOn = Value(occurredOn),
@@ -1173,6 +1216,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     Expression<double>? manualFxRateToUsd,
     Expression<double>? amountUsd,
     Expression<bool>? paidWithCreditCard,
+    Expression<String>? description,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1186,6 +1230,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
       if (amountUsd != null) 'amount_usd': amountUsd,
       if (paidWithCreditCard != null)
         'paid_with_credit_card': paidWithCreditCard,
+      if (description != null) 'description': description,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1200,6 +1245,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     Value<double>? manualFxRateToUsd,
     Value<double>? amountUsd,
     Value<bool>? paidWithCreditCard,
+    Value<String>? description,
     Value<int>? rowid,
   }) {
     return ExpensesCompanion(
@@ -1212,6 +1258,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
       manualFxRateToUsd: manualFxRateToUsd ?? this.manualFxRateToUsd,
       amountUsd: amountUsd ?? this.amountUsd,
       paidWithCreditCard: paidWithCreditCard ?? this.paidWithCreditCard,
+      description: description ?? this.description,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1246,6 +1293,9 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     if (paidWithCreditCard.present) {
       map['paid_with_credit_card'] = Variable<bool>(paidWithCreditCard.value);
     }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1264,6 +1314,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
           ..write('manualFxRateToUsd: $manualFxRateToUsd, ')
           ..write('amountUsd: $amountUsd, ')
           ..write('paidWithCreditCard: $paidWithCreditCard, ')
+          ..write('description: $description, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2106,6 +2157,7 @@ typedef $$ExpensesTableCreateCompanionBuilder =
       Value<double> manualFxRateToUsd,
       required double amountUsd,
       Value<bool> paidWithCreditCard,
+      Value<String> description,
       Value<int> rowid,
     });
 typedef $$ExpensesTableUpdateCompanionBuilder =
@@ -2119,6 +2171,7 @@ typedef $$ExpensesTableUpdateCompanionBuilder =
       Value<double> manualFxRateToUsd,
       Value<double> amountUsd,
       Value<bool> paidWithCreditCard,
+      Value<String> description,
       Value<int> rowid,
     });
 
@@ -2206,6 +2259,11 @@ class $$ExpensesTableFilterComposer
 
   ColumnFilters<bool> get paidWithCreditCard => $composableBuilder(
     column: $table.paidWithCreditCard,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2300,6 +2358,11 @@ class $$ExpensesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CategoriesTableOrderingComposer get categoryId {
     final $$CategoriesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2387,6 +2450,11 @@ class $$ExpensesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
   $$CategoriesTableAnnotationComposer get categoryId {
     final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -2471,6 +2539,7 @@ class $$ExpensesTableTableManager
                 Value<double> manualFxRateToUsd = const Value.absent(),
                 Value<double> amountUsd = const Value.absent(),
                 Value<bool> paidWithCreditCard = const Value.absent(),
+                Value<String> description = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpensesCompanion(
                 id: id,
@@ -2482,6 +2551,7 @@ class $$ExpensesTableTableManager
                 manualFxRateToUsd: manualFxRateToUsd,
                 amountUsd: amountUsd,
                 paidWithCreditCard: paidWithCreditCard,
+                description: description,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2495,6 +2565,7 @@ class $$ExpensesTableTableManager
                 Value<double> manualFxRateToUsd = const Value.absent(),
                 required double amountUsd,
                 Value<bool> paidWithCreditCard = const Value.absent(),
+                Value<String> description = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpensesCompanion.insert(
                 id: id,
@@ -2506,6 +2577,7 @@ class $$ExpensesTableTableManager
                 manualFxRateToUsd: manualFxRateToUsd,
                 amountUsd: amountUsd,
                 paidWithCreditCard: paidWithCreditCard,
+                description: description,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

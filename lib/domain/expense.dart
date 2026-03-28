@@ -32,6 +32,7 @@ class Expense {
     required this.manualFxRateToUsd,
     required this.amountUsd,
     required this.paidWithCreditCard,
+    this.description = '',
   });
 
   final String id;
@@ -53,6 +54,9 @@ class Expense {
   final double amountUsd;
   final bool paidWithCreditCard;
 
+  /// Optional user note (plain text).
+  final String description;
+
   static double computeUsd(double amountOriginal, double manualFxRateToUsd) {
     return amountOriginal * manualFxRateToUsd;
   }
@@ -67,6 +71,7 @@ class Expense {
     double? manualFxRateToUsd,
     double? amountUsd,
     bool? paidWithCreditCard,
+    String? description,
   }) {
     return Expense(
       id: id ?? this.id,
@@ -78,6 +83,7 @@ class Expense {
       manualFxRateToUsd: manualFxRateToUsd ?? this.manualFxRateToUsd,
       amountUsd: amountUsd ?? this.amountUsd,
       paidWithCreditCard: paidWithCreditCard ?? this.paidWithCreditCard,
+      description: description ?? this.description,
     );
   }
 }

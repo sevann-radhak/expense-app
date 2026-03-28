@@ -19,7 +19,7 @@ void main() {
     await db.close();
   });
 
-  test('seed creates eight categories each with Other subcategory', () async {
+  test('seed creates eight categories each with exactly one Other subcategory', () async {
     final cats = await db.select(db.categories).get();
     expect(cats.length, 8);
 
@@ -27,10 +27,18 @@ void main() {
       final subs = await (db.select(db.subcategories)
             ..where((t) => t.categoryId.equals(c.id)))
           .get();
-      expect(subs.length, 1);
-      expect(subs.single.slug, kOtherSubcategorySlug);
-      expect(subs.single.isSystemReserved, isTrue);
+      expect(subs.length, greaterThanOrEqualTo(1));
+      final others = subs.where((s) => s.slug == kOtherSubcategorySlug).toList();
+      expect(others, hasLength(1));
+      expect(others.single.isSystemReserved, isTrue);
     }
+  });
+
+  test('default template includes multiple subcategories per category', () async {
+    final subs = await (db.select(db.subcategories)
+          ..where((t) => t.categoryId.equals('cat_fixed_expenses')))
+        .get();
+    expect(subs.length, greaterThan(3));
   });
 
   test('deleteSubcategory throws for system Other', () async {

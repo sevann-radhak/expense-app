@@ -90,6 +90,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Percentages use total USD in the selected period. Subcategory rows use that category’s USD as the total.';
 
   @override
+  String get reportsChartMonthlyTitle => 'Spend by month (chart)';
+
+  @override
+  String get reportsChartCategoryTitle => 'Spend by category (chart)';
+
+  @override
+  String get reportsChartMonthlySemanticLabel =>
+      'Bar chart of total USD spent per calendar month for the selected year.';
+
+  @override
+  String get reportsChartCategorySemanticLabel =>
+      'Doughnut chart of USD share by category for the selected period, with a text legend.';
+
+  @override
   String get categoriesScreenSubtitle =>
       'Taxonomy from your local database (debug / admin).';
 

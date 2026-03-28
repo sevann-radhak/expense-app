@@ -74,6 +74,22 @@
   "@reportsPercentFootnote": {
     "description": "Explains denominators for category vs subcategory %."
   },
+  "reportsChartMonthlyTitle": "Spend by month (chart)",
+  "@reportsChartMonthlyTitle": {
+    "description": "Heading above the annual bar chart on Reports."
+  },
+  "reportsChartCategoryTitle": "Spend by category (chart)",
+  "@reportsChartCategoryTitle": {
+    "description": "Heading above the category doughnut chart on Reports."
+  },
+  "reportsChartMonthlySemanticLabel": "Bar chart of total USD spent per calendar month for the selected year.",
+  "@reportsChartMonthlySemanticLabel": {
+    "description": "Screen reader summary for the monthly bar chart."
+  },
+  "reportsChartCategorySemanticLabel": "Doughnut chart of USD share by category for the selected period, with a text legend.",
+  "@reportsChartCategorySemanticLabel": {
+    "description": "Screen reader summary for the category chart."
+  },
   "categoriesScreenSubtitle": "Taxonomy from your local database (debug / admin).",
   "@categoriesScreenSubtitle": {
     "description": "Short intro under the categories screen app bar."

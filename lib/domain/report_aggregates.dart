@@ -1,5 +1,17 @@
 import 'package:expense_app/domain/expense.dart';
 
+/// January at index `0`, December at index `11`.
+List<double> monthlyUsdTotalsByCalendarMonth(Iterable<Expense> expenses) {
+  final list = List<double>.filled(12, 0);
+  for (final e in expenses) {
+    final m = e.occurredOn.month;
+    if (m >= 1 && m <= 12) {
+      list[m - 1] += e.amountUsd;
+    }
+  }
+  return list;
+}
+
 /// Sum of [Expense.amountUsd] (already FX-converted at save time).
 double totalUsd(Iterable<Expense> expenses) {
   var s = 0.0;

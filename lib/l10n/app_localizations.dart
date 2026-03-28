@@ -250,6 +250,30 @@ abstract class AppLocalizations {
   /// **'Percentages use total USD in the selected period. Subcategory rows use that category’s USD as the total.'**
   String get reportsPercentFootnote;
 
+  /// Heading above the annual bar chart on Reports.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend by month (chart)'**
+  String get reportsChartMonthlyTitle;
+
+  /// Heading above the category doughnut chart on Reports.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend by category (chart)'**
+  String get reportsChartCategoryTitle;
+
+  /// Screen reader summary for the monthly bar chart.
+  ///
+  /// In en, this message translates to:
+  /// **'Bar chart of total USD spent per calendar month for the selected year.'**
+  String get reportsChartMonthlySemanticLabel;
+
+  /// Screen reader summary for the category chart.
+  ///
+  /// In en, this message translates to:
+  /// **'Doughnut chart of USD share by category for the selected period, with a text legend.'**
+  String get reportsChartCategorySemanticLabel;
+
   /// Short intro under the categories screen app bar.
   ///
   /// In en, this message translates to:

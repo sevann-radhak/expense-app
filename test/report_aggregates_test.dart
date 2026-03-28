@@ -53,6 +53,23 @@ void main() {
     expect(rows[1].totalUsd, 15);
   });
 
+  test('monthlyUsdTotalsByCalendarMonth buckets by occurredOn month', () {
+    final list = monthlyUsdTotalsByCalendarMonth([
+      _e(id: '1', categoryId: 'c', subcategoryId: 's', usd: 10).copyWith(
+        occurredOn: DateTime(2025, 1, 15),
+      ),
+      _e(id: '2', categoryId: 'c', subcategoryId: 's', usd: 5).copyWith(
+        occurredOn: DateTime(2025, 1, 20),
+      ),
+      _e(id: '3', categoryId: 'c', subcategoryId: 's', usd: 100).copyWith(
+        occurredOn: DateTime(2025, 12, 1),
+      ),
+    ]);
+    expect(list[0], 15);
+    expect(list[11], 100);
+    expect(list[5], 0);
+  });
+
   test('aggregateUsdBySubcategoryForCategory filters and sorts', () {
     final rows = aggregateUsdBySubcategoryForCategory([
       _e(id: '1', categoryId: 'c', subcategoryId: 's1', usd: 3),

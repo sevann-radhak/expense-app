@@ -9,6 +9,8 @@ import 'package:expense_app/presentation/expenses/expense_summary_list_tile.dart
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/home/expense_form_dialog.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
+import 'package:expense_app/presentation/reports/reports_category_pie_chart.dart';
+import 'package:expense_app/presentation/reports/reports_monthly_bar_chart.dart';
 
 class ReportsScreen extends ConsumerWidget {
   const ReportsScreen({super.key});
@@ -101,6 +103,7 @@ class _ReportsAnnualTabBody extends ConsumerWidget {
         expensesAsync.when(
           data: (expenses) {
             final loc = Localizations.localeOf(context);
+            final monthlyUsd = monthlyUsdTotalsByCalendarMonth(expenses);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
@@ -122,7 +125,14 @@ class _ReportsAnnualTabBody extends ConsumerWidget {
                   const SizedBox(height: 8),
                   _MonthlyUsdTable(
                     year: year,
-                    expenses: expenses,
+                    monthlyUsd: monthlyUsd,
+                    localeName: locale,
+                    l10n: l10n,
+                  ),
+                  const SizedBox(height: 16),
+                  ReportsMonthlyBarChart(
+                    year: year,
+                    monthlyUsd: monthlyUsd,
                     localeName: locale,
                     l10n: l10n,
                   ),
@@ -320,10 +330,18 @@ class _ReportsByCategoryTabBody extends ConsumerWidget {
                 Text(
                   l10n.reportsPercentFootnote,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 12),
+                ReportsCategoryPieChart(
+                  aggregates: aggregates,
+                  periodTotalUsd: periodTotal,
+                  categoryName: categoryName,
+                  localeName: localeName,
+                  l10n: l10n,
+                ),
+                const SizedBox(height: 16),
                 _CategoryBreakdownTable(
                   expenses: expenses,
                   aggregates: aggregates,
@@ -724,13 +742,13 @@ class _YearSummaryCurrencyChip extends StatelessWidget {
 class _MonthlyUsdTable extends StatelessWidget {
   const _MonthlyUsdTable({
     required this.year,
-    required this.expenses,
+    required this.monthlyUsd,
     required this.localeName,
     required this.l10n,
   });
 
   final int year;
-  final List<Expense> expenses;
+  final List<double> monthlyUsd;
   final String localeName;
   final AppLocalizations l10n;
 
@@ -738,13 +756,6 @@ class _MonthlyUsdTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final byMonthUsd = List<double>.filled(12, 0);
-    for (final e in expenses) {
-      final m = e.occurredOn.month;
-      if (m >= 1 && m <= 12) {
-        byMonthUsd[m - 1] += e.amountUsd;
-      }
-    }
 
     return Card(
       elevation: 0,
@@ -783,7 +794,7 @@ class _MonthlyUsdTable extends StatelessWidget {
             ),
             ...List.generate(12, (i) {
               final month = i + 1;
-              final total = byMonthUsd[i];
+              final total = monthlyUsd[i];
               final monthLabel = DateFormat.MMM(
                 localeName,
               ).format(DateTime(year, month));

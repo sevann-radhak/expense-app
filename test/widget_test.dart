@@ -98,6 +98,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Formation'), findsOneWidget);
+      expect(find.textContaining('cat_'), findsNothing);
     } finally {
       await disposeUiAndDb(tester, db);
     }

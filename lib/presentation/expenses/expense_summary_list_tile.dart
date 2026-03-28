@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
+import 'package:expense_app/presentation/theme/category_accent_colors.dart';
 
 /// Compact expense row (category, subcategory, date, amounts) for lists.
 class ExpenseSummaryListTile extends StatelessWidget {
@@ -11,12 +12,16 @@ class ExpenseSummaryListTile extends StatelessWidget {
     required this.categoryName,
     required this.subcategoryName,
     super.key,
+    this.categoryId,
     this.onTap,
   });
 
   final Expense expense;
   final String categoryName;
   final String subcategoryName;
+
+  /// When set, shows a left accent bar using the shared category palette.
+  final String? categoryId;
   final VoidCallback? onTap;
 
   @override
@@ -42,6 +47,17 @@ class ExpenseSummaryListTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (categoryId != null) ...[
+            Container(
+              width: 4,
+              constraints: const BoxConstraints(minHeight: 40),
+              decoration: BoxDecoration(
+                color: categoryAccentColor(categoryId!),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

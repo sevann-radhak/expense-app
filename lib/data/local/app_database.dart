@@ -11,6 +11,8 @@ class Categories extends Table {
 
   TextColumn get name => text()();
 
+  TextColumn get description => text().nullable()();
+
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 
   @override
@@ -28,6 +30,8 @@ class Subcategories extends Table {
       )();
 
   TextColumn get name => text()();
+
+  TextColumn get description => text().nullable()();
 
   TextColumn get slug => text()();
 
@@ -91,7 +95,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -112,9 +116,13 @@ class AppDatabase extends _$AppDatabase {
           if (from < 5) {
             await ensureExpenseDescriptionColumn();
           }
+          if (from < 6) {
+            await ensureCategoryAndSubcategoryDescriptionColumns();
+          }
         },
         beforeOpen: (OpeningDetails details) async {
           await ensureExpenseDescriptionColumn();
+          await ensureCategoryAndSubcategoryDescriptionColumns();
         },
       );
 
@@ -137,6 +145,28 @@ class AppDatabase extends _$AppDatabase {
       rethrow;
     }
   }
+
+  /// Ensures nullable taxonomy description columns (upgrades + WASM quirks).
+  Future<void> ensureCategoryAndSubcategoryDescriptionColumns() async {
+    const stmts = <String>[
+      'ALTER TABLE categories ADD COLUMN description TEXT',
+      'ALTER TABLE subcategories ADD COLUMN description TEXT',
+    ];
+    for (final sql in stmts) {
+      try {
+        await customStatement(sql);
+      } catch (e) {
+        final msg = e.toString().toLowerCase();
+        if (msg.contains('duplicate column') || msg.contains('already exists')) {
+          continue;
+        }
+        if (msg.contains('no such table')) {
+          continue;
+        }
+        rethrow;
+      }
+    }
+  }
 }
 
 AppDatabase? _appDatabase;
@@ -149,6 +179,7 @@ Future<AppDatabase> initializeAppDatabase() async {
   final db = AppDatabase.openDefault();
   await db.customSelect('SELECT 1').getSingle();
   await db.ensureExpenseDescriptionColumn();
+  await db.ensureCategoryAndSubcategoryDescriptionColumns();
   _appDatabase = db;
   return db;
 }

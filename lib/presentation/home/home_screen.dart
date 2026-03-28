@@ -97,10 +97,11 @@ class HomeScreen extends ConsumerWidget {
                     ...expenses.map(
                       (e) => ExpenseSummaryListTile(
                         expense: e,
-                        categoryName:
-                            categoryName[e.categoryId] ?? e.categoryId,
-                        subcategoryName:
-                            subcategoryName[e.subcategoryId] ?? e.subcategoryId,
+                        categoryId: e.categoryId,
+                        categoryName: categoryName[e.categoryId] ??
+                            l10n.taxonomyUnknownLabel,
+                        subcategoryName: subcategoryName[e.subcategoryId] ??
+                            l10n.taxonomyUnknownLabel,
                         onTap: () {
                           showDialog<void>(
                             context: context,

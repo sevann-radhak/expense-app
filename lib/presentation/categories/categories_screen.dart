@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
+import 'package:expense_app/presentation/theme/category_accent_colors.dart';
 
 class CategoriesScreen extends ConsumerWidget {
   const CategoriesScreen({super.key});
@@ -41,10 +42,116 @@ class CategoriesScreen extends ConsumerWidget {
   }
 }
 
+class _DescriptionEditorDialog extends StatefulWidget {
+  const _DescriptionEditorDialog({
+    required this.title,
+    required this.label,
+    required this.initialText,
+    required this.onSave,
+  });
+
+  final String title;
+  final String label;
+  final String initialText;
+  final Future<void> Function(String text) onSave;
+
+  @override
+  State<_DescriptionEditorDialog> createState() =>
+      _DescriptionEditorDialogState();
+}
+
+class _DescriptionEditorDialogState extends State<_DescriptionEditorDialog> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.initialText);
+  var _busy = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(widget.title),
+      content: TextField(
+        controller: _controller,
+        maxLines: 3,
+        enabled: !_busy,
+        decoration: InputDecoration(labelText: widget.label),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _busy ? null : () => Navigator.pop(context),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: _busy
+              ? null
+              : () async {
+                  setState(() => _busy = true);
+                  try {
+                    await widget.onSave(_controller.text);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
+                  } finally {
+                    if (mounted) {
+                      setState(() => _busy = false);
+                    }
+                  }
+                },
+          child: Text(l10n.saveExpenseAction),
+        ),
+      ],
+    );
+  }
+}
+
 class _CategoryExpansionTile extends ConsumerWidget {
   const _CategoryExpansionTile({required this.category});
 
   final Category category;
+
+  static Future<void> _openCategoryEditor(
+    BuildContext context,
+    WidgetRef ref,
+    Category category,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => _DescriptionEditorDialog(
+        title: l10n.categoryEditDescriptionTitle,
+        label: l10n.categoryDescriptionLabel,
+        initialText: category.description ?? '',
+        onSave: (text) => ref
+            .read(categoryRepositoryProvider)
+            .setCategoryDescription(category.id, text),
+      ),
+    );
+  }
+
+  static Future<void> _openSubcategoryEditor(
+    BuildContext context,
+    WidgetRef ref,
+    Subcategory sub,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => _DescriptionEditorDialog(
+        title: l10n.subcategoryEditDescriptionTitle,
+        label: l10n.categoryDescriptionLabel,
+        initialText: sub.description ?? '',
+        onSave: (text) => ref
+            .read(categoryRepositoryProvider)
+            .setSubcategoryDescription(sub.id, text),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -52,47 +159,104 @@ class _CategoryExpansionTile extends ConsumerWidget {
     final subsAsync = ref.watch(
       subcategoriesForCategoryProvider(category.id),
     );
+    final catDesc = category.description?.trim();
+    final parentColor = categoryAccentColor(category.id);
 
     return Card(
       margin: EdgeInsets.zero,
       child: ExpansionTile(
-        title: Text(category.name),
-        subtitle: Text(
-          category.id,
-          style: Theme.of(context).textTheme.bodySmall,
+        leading: Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: parentColor,
+            shape: BoxShape.circle,
+          ),
         ),
-        children: subsAsync.when(
-          data: (subs) => subs
-              .map(
-                (s) => ListTile(
-                  dense: true,
-                  title: Text(s.name),
-                  subtitle: Text('${s.slug} · ${s.id}'),
-                  trailing: s.isSystemReserved
-                      ? null
-                      : IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () async {
-                            try {
-                              await ref
-                                  .read(categoryRepositoryProvider)
-                                  .deleteSubcategory(s.id);
-                            } on ReservedSubcategoryException {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      l10n.cannotDeleteReservedSubcategory,
-                                    ),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                        ),
-                ),
+        title: Row(
+          children: [
+            Expanded(child: Text(category.name)),
+            IconButton(
+              tooltip: l10n.categoryEditDescriptionTooltip,
+              icon: const Icon(Icons.edit_outlined),
+              visualDensity: VisualDensity.compact,
+              onPressed: () => _openCategoryEditor(context, ref, category),
+            ),
+          ],
+        ),
+        subtitle: catDesc != null && catDesc.isNotEmpty
+            ? Text(
+                catDesc,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
               )
-              .toList(),
+            : null,
+        children: subsAsync.when(
+          data: (subs) {
+            final n = subs.length;
+            return subs.asMap().entries.map((e) {
+              final i = e.key;
+              final s = e.value;
+              final subDesc = s.description?.trim();
+              final tone = subcategoryTonalColor(parentColor, i, n);
+              return ListTile(
+                dense: true,
+                leading: Container(
+                  width: 8,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: tone,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                title: Text(s.name),
+                subtitle: subDesc != null && subDesc.isNotEmpty
+                    ? Text(
+                        subDesc,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    : null,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      tooltip: l10n.categoryEditDescriptionTooltip,
+                      icon: const Icon(Icons.edit_outlined, size: 20),
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () =>
+                          _openSubcategoryEditor(context, ref, s),
+                    ),
+                    if (!s.isSystemReserved)
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, size: 20),
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () async {
+                          try {
+                            await ref
+                                .read(categoryRepositoryProvider)
+                                .deleteSubcategory(s.id);
+                          } on ReservedSubcategoryException {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    l10n.cannotDeleteReservedSubcategory,
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                  ],
+                ),
+              );
+            }).toList();
+          },
           loading: () => [
             const Padding(
               padding: EdgeInsets.all(16),

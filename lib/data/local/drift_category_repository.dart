@@ -20,6 +20,7 @@ class DriftCategoryRepository implements CategoryRepository {
                   id: r.id,
                   categoryId: r.categoryId,
                   name: r.name,
+                  description: r.description,
                   slug: r.slug,
                   isSystemReserved: r.isSystemReserved,
                   sortOrder: r.sortOrder,
@@ -40,6 +41,7 @@ class DriftCategoryRepository implements CategoryRepository {
                 (r) => Category(
                   id: r.id,
                   name: r.name,
+                  description: r.description,
                   sortOrder: r.sortOrder,
                 ),
               )
@@ -60,6 +62,7 @@ class DriftCategoryRepository implements CategoryRepository {
                   id: r.id,
                   categoryId: r.categoryId,
                   name: r.name,
+                  description: r.description,
                   slug: r.slug,
                   isSystemReserved: r.isSystemReserved,
                   sortOrder: r.sortOrder,
@@ -82,5 +85,25 @@ class DriftCategoryRepository implements CategoryRepository {
       );
     }
     await (_db.delete(_db.subcategories)..where((t) => t.id.equals(id))).go();
+  }
+
+  @override
+  Future<void> setCategoryDescription(String id, String? description) async {
+    final normalized = description?.trim();
+    final stored =
+        normalized == null || normalized.isEmpty ? null : normalized;
+    await (_db.update(_db.categories)..where((t) => t.id.equals(id))).write(
+      CategoriesCompanion(description: Value(stored)),
+    );
+  }
+
+  @override
+  Future<void> setSubcategoryDescription(String id, String? description) async {
+    final normalized = description?.trim();
+    final stored =
+        normalized == null || normalized.isEmpty ? null : normalized;
+    await (_db.update(_db.subcategories)..where((t) => t.id.equals(id))).write(
+      SubcategoriesCompanion(description: Value(stored)),
+    );
   }
 }

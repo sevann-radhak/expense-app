@@ -267,9 +267,11 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                 ...expenses.map(
                   (e) => ExpenseSummaryListTile(
                     expense: e,
-                    categoryName: categoryName[e.categoryId] ?? e.categoryId,
-                    subcategoryName:
-                        subcategoryName[e.subcategoryId] ?? e.subcategoryId,
+                    categoryId: e.categoryId,
+                    categoryName: categoryName[e.categoryId] ??
+                        l10n.taxonomyUnknownLabel,
+                    subcategoryName: subcategoryName[e.subcategoryId] ??
+                        l10n.taxonomyUnknownLabel,
                     onTap: () {
                       showDialog<void>(
                         context: context,
@@ -479,7 +481,8 @@ class _CategoryBreakdownTable extends StatelessWidget {
           ),
           const Divider(height: 1),
           ...aggregates.map((row) {
-            final name = categoryName[row.categoryId] ?? row.categoryId;
+            final name =
+                categoryName[row.categoryId] ?? l10n.taxonomyUnknownLabel;
             final share = percentOfTotal(row.totalUsd, periodTotalUsd);
             final subRows = aggregateUsdBySubcategoryForCategory(
               expenses,
@@ -513,9 +516,8 @@ class _CategoryBreakdownTable extends StatelessWidget {
                             s.totalUsd,
                             row.totalUsd,
                           );
-                          final subLabel =
-                              subcategoryName[s.subcategoryId] ??
-                              s.subcategoryId;
+                          final subLabel = subcategoryName[s.subcategoryId] ??
+                              l10n.taxonomyUnknownLabel;
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             child: Row(

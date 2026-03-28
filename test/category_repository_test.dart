@@ -52,4 +52,43 @@ void main() {
       throwsA(isA<ReservedSubcategoryException>()),
     );
   });
+
+  test('setCategoryDescription trims, persists, and clears', () async {
+    await repo.setCategoryDescription('cat_formation', '  Hello  ');
+    var row = await (db.select(db.categories)
+          ..where((t) => t.id.equals('cat_formation')))
+        .getSingle();
+    expect(row.description, 'Hello');
+
+    await repo.setCategoryDescription('cat_formation', null);
+    row = await (db.select(db.categories)
+          ..where((t) => t.id.equals('cat_formation')))
+        .getSingle();
+    expect(row.description, isNull);
+
+    await repo.setCategoryDescription('cat_formation', '   ');
+    row = await (db.select(db.categories)
+          ..where((t) => t.id.equals('cat_formation')))
+        .getSingle();
+    expect(row.description, isNull);
+  });
+
+  test('setSubcategoryDescription persists', () async {
+    final row = await (db.select(db.subcategories)
+          ..where((t) => t.categoryId.equals('cat_leisure'))
+          ..limit(1))
+        .getSingle();
+    await repo.setSubcategoryDescription(row.id, 'Day trips');
+    final updated = await (db.select(db.subcategories)
+          ..where((t) => t.id.equals(row.id)))
+        .getSingle();
+    expect(updated.description, 'Day trips');
+  });
+
+  test('ensureCategoryAndSubcategoryDescriptionColumns is idempotent', () async {
+    await db.ensureCategoryAndSubcategoryDescriptionColumns();
+    await db.ensureCategoryAndSubcategoryDescriptionColumns();
+    final cats = await db.select(db.categories).get();
+    expect(cats, isNotEmpty);
+  });
 }

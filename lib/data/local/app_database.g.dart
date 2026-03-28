@@ -27,6 +27,17 @@ class $CategoriesTable extends Categories
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _sortOrderMeta = const VerificationMeta(
     'sortOrder',
   );
@@ -40,7 +51,7 @@ class $CategoriesTable extends Categories
     defaultValue: const Constant(0),
   );
   @override
-  List<GeneratedColumn> get $columns => [id, name, sortOrder];
+  List<GeneratedColumn> get $columns => [id, name, description, sortOrder];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -66,6 +77,15 @@ class $CategoriesTable extends Categories
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
     if (data.containsKey('sort_order')) {
       context.handle(
         _sortOrderMeta,
@@ -89,6 +109,10 @@ class $CategoriesTable extends Categories
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
       sortOrder: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
@@ -105,10 +129,12 @@ class $CategoriesTable extends Categories
 class CategoryRow extends DataClass implements Insertable<CategoryRow> {
   final String id;
   final String name;
+  final String? description;
   final int sortOrder;
   const CategoryRow({
     required this.id,
     required this.name,
+    this.description,
     required this.sortOrder,
   });
   @override
@@ -116,6 +142,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
     map['sort_order'] = Variable<int>(sortOrder);
     return map;
   }
@@ -124,6 +153,9 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     return CategoriesCompanion(
       id: Value(id),
       name: Value(name),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
       sortOrder: Value(sortOrder),
     );
   }
@@ -136,6 +168,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     return CategoryRow(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
     );
   }
@@ -145,20 +178,29 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
       'sortOrder': serializer.toJson<int>(sortOrder),
     };
   }
 
-  CategoryRow copyWith({String? id, String? name, int? sortOrder}) =>
-      CategoryRow(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        sortOrder: sortOrder ?? this.sortOrder,
-      );
+  CategoryRow copyWith({
+    String? id,
+    String? name,
+    Value<String?> description = const Value.absent(),
+    int? sortOrder,
+  }) => CategoryRow(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+    sortOrder: sortOrder ?? this.sortOrder,
+  );
   CategoryRow copyWithCompanion(CategoriesCompanion data) {
     return CategoryRow(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
     );
   }
@@ -168,36 +210,41 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     return (StringBuffer('CategoryRow(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('description: $description, ')
           ..write('sortOrder: $sortOrder')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, sortOrder);
+  int get hashCode => Object.hash(id, name, description, sortOrder);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is CategoryRow &&
           other.id == this.id &&
           other.name == this.name &&
+          other.description == this.description &&
           other.sortOrder == this.sortOrder);
 }
 
 class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
   final Value<String> id;
   final Value<String> name;
+  final Value<String?> description;
   final Value<int> sortOrder;
   final Value<int> rowid;
   const CategoriesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.description = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CategoriesCompanion.insert({
     required String id,
     required String name,
+    this.description = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -205,12 +252,14 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
   static Insertable<CategoryRow> custom({
     Expression<String>? id,
     Expression<String>? name,
+    Expression<String>? description,
     Expression<int>? sortOrder,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (description != null) 'description': description,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (rowid != null) 'rowid': rowid,
     });
@@ -219,12 +268,14 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
   CategoriesCompanion copyWith({
     Value<String>? id,
     Value<String>? name,
+    Value<String?>? description,
     Value<int>? sortOrder,
     Value<int>? rowid,
   }) {
     return CategoriesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
+      description: description ?? this.description,
       sortOrder: sortOrder ?? this.sortOrder,
       rowid: rowid ?? this.rowid,
     );
@@ -238,6 +289,9 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
     }
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
@@ -253,6 +307,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     return (StringBuffer('CategoriesCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('description: $description, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -298,6 +353,17 @@ class $SubcategoriesTable extends Subcategories
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _slugMeta = const VerificationMeta('slug');
   @override
   late final GeneratedColumn<String> slug = GeneratedColumn<String>(
@@ -339,6 +405,7 @@ class $SubcategoriesTable extends Subcategories
     id,
     categoryId,
     name,
+    description,
     slug,
     isSystemReserved,
     sortOrder,
@@ -375,6 +442,15 @@ class $SubcategoriesTable extends Subcategories
       );
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
     }
     if (data.containsKey('slug')) {
       context.handle(
@@ -420,6 +496,10 @@ class $SubcategoriesTable extends Subcategories
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
       slug: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}slug'],
@@ -445,6 +525,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
   final String id;
   final String categoryId;
   final String name;
+  final String? description;
   final String slug;
   final bool isSystemReserved;
   final int sortOrder;
@@ -452,6 +533,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
     required this.id,
     required this.categoryId,
     required this.name,
+    this.description,
     required this.slug,
     required this.isSystemReserved,
     required this.sortOrder,
@@ -462,6 +544,9 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
     map['id'] = Variable<String>(id);
     map['category_id'] = Variable<String>(categoryId);
     map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
     map['slug'] = Variable<String>(slug);
     map['is_system_reserved'] = Variable<bool>(isSystemReserved);
     map['sort_order'] = Variable<int>(sortOrder);
@@ -473,6 +558,9 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
       id: Value(id),
       categoryId: Value(categoryId),
       name: Value(name),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
       slug: Value(slug),
       isSystemReserved: Value(isSystemReserved),
       sortOrder: Value(sortOrder),
@@ -488,6 +576,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
       id: serializer.fromJson<String>(json['id']),
       categoryId: serializer.fromJson<String>(json['categoryId']),
       name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
       slug: serializer.fromJson<String>(json['slug']),
       isSystemReserved: serializer.fromJson<bool>(json['isSystemReserved']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
@@ -500,6 +589,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
       'id': serializer.toJson<String>(id),
       'categoryId': serializer.toJson<String>(categoryId),
       'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
       'slug': serializer.toJson<String>(slug),
       'isSystemReserved': serializer.toJson<bool>(isSystemReserved),
       'sortOrder': serializer.toJson<int>(sortOrder),
@@ -510,6 +600,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
     String? id,
     String? categoryId,
     String? name,
+    Value<String?> description = const Value.absent(),
     String? slug,
     bool? isSystemReserved,
     int? sortOrder,
@@ -517,6 +608,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
     id: id ?? this.id,
     categoryId: categoryId ?? this.categoryId,
     name: name ?? this.name,
+    description: description.present ? description.value : this.description,
     slug: slug ?? this.slug,
     isSystemReserved: isSystemReserved ?? this.isSystemReserved,
     sortOrder: sortOrder ?? this.sortOrder,
@@ -528,6 +620,9 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
           ? data.categoryId.value
           : this.categoryId,
       name: data.name.present ? data.name.value : this.name,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
       slug: data.slug.present ? data.slug.value : this.slug,
       isSystemReserved: data.isSystemReserved.present
           ? data.isSystemReserved.value
@@ -542,6 +637,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
           ..write('id: $id, ')
           ..write('categoryId: $categoryId, ')
           ..write('name: $name, ')
+          ..write('description: $description, ')
           ..write('slug: $slug, ')
           ..write('isSystemReserved: $isSystemReserved, ')
           ..write('sortOrder: $sortOrder')
@@ -550,8 +646,15 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, categoryId, name, slug, isSystemReserved, sortOrder);
+  int get hashCode => Object.hash(
+    id,
+    categoryId,
+    name,
+    description,
+    slug,
+    isSystemReserved,
+    sortOrder,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -559,6 +662,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
           other.id == this.id &&
           other.categoryId == this.categoryId &&
           other.name == this.name &&
+          other.description == this.description &&
           other.slug == this.slug &&
           other.isSystemReserved == this.isSystemReserved &&
           other.sortOrder == this.sortOrder);
@@ -568,6 +672,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
   final Value<String> id;
   final Value<String> categoryId;
   final Value<String> name;
+  final Value<String?> description;
   final Value<String> slug;
   final Value<bool> isSystemReserved;
   final Value<int> sortOrder;
@@ -576,6 +681,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
     this.id = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.name = const Value.absent(),
+    this.description = const Value.absent(),
     this.slug = const Value.absent(),
     this.isSystemReserved = const Value.absent(),
     this.sortOrder = const Value.absent(),
@@ -585,6 +691,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
     required String id,
     required String categoryId,
     required String name,
+    this.description = const Value.absent(),
     required String slug,
     this.isSystemReserved = const Value.absent(),
     this.sortOrder = const Value.absent(),
@@ -597,6 +704,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
     Expression<String>? id,
     Expression<String>? categoryId,
     Expression<String>? name,
+    Expression<String>? description,
     Expression<String>? slug,
     Expression<bool>? isSystemReserved,
     Expression<int>? sortOrder,
@@ -606,6 +714,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
       if (id != null) 'id': id,
       if (categoryId != null) 'category_id': categoryId,
       if (name != null) 'name': name,
+      if (description != null) 'description': description,
       if (slug != null) 'slug': slug,
       if (isSystemReserved != null) 'is_system_reserved': isSystemReserved,
       if (sortOrder != null) 'sort_order': sortOrder,
@@ -617,6 +726,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
     Value<String>? id,
     Value<String>? categoryId,
     Value<String>? name,
+    Value<String?>? description,
     Value<String>? slug,
     Value<bool>? isSystemReserved,
     Value<int>? sortOrder,
@@ -626,6 +736,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
       id: id ?? this.id,
       categoryId: categoryId ?? this.categoryId,
       name: name ?? this.name,
+      description: description ?? this.description,
       slug: slug ?? this.slug,
       isSystemReserved: isSystemReserved ?? this.isSystemReserved,
       sortOrder: sortOrder ?? this.sortOrder,
@@ -644,6 +755,9 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
     }
     if (slug.present) {
       map['slug'] = Variable<String>(slug.value);
@@ -666,6 +780,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
           ..write('id: $id, ')
           ..write('categoryId: $categoryId, ')
           ..write('name: $name, ')
+          ..write('description: $description, ')
           ..write('slug: $slug, ')
           ..write('isSystemReserved: $isSystemReserved, ')
           ..write('sortOrder: $sortOrder, ')
@@ -1352,6 +1467,7 @@ typedef $$CategoriesTableCreateCompanionBuilder =
     CategoriesCompanion Function({
       required String id,
       required String name,
+      Value<String?> description,
       Value<int> sortOrder,
       Value<int> rowid,
     });
@@ -1359,6 +1475,7 @@ typedef $$CategoriesTableUpdateCompanionBuilder =
     CategoriesCompanion Function({
       Value<String> id,
       Value<String> name,
+      Value<String?> description,
       Value<int> sortOrder,
       Value<int> rowid,
     });
@@ -1423,6 +1540,11 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1501,6 +1623,11 @@ class $$CategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
     builder: (column) => ColumnOrderings(column),
@@ -1521,6 +1648,11 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
@@ -1606,11 +1738,13 @@ class $$CategoriesTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion(
                 id: id,
                 name: name,
+                description: description,
                 sortOrder: sortOrder,
                 rowid: rowid,
               ),
@@ -1618,11 +1752,13 @@ class $$CategoriesTableTableManager
               ({
                 required String id,
                 required String name,
+                Value<String?> description = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion.insert(
                 id: id,
                 name: name,
+                description: description,
                 sortOrder: sortOrder,
                 rowid: rowid,
               ),
@@ -1714,6 +1850,7 @@ typedef $$SubcategoriesTableCreateCompanionBuilder =
       required String id,
       required String categoryId,
       required String name,
+      Value<String?> description,
       required String slug,
       Value<bool> isSystemReserved,
       Value<int> sortOrder,
@@ -1724,6 +1861,7 @@ typedef $$SubcategoriesTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> categoryId,
       Value<String> name,
+      Value<String?> description,
       Value<String> slug,
       Value<bool> isSystemReserved,
       Value<int> sortOrder,
@@ -1795,6 +1933,11 @@ class $$SubcategoriesTableFilterComposer
 
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1881,6 +2024,11 @@ class $$SubcategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get slug => $composableBuilder(
     column: $table.slug,
     builder: (column) => ColumnOrderings(column),
@@ -1934,6 +2082,11 @@ class $$SubcategoriesTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get slug =>
       $composableBuilder(column: $table.slug, builder: (column) => column);
@@ -2026,6 +2179,7 @@ class $$SubcategoriesTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> categoryId = const Value.absent(),
                 Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
                 Value<String> slug = const Value.absent(),
                 Value<bool> isSystemReserved = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
@@ -2034,6 +2188,7 @@ class $$SubcategoriesTableTableManager
                 id: id,
                 categoryId: categoryId,
                 name: name,
+                description: description,
                 slug: slug,
                 isSystemReserved: isSystemReserved,
                 sortOrder: sortOrder,
@@ -2044,6 +2199,7 @@ class $$SubcategoriesTableTableManager
                 required String id,
                 required String categoryId,
                 required String name,
+                Value<String?> description = const Value.absent(),
                 required String slug,
                 Value<bool> isSystemReserved = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
@@ -2052,6 +2208,7 @@ class $$SubcategoriesTableTableManager
                 id: id,
                 categoryId: categoryId,
                 name: name,
+                description: description,
                 slug: slug,
                 isSystemReserved: isSystemReserved,
                 sortOrder: sortOrder,

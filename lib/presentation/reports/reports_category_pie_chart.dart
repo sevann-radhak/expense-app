@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
-import 'package:expense_app/presentation/reports/report_chart_colors.dart';
 
 /// Doughnut + text legend (names, USD, %) — color is not the only cue.
 class ReportsCategoryPieChart extends StatelessWidget {
@@ -35,7 +34,9 @@ class ReportsCategoryPieChart extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final colors = reportChartCategoryFills(scheme, aggregates.length);
+    final colors = aggregates
+        .map((a) => Color(categoryFillArgb(a.categoryId)))
+        .toList();
     const pieSize = 200.0;
 
     final sections = <PieChartSectionData>[];
@@ -92,7 +93,7 @@ class ReportsCategoryPieChart extends StatelessWidget {
                       children: [
                         TextSpan(
                           text:
-                              '${categoryName[aggregates[i].categoryId] ?? aggregates[i].categoryId}: ',
+                              '${categoryName[aggregates[i].categoryId] ?? l10n.taxonomyUnknownLabel}: ',
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         TextSpan(

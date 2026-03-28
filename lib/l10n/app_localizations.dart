@@ -304,6 +304,36 @@ abstract class AppLocalizations {
   /// **'Taxonomy from your local database (debug / admin).'**
   String get categoriesScreenSubtitle;
 
+  /// Fallback label when a category or subcategory name cannot be resolved (ids are not shown).
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get taxonomyUnknownLabel;
+
+  /// Dialog title when editing a category description.
+  ///
+  /// In en, this message translates to:
+  /// **'Category note'**
+  String get categoryEditDescriptionTitle;
+
+  /// Dialog title when editing a subcategory description.
+  ///
+  /// In en, this message translates to:
+  /// **'Subcategory note'**
+  String get subcategoryEditDescriptionTitle;
+
+  /// Text field label for optional taxonomy descriptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get categoryDescriptionLabel;
+
+  /// Tooltip for edit actions on category and subcategory rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit note'**
+  String get categoryEditDescriptionTooltip;
+
   /// App bar title on the home route.
   ///
   /// In en, this message translates to:

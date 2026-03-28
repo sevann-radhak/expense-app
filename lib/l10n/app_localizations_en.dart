@@ -121,6 +121,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Taxonomy from your local database (debug / admin).';
 
   @override
+  String get taxonomyUnknownLabel => 'Unknown';
+
+  @override
+  String get categoryEditDescriptionTitle => 'Category note';
+
+  @override
+  String get subcategoryEditDescriptionTitle => 'Subcategory note';
+
+  @override
+  String get categoryDescriptionLabel => 'Description (optional)';
+
+  @override
+  String get categoryEditDescriptionTooltip => 'Edit note';
+
+  @override
   String get homeTitle => 'Home';
 
   @override

@@ -12,6 +12,11 @@ abstract class CategoryRepository {
   /// Deletes a user-defined subcategory. Throws [ReservedSubcategoryException]
   /// for the system **Other** row.
   Future<void> deleteSubcategory(String id);
+
+  /// Persists optional user-facing notes (empty string clears to null).
+  Future<void> setCategoryDescription(String id, String? description);
+
+  Future<void> setSubcategoryDescription(String id, String? description);
 }
 
 class ReservedSubcategoryException implements Exception {

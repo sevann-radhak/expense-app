@@ -110,6 +110,26 @@
   "@categoriesScreenSubtitle": {
     "description": "Short intro under the categories screen app bar."
   },
+  "taxonomyUnknownLabel": "Unknown",
+  "@taxonomyUnknownLabel": {
+    "description": "Fallback label when a category or subcategory name cannot be resolved (ids are not shown)."
+  },
+  "categoryEditDescriptionTitle": "Category note",
+  "@categoryEditDescriptionTitle": {
+    "description": "Dialog title when editing a category description."
+  },
+  "subcategoryEditDescriptionTitle": "Subcategory note",
+  "@subcategoryEditDescriptionTitle": {
+    "description": "Dialog title when editing a subcategory description."
+  },
+  "categoryDescriptionLabel": "Description (optional)",
+  "@categoryDescriptionLabel": {
+    "description": "Text field label for optional taxonomy descriptions."
+  },
+  "categoryEditDescriptionTooltip": "Edit note",
+  "@categoryEditDescriptionTooltip": {
+    "description": "Tooltip for edit actions on category and subcategory rows."
+  },
   "homeTitle": "Home",
   "@homeTitle": {
     "description": "App bar title on the home route."

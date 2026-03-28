@@ -1,14 +1,6 @@
 # Personal expense app
 
-Flutter package **`expense_app`**: **local-first**, **web-first** personal expense tracker (see product roadmap below).
-
----
-
-## Product source of truth
-
-Roadmap, stack decisions, and domain summary: **[`docs/PROJECT_MASTER_PLAN.md`](docs/PROJECT_MASTER_PLAN.md)** (master plan §6 for phased delivery).
-
-> **If `docs/` is gitignored in your clone:** those paths exist only on your machine unless you track `docs/` in Git or copy the files in. The links above assume the standard layout; adjust or remove the `docs/` line from `.gitignore` if the team should share planning files via the repository.
+Flutter package **`expense_app`**: **local-first**, **web-first** personal expense tracker.
 
 ---
 
@@ -58,7 +50,7 @@ dart run build_runner build --delete-conflicting-outputs
 
 ## Phase 0 complete — what you have
 
-Foundation (implementation plan `docs/01-implementation-initial-plan.md` phases 0.1–0.7) delivers:
+Foundation (implementation plan phases 0.1–0.7) delivers:
 
 - Runnable **web** app, **lints**, layered **`lib/`**, **Drift** + **web WASM** (`web/sqlite3.wasm`, `web/drift_worker.js`), **ARB / l10n** (English), responsive **shell** + **`go_router`** (**Home** / **Settings**).
 
@@ -66,14 +58,14 @@ Foundation (implementation plan `docs/01-implementation-initial-plan.md` phases 
 
 ## Phase 1 entry criteria (MVP data)
 
-Start Phase 1 when you are ready to implement **categories + expenses** (aligned with **master plan §6 — Phase 1**). Target outcomes:
+Start Phase 1 when you are ready to implement **categories + expenses** (aligned with the product master plan §6 — Phase 1). Target outcomes:
 
 - **Categories:** Entities and persistence; **subcategories** with a non-deletable **Other** per category; seed taxonomy (see master plan §7).
 - **Expenses:** **CRUD**, list **filtered by calendar month**; **subcategory must belong** to the selected category.
 - **Fields:** **Date-only** `occurredOn`, detail, `paidWithCreditCard`, local amount, **manual FX**, **computed USD** (per master plan).
 - **Deliverable:** Behavior equivalent to **one month’s Excel sheet** for entry and review (digital).
 
-Detailed breakdown: **`docs/01-implementation-initial-plan.md`** (Phase 1.1–1.3).
+Detailed breakdown: implementation plan Phase 1.1–1.3.
 
 ---
 
@@ -116,18 +108,13 @@ Stop ignoring those paths in `.gitignore` when you want to **commit** platform p
 
 ---
 
-## Start here (docs & rules)
+## Start here (agent rules)
 
-| File | Purpose |
-|------|---------|
-| [docs/PROJECT_MASTER_PLAN.md](docs/PROJECT_MASTER_PLAN.md) | Product phases, stack, domain |
-| [docs/01-implementation-initial-plan.md](docs/01-implementation-initial-plan.md) | Foundation + Phase 1 steps, commit hints |
-| [docs/_templates/implementation-plan-template.md](docs/_templates/implementation-plan-template.md) | Template for `02-…` plans |
-| [docs/Plantilla-2025-agent-prompt.mdc](docs/Plantilla-2025-agent-prompt.mdc) | Excel parity reference |
-| [docs/Plantilla 2025.xlsx](docs/Plantilla%202025.xlsx) | Source workbook |
+| Location | Purpose |
+|----------|---------|
 | [.cursor/rules/](.cursor/rules/) | Agent implementation rules |
 
-Keep `docs/` and `.cursor/rules/` aligned with the codebase (paths may be gitignored in some clones).
+Keep `.cursor/rules/` aligned with the codebase.
 
 ---
 

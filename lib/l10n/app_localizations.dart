@@ -178,6 +178,78 @@ abstract class AppLocalizations {
   /// **'USD uses each expense’s stored FX snapshot; original-currency chips are for reference.'**
   String get reportsFxFootnote;
 
+  /// Reports tab: year overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual'**
+  String get reportsTabAnnual;
+
+  /// Reports tab: list expenses for one month in the selected year.
+  ///
+  /// In en, this message translates to:
+  /// **'By month'**
+  String get reportsTabByMonth;
+
+  /// Reports tab: USD totals and percentages by category.
+  ///
+  /// In en, this message translates to:
+  /// **'By category'**
+  String get reportsTabByCategory;
+
+  /// Empty state on Reports By month tab.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses in this month for the selected year.'**
+  String get reportsByMonthEmpty;
+
+  /// No description provided for @reportsByCategoryScopeYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Full year'**
+  String get reportsByCategoryScopeYear;
+
+  /// No description provided for @reportsByCategoryScopeMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Single month'**
+  String get reportsByCategoryScopeMonth;
+
+  /// Empty category breakdown when there is no spend.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses in this period.'**
+  String get reportsByCategoryEmpty;
+
+  /// No description provided for @reportsCategoryColumnCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get reportsCategoryColumnCategory;
+
+  /// No description provided for @reportsCategoryColumnUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'USD (total)'**
+  String get reportsCategoryColumnUsd;
+
+  /// No description provided for @reportsCategoryColumnShare.
+  ///
+  /// In en, this message translates to:
+  /// **'% of period'**
+  String get reportsCategoryColumnShare;
+
+  /// No description provided for @reportsSubcategoryColumnShare.
+  ///
+  /// In en, this message translates to:
+  /// **'% of category'**
+  String get reportsSubcategoryColumnShare;
+
+  /// Explains denominators for category vs subcategory %.
+  ///
+  /// In en, this message translates to:
+  /// **'Percentages use total USD in the selected period. Subcategory rows use that category’s USD as the total.'**
+  String get reportsPercentFootnote;
+
   /// Short intro under the categories screen app bar.
   ///
   /// In en, this message translates to:

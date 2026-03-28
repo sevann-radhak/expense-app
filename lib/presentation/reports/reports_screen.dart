@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
+import 'package:expense_app/presentation/expenses/expense_summary_list_tile.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
+import 'package:expense_app/presentation/home/expense_form_dialog.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 
 class ReportsScreen extends ConsumerWidget {
@@ -14,84 +16,481 @@ class ReportsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.reportsTitle),
+          bottom: TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            tabs: [
+              Tab(text: l10n.reportsTabAnnual),
+              Tab(text: l10n.reportsTabByMonth),
+              Tab(text: l10n.reportsTabByCategory),
+            ],
+          ),
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: _ReportYearStrip(),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _ReportsAnnualTabBody(),
+                  _ReportsByMonthTabBody(),
+                  _ReportsByCategoryTabBody(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReportYearStrip extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final year = ref.watch(selectedReportYearProvider);
+
+    return Row(
+      children: [
+        IconButton(
+          tooltip: l10n.reportsYearPickerPrevious,
+          onPressed: () => bumpReportYear(ref, -1),
+          icon: const Icon(Icons.chevron_left),
+        ),
+        Expanded(
+          child: Text(
+            year.toString(),
+            key: const ValueKey<String>('selected-report-year-label'),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
+        IconButton(
+          tooltip: l10n.reportsYearPickerNext,
+          onPressed: () => bumpReportYear(ref, 1),
+          icon: const Icon(Icons.chevron_right),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReportsAnnualTabBody extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
     final year = ref.watch(selectedReportYearProvider);
     final expensesAsync = ref.watch(expensesForSelectedReportYearProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.reportsTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        expensesAsync.when(
+          data: (expenses) {
+            final loc = Localizations.localeOf(context);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _YearSpendSummary(expenses: expenses, locale: loc, l10n: l10n),
+                if (expenses.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.reportsFxFootnote,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    l10n.reportsByMonthHeading,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  _MonthlyUsdTable(
+                    year: year,
+                    expenses: expenses,
+                    localeName: locale,
+                    l10n: l10n,
+                  ),
+                ],
+              ],
+            );
+          },
+          loading: () => const Padding(
+            padding: EdgeInsets.all(32),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (e, _) => Text('$e'),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReportsByMonthTabBody extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toString();
+    final year = ref.watch(selectedReportYearProvider);
+    final month = ref.watch(selectedReportDetailMonthProvider);
+    final monthLabel = DateFormat.yMMMM(
+      localeName,
+    ).format(DateTime(year, month));
+    final expensesAsync = ref.watch(expensesForReportDetailMonthProvider);
+    final categories = ref.watch(categoriesStreamProvider).valueOrNull ?? [];
+    final allSubs = ref.watch(allSubcategoriesStreamProvider).valueOrNull ?? [];
+    final categoryName = {for (final c in categories) c.id: c.name};
+    final subcategoryName = {for (final s in allSubs) s.id: s.name};
+
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        Row(
+          children: [
+            IconButton(
+              tooltip: l10n.monthPickerPrevious,
+              onPressed: () {
+                final m = ref.read(selectedReportDetailMonthProvider);
+                ref.read(selectedReportDetailMonthProvider.notifier).state =
+                    m > 1 ? m - 1 : 12;
+              },
+              icon: const Icon(Icons.chevron_left),
+            ),
+            Expanded(
+              child: Text(
+                monthLabel,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            IconButton(
+              tooltip: l10n.monthPickerNext,
+              onPressed: () {
+                final m = ref.read(selectedReportDetailMonthProvider);
+                ref.read(selectedReportDetailMonthProvider.notifier).state =
+                    m < 12 ? m + 1 : 1;
+              },
+              icon: const Icon(Icons.chevron_right),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        expensesAsync.when(
+          data: (expenses) {
+            if (expenses.isEmpty) {
+              return Text(
+                l10n.reportsByMonthEmpty,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.expensesThisMonthHeading,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                ...expenses.map(
+                  (e) => ExpenseSummaryListTile(
+                    expense: e,
+                    categoryName: categoryName[e.categoryId] ?? e.categoryId,
+                    subcategoryName:
+                        subcategoryName[e.subcategoryId] ?? e.subcategoryId,
+                    onTap: () {
+                      showDialog<void>(
+                        context: context,
+                        builder: (ctx) => ExpenseFormDialog(initial: e),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Text('$e'),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReportsByCategoryTabBody extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toString();
+    final year = ref.watch(selectedReportYearProvider);
+    final month = ref.watch(selectedReportDetailMonthProvider);
+    final scope = ref.watch(reportCategoryPeriodScopeProvider);
+    final expensesAsync = ref.watch(expensesForReportCategoryScopeProvider);
+    final categories = ref.watch(categoriesStreamProvider).valueOrNull ?? [];
+    final allSubs = ref.watch(allSubcategoriesStreamProvider).valueOrNull ?? [];
+    final categoryName = {for (final c in categories) c.id: c.name};
+    final subcategoryName = {for (final s in allSubs) s.id: s.name};
+
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        SegmentedButton<ReportCategoryPeriodScope>(
+          segments: [
+            ButtonSegment<ReportCategoryPeriodScope>(
+              value: ReportCategoryPeriodScope.fullYear,
+              label: Text(l10n.reportsByCategoryScopeYear),
+            ),
+            ButtonSegment<ReportCategoryPeriodScope>(
+              value: ReportCategoryPeriodScope.singleMonth,
+              label: Text(l10n.reportsByCategoryScopeMonth),
+            ),
+          ],
+          selected: {scope},
+          onSelectionChanged: (next) {
+            ref.read(reportCategoryPeriodScopeProvider.notifier).state =
+                next.first;
+          },
+        ),
+        if (scope == ReportCategoryPeriodScope.singleMonth) ...[
+          const SizedBox(height: 12),
           Row(
             children: [
               IconButton(
-                tooltip: l10n.reportsYearPickerPrevious,
+                tooltip: l10n.monthPickerPrevious,
                 onPressed: () {
-                  ref.read(selectedReportYearProvider.notifier).state = year - 1;
+                  final m = ref.read(selectedReportDetailMonthProvider);
+                  ref.read(selectedReportDetailMonthProvider.notifier).state =
+                      m > 1 ? m - 1 : 12;
                 },
                 icon: const Icon(Icons.chevron_left),
               ),
               Expanded(
                 child: Text(
-                  year.toString(),
-                  key: const ValueKey<String>('selected-report-year-label'),
+                  DateFormat.yMMMM(localeName).format(DateTime(year, month)),
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
               IconButton(
-                tooltip: l10n.reportsYearPickerNext,
+                tooltip: l10n.monthPickerNext,
                 onPressed: () {
-                  ref.read(selectedReportYearProvider.notifier).state = year + 1;
+                  final m = ref.read(selectedReportDetailMonthProvider);
+                  ref.read(selectedReportDetailMonthProvider.notifier).state =
+                      m < 12 ? m + 1 : 1;
                 },
                 icon: const Icon(Icons.chevron_right),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          expensesAsync.when(
-            data: (expenses) {
-              final loc = Localizations.localeOf(context);
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _YearSpendSummary(
-                    expenses: expenses,
-                    locale: loc,
-                    l10n: l10n,
-                  ),
-                  if (expenses.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.reportsFxFootnote,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      l10n.reportsByMonthHeading,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    _MonthlyUsdTable(
-                      year: year,
-                      expenses: expenses,
-                      localeName: locale,
-                      l10n: l10n,
-                    ),
-                  ],
-                ],
+        ],
+        const SizedBox(height: 16),
+        expensesAsync.when(
+          data: (expenses) {
+            final periodTotal = totalUsd(expenses);
+            if (expenses.isEmpty || periodTotal <= 0) {
+              return Text(
+                l10n.reportsByCategoryEmpty,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               );
-            },
-            loading: () => const Padding(
-              padding: EdgeInsets.all(32),
-              child: Center(child: CircularProgressIndicator()),
+            }
+            final aggregates = aggregateUsdByCategory(expenses);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.reportsPercentFootnote,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _CategoryBreakdownTable(
+                  expenses: expenses,
+                  aggregates: aggregates,
+                  periodTotalUsd: periodTotal,
+                  categoryName: categoryName,
+                  subcategoryName: subcategoryName,
+                  localeName: localeName,
+                  l10n: l10n,
+                ),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Text('$e'),
+        ),
+      ],
+    );
+  }
+}
+
+class _CategoryBreakdownTable extends StatelessWidget {
+  const _CategoryBreakdownTable({
+    required this.expenses,
+    required this.aggregates,
+    required this.periodTotalUsd,
+    required this.categoryName,
+    required this.subcategoryName,
+    required this.localeName,
+    required this.l10n,
+  });
+
+  final List<Expense> expenses;
+  final List<CategoryUsdAggregate> aggregates;
+  final double periodTotalUsd;
+  final Map<String, String> categoryName;
+  final Map<String, String> subcategoryName;
+  final String localeName;
+  final AppLocalizations l10n;
+
+  static String _pct(double value) => '${value.toStringAsFixed(1)}%';
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Card(
+      elevation: 0,
+      color: scheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    l10n.reportsCategoryColumnCategory,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    l10n.reportsCategoryColumnUsd,
+                    textAlign: TextAlign.end,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 88,
+                  child: Text(
+                    l10n.reportsCategoryColumnShare,
+                    textAlign: TextAlign.end,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            error: (e, _) => Text('$e'),
           ),
+          const Divider(height: 1),
+          ...aggregates.map((row) {
+            final name = categoryName[row.categoryId] ?? row.categoryId;
+            final share = percentOfTotal(row.totalUsd, periodTotalUsd);
+            final subRows = aggregateUsdBySubcategoryForCategory(
+              expenses,
+              row.categoryId,
+            );
+            return ExpansionTile(
+              key: PageStorageKey<String>('cat-${row.categoryId}'),
+              title: Text(name),
+              subtitle: Text(
+                '${formatDisplayCurrencyLine('USD', row.totalUsd, localeName)} · ${_pct(share)}',
+                style: theme.textTheme.bodySmall,
+              ),
+              children: [
+                if (subRows.isEmpty)
+                  const SizedBox.shrink()
+                else
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          l10n.reportsSubcategoryColumnShare,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        ...subRows.map((s) {
+                          final subShare = percentOfTotal(
+                            s.totalUsd,
+                            row.totalUsd,
+                          );
+                          final subLabel =
+                              subcategoryName[s.subcategoryId] ??
+                              s.subcategoryId;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    subLabel,
+                                    style: theme.textTheme.bodyMedium,
+                                  ),
+                                ),
+                                Text(
+                                  formatDisplayCurrencyLine(
+                                    'USD',
+                                    s.totalUsd,
+                                    localeName,
+                                  ),
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 72,
+                                  child: Text(
+                                    _pct(subShare),
+                                    textAlign: TextAlign.end,
+                                    style: theme.textTheme.bodySmall,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+              ],
+            );
+          }),
         ],
       ),
     );
@@ -127,7 +526,11 @@ class _YearSpendSummary extends StatelessWidget {
     final leftCodes = byCurrency.keys.where((c) => c != 'USD').toList()..sort();
 
     final usdTotal = expenses.fold<double>(0, (s, e) => s + e.amountUsd);
-    final usdLine = formatDisplayCurrencyLine('USD', usdTotal, locale.toString());
+    final usdLine = formatDisplayCurrencyLine(
+      'USD',
+      usdTotal,
+      locale.toString(),
+    );
     final usdAccessibilityAmount = NumberFormat.decimalPatternDigits(
       locale: locale.toString(),
       decimalDigits: 2,
@@ -381,17 +784,14 @@ class _MonthlyUsdTable extends StatelessWidget {
             ...List.generate(12, (i) {
               final month = i + 1;
               final total = byMonthUsd[i];
-              final monthLabel = DateFormat.MMM(localeName).format(
-                DateTime(year, month),
-              );
+              final monthLabel = DateFormat.MMM(
+                localeName,
+              ).format(DateTime(year, month));
               return TableRow(
                 children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
-                    child: Text(
-                      monthLabel,
-                      style: theme.textTheme.bodyLarge,
-                    ),
+                    child: Text(monthLabel, style: theme.textTheme.bodyLarge),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(8, 10, 12, 10),

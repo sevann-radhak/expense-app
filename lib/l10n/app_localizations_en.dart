@@ -52,6 +52,44 @@ class AppLocalizationsEn extends AppLocalizations {
       'USD uses each expense’s stored FX snapshot; original-currency chips are for reference.';
 
   @override
+  String get reportsTabAnnual => 'Annual';
+
+  @override
+  String get reportsTabByMonth => 'By month';
+
+  @override
+  String get reportsTabByCategory => 'By category';
+
+  @override
+  String get reportsByMonthEmpty =>
+      'No expenses in this month for the selected year.';
+
+  @override
+  String get reportsByCategoryScopeYear => 'Full year';
+
+  @override
+  String get reportsByCategoryScopeMonth => 'Single month';
+
+  @override
+  String get reportsByCategoryEmpty => 'No expenses in this period.';
+
+  @override
+  String get reportsCategoryColumnCategory => 'Category';
+
+  @override
+  String get reportsCategoryColumnUsd => 'USD (total)';
+
+  @override
+  String get reportsCategoryColumnShare => '% of period';
+
+  @override
+  String get reportsSubcategoryColumnShare => '% of category';
+
+  @override
+  String get reportsPercentFootnote =>
+      'Percentages use total USD in the selected period. Subcategory rows use that category’s USD as the total.';
+
+  @override
   String get categoriesScreenSubtitle =>
       'Taxonomy from your local database (debug / admin).';
 

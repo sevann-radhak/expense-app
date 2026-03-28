@@ -44,6 +44,36 @@
   "@reportsFxFootnote": {
     "description": "Short note under the year summary when expenses exist."
   },
+  "reportsTabAnnual": "Annual",
+  "@reportsTabAnnual": {
+    "description": "Reports tab: year overview."
+  },
+  "reportsTabByMonth": "By month",
+  "@reportsTabByMonth": {
+    "description": "Reports tab: list expenses for one month in the selected year."
+  },
+  "reportsTabByCategory": "By category",
+  "@reportsTabByCategory": {
+    "description": "Reports tab: USD totals and percentages by category."
+  },
+  "reportsByMonthEmpty": "No expenses in this month for the selected year.",
+  "@reportsByMonthEmpty": {
+    "description": "Empty state on Reports By month tab."
+  },
+  "reportsByCategoryScopeYear": "Full year",
+  "reportsByCategoryScopeMonth": "Single month",
+  "reportsByCategoryEmpty": "No expenses in this period.",
+  "@reportsByCategoryEmpty": {
+    "description": "Empty category breakdown when there is no spend."
+  },
+  "reportsCategoryColumnCategory": "Category",
+  "reportsCategoryColumnUsd": "USD (total)",
+  "reportsCategoryColumnShare": "% of period",
+  "reportsSubcategoryColumnShare": "% of category",
+  "reportsPercentFootnote": "Percentages use total USD in the selected period. Subcategory rows use that category’s USD as the total.",
+  "@reportsPercentFootnote": {
+    "description": "Explains denominators for category vs subcategory %."
+  },
   "categoriesScreenSubtitle": "Taxonomy from your local database (debug / admin).",
   "@categoriesScreenSubtitle": {
     "description": "Short intro under the categories screen app bar."

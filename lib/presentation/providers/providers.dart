@@ -41,6 +41,42 @@ final selectedReportYearProvider = StateProvider<int>((ref) {
   return DateTime.now().year;
 });
 
+/// Month 1–12 within [selectedReportYearProvider] for report drill-downs.
+final selectedReportDetailMonthProvider = StateProvider<int>((ref) {
+  return DateTime.now().month;
+});
+
+/// Whether the category report uses the full year or a single month.
+enum ReportCategoryPeriodScope { fullYear, singleMonth }
+
+final reportCategoryPeriodScopeProvider =
+    StateProvider<ReportCategoryPeriodScope>((ref) {
+      return ReportCategoryPeriodScope.fullYear;
+    });
+
+/// Expenses for the selected report year and detail month (same bounds as Home month list).
+final expensesForReportDetailMonthProvider = StreamProvider<List<Expense>>((
+  ref,
+) {
+  final year = ref.watch(selectedReportYearProvider);
+  final month = ref.watch(selectedReportDetailMonthProvider);
+  return ref.watch(expenseRepositoryProvider).watchForMonth(year, month);
+});
+
+/// Expenses driving the category / % table (year vs single month).
+final expensesForReportCategoryScopeProvider = StreamProvider<List<Expense>>((
+  ref,
+) {
+  final scope = ref.watch(reportCategoryPeriodScopeProvider);
+  final year = ref.watch(selectedReportYearProvider);
+  final repo = ref.watch(expenseRepositoryProvider);
+  if (scope == ReportCategoryPeriodScope.fullYear) {
+    return repo.watchForYear(year);
+  }
+  final month = ref.watch(selectedReportDetailMonthProvider);
+  return repo.watchForMonth(year, month);
+});
+
 final categoriesStreamProvider = StreamProvider<List<Category>>((ref) {
   return ref.watch(categoryRepositoryProvider).watchCategories();
 });
@@ -51,20 +87,29 @@ final allSubcategoriesStreamProvider = StreamProvider<List<Subcategory>>((ref) {
 
 final expensesForSelectedMonthProvider = StreamProvider<List<Expense>>((ref) {
   final m = ref.watch(selectedMonthProvider);
-  return ref
-      .watch(expenseRepositoryProvider)
-      .watchForMonth(m.year, m.month);
+  return ref.watch(expenseRepositoryProvider).watchForMonth(m.year, m.month);
 });
 
-final expensesForSelectedReportYearProvider =
-    StreamProvider<List<Expense>>((ref) {
+final expensesForSelectedReportYearProvider = StreamProvider<List<Expense>>((
+  ref,
+) {
   final year = ref.watch(selectedReportYearProvider);
   return ref.watch(expenseRepositoryProvider).watchForYear(year);
 });
 
 final subcategoriesForCategoryProvider =
     StreamProvider.family<List<Subcategory>, String>((ref, categoryId) {
-  return ref
-      .watch(categoryRepositoryProvider)
-      .watchSubcategories(categoryId);
-});
+      return ref
+          .watch(categoryRepositoryProvider)
+          .watchSubcategories(categoryId);
+    });
+
+/// Updates report year and resets detail month when the year no longer matches “today”.
+void bumpReportYear(WidgetRef ref, int delta) {
+  final y = ref.read(selectedReportYearProvider) + delta;
+  ref.read(selectedReportYearProvider.notifier).state = y;
+  final now = DateTime.now();
+  ref.read(selectedReportDetailMonthProvider.notifier).state = y == now.year
+      ? now.month
+      : 1;
+}

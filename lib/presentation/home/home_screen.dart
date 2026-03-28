@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
+import 'package:expense_app/presentation/expenses/expense_summary_list_tile.dart';
 import 'package:expense_app/presentation/home/expense_form_dialog.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
@@ -46,8 +47,10 @@ class HomeScreen extends ConsumerWidget {
               IconButton(
                 tooltip: l10n.monthPickerPrevious,
                 onPressed: () {
-                  ref.read(selectedMonthProvider.notifier).state =
-                      DateTime(month.year, month.month - 1);
+                  ref.read(selectedMonthProvider.notifier).state = DateTime(
+                    month.year,
+                    month.month - 1,
+                  );
                 },
                 icon: const Icon(Icons.chevron_left),
               ),
@@ -62,8 +65,10 @@ class HomeScreen extends ConsumerWidget {
               IconButton(
                 tooltip: l10n.monthPickerNext,
                 onPressed: () {
-                  ref.read(selectedMonthProvider.notifier).state =
-                      DateTime(month.year, month.month + 1);
+                  ref.read(selectedMonthProvider.notifier).state = DateTime(
+                    month.year,
+                    month.month + 1,
+                  );
                 },
                 icon: const Icon(Icons.chevron_right),
               ),
@@ -90,9 +95,10 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     ...expenses.map(
-                      (e) => _ExpenseTile(
+                      (e) => ExpenseSummaryListTile(
                         expense: e,
-                        categoryName: categoryName[e.categoryId] ?? e.categoryId,
+                        categoryName:
+                            categoryName[e.categoryId] ?? e.categoryId,
                         subcategoryName:
                             subcategoryName[e.subcategoryId] ?? e.subcategoryId,
                         onTap: () {
@@ -151,7 +157,11 @@ class _MonthSpendSummary extends StatelessWidget {
     final leftCodes = byCurrency.keys.where((c) => c != 'USD').toList()..sort();
 
     final usdTotal = expenses.fold<double>(0, (s, e) => s + e.amountUsd);
-    final usdLine = formatDisplayCurrencyLine('USD', usdTotal, locale.toString());
+    final usdLine = formatDisplayCurrencyLine(
+      'USD',
+      usdTotal,
+      locale.toString(),
+    );
     final usdAccessibilityAmount = NumberFormat.decimalPatternDigits(
       locale: locale.toString(),
       decimalDigits: 2,
@@ -335,110 +345,6 @@ class _MonthSummaryCurrencyChip extends StatelessWidget {
             fontWeight: FontWeight.w600,
             letterSpacing: 0.1,
             color: scheme.onSurface,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ExpenseTile extends StatelessWidget {
-  const _ExpenseTile({
-    required this.expense,
-    required this.categoryName,
-    required this.subcategoryName,
-    required this.onTap,
-  });
-
-  final Expense expense;
-  final String categoryName;
-  final String subcategoryName;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final localeName = Localizations.localeOf(context).toString();
-    final dateStr = ExpenseDates.toStorageDate(expense.occurredOn);
-    final originalLabel = formatDisplayCurrencyLine(
-      expense.currencyCode,
-      expense.amountOriginal,
-      localeName,
-    );
-    final usdLabel = formatDisplayCurrencyLine(
-      'USD',
-      expense.amountUsd,
-      localeName,
-    );
-    final note = expense.description.trim();
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text.rich(
-                      TextSpan(
-                        style: theme.textTheme.bodyMedium,
-                        children: [
-                          TextSpan(
-                            text: '$categoryName — $subcategoryName · $dateStr',
-                          ),
-                          if (expense.paidWithCreditCard)
-                            TextSpan(
-                              text: ' · ${l10n.expenseListCardBadge}',
-                              style: theme.textTheme.bodySmall,
-                            ),
-                        ],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (note.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          note,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    originalLabel,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    usdLabel,
-                    style: theme.textTheme.titleSmall,
-                  ),
-                ],
-              ),
-            ],
           ),
         ),
       ),

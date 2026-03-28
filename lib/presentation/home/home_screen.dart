@@ -378,10 +378,18 @@ class _ExpenseTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final localeName = Localizations.localeOf(context).toString();
     final dateStr = ExpenseDates.toStorageDate(expense.occurredOn);
-    final usdStr = expense.amountUsd.toStringAsFixed(2);
-    final origStr = expense.amountOriginal.toStringAsFixed(2);
-    final originalLabel = l10n.expenseListOriginal(origStr, expense.currencyCode);
+    final originalLabel = formatDisplayCurrencyLine(
+      expense.currencyCode,
+      expense.amountOriginal,
+      localeName,
+    );
+    final usdLabel = formatDisplayCurrencyLine(
+      'USD',
+      expense.amountUsd,
+      localeName,
+    );
     final note = expense.description.trim();
 
     return Card(
@@ -444,7 +452,7 @@ class _ExpenseTile extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    l10n.expenseListUsd(usdStr),
+                    usdLabel,
                     style: theme.textTheme.titleSmall,
                   ),
                 ],

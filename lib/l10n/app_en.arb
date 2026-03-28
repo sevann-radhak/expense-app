@@ -90,25 +90,6 @@
   "expenseFxInvalid": "Enter a positive number (units per 1 USD).",
   "invalidSubcategoryPairing": "That subcategory does not belong to the selected category.",
   "addExpenseTooltip": "Add expense",
-  "expenseListUsd": "USD {amount}",
-  "@expenseListUsd": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-  "expenseListOriginal": "{amount} {currency}",
-  "@expenseListOriginal": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      },
-      "currency": {
-        "type": "String"
-      }
-    }
-  },
   "expenseListCardBadge": "Card",
   "expensesThisMonthHeading": "Transactions",
   "monthSummaryTitle": "Month totals",

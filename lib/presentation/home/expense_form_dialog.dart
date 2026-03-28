@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
+import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 
 class ExpenseFormDialog extends ConsumerWidget {
@@ -45,23 +46,25 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
   final _fxController = TextEditingController();
+  final _amountFocus = FocusNode();
 
   late DateTime _occurredOn;
   late String _currencyCode;
   String? _categoryId;
   String? _subcategoryId;
   bool _paidWithCreditCard = false;
+  bool _appliedInitialAmountMask = false;
 
   @override
   void initState() {
     super.initState();
+    _amountFocus.addListener(_onAmountFocusChange);
     final i = widget.initial;
     final catalog = widget.catalog;
     if (i != null) {
       _occurredOn = DateTime(i.occurredOn.year, i.occurredOn.month, i.occurredOn.day);
       _categoryId = i.categoryId;
       _subcategoryId = i.subcategoryId;
-      _amountController.text = _formatAmount(i.amountOriginal);
       _currencyCode = i.currencyCode.toUpperCase();
       final m = i.manualFxRateToUsd;
       _fxController.text = m > 0
@@ -79,15 +82,54 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
     }
   }
 
-  String _formatAmount(double v) {
-    if (v == v.roundToDouble()) {
-      return v.toInt().toString();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_appliedInitialAmountMask) {
+      return;
     }
-    return v.toString();
+    final i = widget.initial;
+    if (i != null) {
+      _appliedInitialAmountMask = true;
+      final loc = Localizations.localeOf(context).toString();
+      _amountController.text = formatAmountGrouped(i.amountOriginal, loc);
+    }
+  }
+
+  void _onAmountFocusChange() {
+    if (!mounted) {
+      return;
+    }
+    final loc = Localizations.localeOf(context).toString();
+    if (_amountFocus.hasFocus) {
+      final v = tryParseDecimalInput(_amountController.text, loc);
+      if (v != null) {
+        final plain = formatAmountPlainForEdit(v);
+        if (_amountController.text != plain) {
+          _amountController.value = TextEditingValue(
+            text: plain,
+            selection: TextSelection.collapsed(offset: plain.length),
+          );
+        }
+      }
+    } else {
+      final v = tryParseDecimalInput(_amountController.text, loc);
+      if (v != null) {
+        final g = formatAmountGrouped(v, loc);
+        if (_amountController.text != g) {
+          _amountController.value = TextEditingValue(
+            text: g,
+            selection: TextSelection.collapsed(offset: g.length),
+          );
+        }
+      }
+    }
   }
 
   @override
   void dispose() {
+    _amountFocus.removeListener(_onAmountFocusChange);
+    _amountFocus.dispose();
     _descriptionController.dispose();
     _amountController.dispose();
     _fxController.dispose();
@@ -108,14 +150,15 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
     }
   }
 
-  double? _parseAmount(String raw) {
+  double? _parseFx(String raw) {
     final t = raw.trim().replaceAll(',', '.');
     return double.tryParse(t);
   }
 
   double get _previewUsd {
-    final amount = _parseAmount(_amountController.text);
-    final localPerUsd = _parseAmount(_fxController.text);
+    final loc = Localizations.localeOf(context).toString();
+    final amount = tryParseDecimalInput(_amountController.text, loc);
+    final localPerUsd = _parseFx(_fxController.text);
     if (amount == null || localPerUsd == null || localPerUsd <= 0) {
       return 0;
     }
@@ -164,8 +207,9 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    final amount = _parseAmount(_amountController.text);
-    final localPerUsd = _parseAmount(_fxController.text);
+    final loc = Localizations.localeOf(context).toString();
+    final amount = tryParseDecimalInput(_amountController.text, loc);
+    final localPerUsd = _parseFx(_fxController.text);
     if (amount == null || localPerUsd == null || localPerUsd <= 0) {
       return;
     }
@@ -243,6 +287,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final localeName = Localizations.localeOf(context).toString();
     final categories = ref.watch(categoriesStreamProvider).valueOrNull ?? [];
     final subsAsync = _categoryId == null
         ? const AsyncValue<List<Subcategory>>.data([])
@@ -370,27 +415,6 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                   maxLines: 3,
                   textCapitalization: TextCapitalization.sentences,
                 ),
-                TextFormField(
-                  controller: _amountController,
-                  decoration: InputDecoration(labelText: l10n.expenseAmountLabel),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                    signed: false,
-                  ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                  ],
-                  onChanged: (_) => setState(() {}),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return l10n.expenseAmountRequired;
-                    }
-                    if (_parseAmount(v) == null) {
-                      return l10n.expenseAmountInvalid;
-                    }
-                    return null;
-                  },
-                ),
                 Text(
                   l10n.expenseFxPresetHint(widget.catalog.asOf),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -398,12 +422,53 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                       ),
                 ),
                 const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  // ignore: deprecated_member_use
-                  value: _currencyCode,
-                  decoration: InputDecoration(labelText: l10n.expenseCurrencyLabel),
-                  items: _currencyMenuItems(l10n),
-                  onChanged: _onCurrencyChanged,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 46,
+                      child: DropdownButtonFormField<String>(
+                        // ignore: deprecated_member_use
+                        value: _currencyCode,
+                        isExpanded: true,
+                        decoration: InputDecoration(
+                          labelText: l10n.expenseCurrencyLabel,
+                        ),
+                        items: _currencyMenuItems(l10n),
+                        onChanged: _onCurrencyChanged,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 54,
+                      child: TextFormField(
+                        controller: _amountController,
+                        focusNode: _amountFocus,
+                        decoration: InputDecoration(
+                          labelText: l10n.expenseAmountLabel,
+                          hintText: formatAmountGrouped(10000, localeName),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                          signed: false,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                        ],
+                        onChanged: (_) => setState(() {}),
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) {
+                            return l10n.expenseAmountRequired;
+                          }
+                          final loc = Localizations.localeOf(context).toString();
+                          if (tryParseDecimalInput(v, loc) == null) {
+                            return l10n.expenseAmountInvalid;
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ],
                 ),
                 TextFormField(
                   controller: _fxController,
@@ -421,7 +486,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                     if (v == null || v.trim().isEmpty) {
                       return l10n.expenseFxRequired;
                     }
-                    final x = _parseAmount(v);
+                    final x = _parseFx(v);
                     if (x == null || x <= 0) {
                       return l10n.expenseFxInvalid;
                     }
@@ -430,7 +495,9 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  l10n.expenseUsdComputedLabel(_previewUsd.toStringAsFixed(2)),
+                  l10n.expenseUsdComputedLabel(
+                    formatUsdAmountOnly(_previewUsd, localeName),
+                  ),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 SwitchListTile(

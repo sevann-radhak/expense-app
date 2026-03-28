@@ -115,3 +115,44 @@ String formatDisplayCurrencyLine(
   }
   return '$code $symbol$number';
 }
+
+/// Grouped number for display (e.g. `10,000.00` in `en_US`).
+String formatAmountGrouped(double value, String localeName) {
+  return NumberFormat.decimalPatternDigits(
+    locale: localeName,
+    decimalDigits: 2,
+  ).format(value);
+}
+
+/// Plain amount while editing (no thousands), minimal decimals.
+String formatAmountPlainForEdit(double value) {
+  if (value == value.roundToDouble()) {
+    return value.toInt().toString();
+  }
+  return value.toString();
+}
+
+/// Parses amount from field text (grouped or plain, locale-aware).
+double? tryParseDecimalInput(String raw, String localeName) {
+  final t = raw.trim();
+  if (t.isEmpty) {
+    return null;
+  }
+  try {
+    return NumberFormat.decimalPattern(localeName).parse(t).toDouble();
+  } catch (_) {
+    final noSpaces = t.replaceAll(' ', '');
+    final noCommasAsThousands = noSpaces.replaceAll(',', '');
+    return double.tryParse(noCommasAsThousands);
+  }
+}
+
+/// For labels like "Computed USD: $71.43" (symbol + number only).
+String formatUsdAmountOnly(double amount, String localeName) {
+  final sym = resolveDisplayCurrencySymbol('USD');
+  final number = NumberFormat.decimalPatternDigits(
+    locale: localeName,
+    decimalDigits: 2,
+  ).format(amount);
+  return '$sym$number';
+}

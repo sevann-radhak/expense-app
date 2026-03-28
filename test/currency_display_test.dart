@@ -31,4 +31,12 @@ void main() {
       r'USD $837.51',
     );
   });
+
+  test('formatAmountGrouped and tryParseDecimalInput round-trip en_US', () {
+    const loc = 'en_US';
+    expect(formatAmountGrouped(10000, loc), '10,000.00');
+    expect(tryParseDecimalInput('10,000.00', loc), 10000.0);
+    expect(tryParseDecimalInput('10000', loc), 10000.0);
+    expect(formatUsdAmountOnly(71.43, loc), r'$71.43');
+  });
 }

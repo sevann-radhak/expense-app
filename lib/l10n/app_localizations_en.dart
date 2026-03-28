@@ -133,16 +133,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addExpenseTooltip => 'Add expense';
 
   @override
-  String expenseListUsd(String amount) {
-    return 'USD $amount';
-  }
-
-  @override
-  String expenseListOriginal(String amount, String currency) {
-    return '$amount $currency';
-  }
-
-  @override
   String get expenseListCardBadge => 'Card';
 
   @override

@@ -322,18 +322,6 @@ abstract class AppLocalizations {
   /// **'Add expense'**
   String get addExpenseTooltip;
 
-  /// No description provided for @expenseListUsd.
-  ///
-  /// In en, this message translates to:
-  /// **'USD {amount}'**
-  String expenseListUsd(String amount);
-
-  /// No description provided for @expenseListOriginal.
-  ///
-  /// In en, this message translates to:
-  /// **'{amount} {currency}'**
-  String expenseListOriginal(String amount, String currency);
-
   /// No description provided for @expenseListCardBadge.
   ///
   /// In en, this message translates to:

@@ -136,6 +136,88 @@ void monthlyIncomeSettledPendingForYear(
   return (settled: settled, pending: pending);
 }
 
+/// Original-currency and USD totals for summary UI, split by settlement
+/// (confirmed / received vs still expected). Skipped and waived lines are omitted.
+final class MonthCashflowOriginalUsdSplit {
+  const MonthCashflowOriginalUsdSplit({
+    required this.settledOriginalByCurrency,
+    required this.pendingOriginalByCurrency,
+    required this.usdSettled,
+    required this.usdPending,
+  });
+
+  final Map<String, double> settledOriginalByCurrency;
+  final Map<String, double> pendingOriginalByCurrency;
+  final double usdSettled;
+  final double usdPending;
+
+  double get usdTotal => usdSettled + usdPending;
+
+  bool get isEmptyCashflow =>
+      usdSettled == 0 &&
+      usdPending == 0 &&
+      settledOriginalByCurrency.isEmpty &&
+      pendingOriginalByCurrency.isEmpty;
+}
+
+MonthCashflowOriginalUsdSplit monthCashflowOriginalUsdSplitForExpenses(
+  Iterable<Expense> lines,
+  DateTime todayDateOnly,
+) {
+  final settled = <String, double>{};
+  final pending = <String, double>{};
+  var usdS = 0.0;
+  var usdP = 0.0;
+  for (final e in lines) {
+    if (isExpenseExcludedFromCashflowTotals(e)) {
+      continue;
+    }
+    final c = e.currencyCode.toUpperCase();
+    if (isEconomicallySettledExpense(e, todayDateOnly)) {
+      settled[c] = (settled[c] ?? 0) + e.amountOriginal;
+      usdS += e.amountUsd;
+    } else {
+      pending[c] = (pending[c] ?? 0) + e.amountOriginal;
+      usdP += e.amountUsd;
+    }
+  }
+  return MonthCashflowOriginalUsdSplit(
+    settledOriginalByCurrency: settled,
+    pendingOriginalByCurrency: pending,
+    usdSettled: usdS,
+    usdPending: usdP,
+  );
+}
+
+MonthCashflowOriginalUsdSplit monthCashflowOriginalUsdSplitForIncome(
+  Iterable<IncomeEntry> lines,
+  DateTime todayDateOnly,
+) {
+  final settled = <String, double>{};
+  final pending = <String, double>{};
+  var usdS = 0.0;
+  var usdP = 0.0;
+  for (final e in lines) {
+    if (isIncomeExcludedFromCashflowTotals(e)) {
+      continue;
+    }
+    final c = e.currencyCode.toUpperCase();
+    if (isEconomicallySettledIncome(e, todayDateOnly)) {
+      settled[c] = (settled[c] ?? 0) + e.amountOriginal;
+      usdS += e.amountUsd;
+    } else {
+      pending[c] = (pending[c] ?? 0) + e.amountOriginal;
+      usdP += e.amountUsd;
+    }
+  }
+  return MonthCashflowOriginalUsdSplit(
+    settledOriginalByCurrency: settled,
+    pendingOriginalByCurrency: pending,
+    usdSettled: usdS,
+    usdPending: usdP,
+  );
+}
+
 /// Sum of [Expense.amountUsd] (already FX-converted at save time).
 double totalUsd(Iterable<Expense> expenses) {
   var s = 0.0;

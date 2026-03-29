@@ -986,6 +986,18 @@ abstract class AppLocalizations {
   /// **'Month totals'**
   String get monthSummaryTitle;
 
+  /// Subheading for amounts already paid or received in the month summary card.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get monthSummaryTotalsConfirmedLabel;
+
+  /// Subheading for scheduled amounts not yet paid or received in the month summary card.
+  ///
+  /// In en, this message translates to:
+  /// **'Still expected'**
+  String get monthSummaryTotalsExpectedLabel;
+
   /// No description provided for @monthSummaryUsdTotal.
   ///
   /// In en, this message translates to:

@@ -483,6 +483,14 @@
   "@monthSummaryTitle": {
     "description": "Heading for per-currency spend summary on the home screen."
   },
+  "monthSummaryTotalsConfirmedLabel": "Confirmed",
+  "@monthSummaryTotalsConfirmedLabel": {
+    "description": "Subheading for amounts already paid or received in the month summary card."
+  },
+  "monthSummaryTotalsExpectedLabel": "Still expected",
+  "@monthSummaryTotalsExpectedLabel": {
+    "description": "Subheading for scheduled amounts not yet paid or received in the month summary card."
+  },
   "monthSummaryUsdTotal": "USD total: {amount}",
   "@monthSummaryUsdTotal": {
     "placeholders": {

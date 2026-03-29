@@ -502,6 +502,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get monthSummaryTitle => 'Month totals';
 
   @override
+  String get monthSummaryTotalsConfirmedLabel => 'Confirmed';
+
+  @override
+  String get monthSummaryTotalsExpectedLabel => 'Still expected';
+
+  @override
   String monthSummaryUsdTotal(String amount) {
     return 'USD total: $amount';
   }

@@ -79,6 +79,42 @@ void main() {
     expect(rows.map((r) => r.subcategoryId).toList(), ['s2', 's1']);
   });
 
+  test('monthCashflowOriginalUsdSplitForIncome splits settled vs pending', () {
+    final today = DateTime(2026, 6, 15);
+    final received = IncomeEntry(
+      id: 'a',
+      receivedOn: DateTime(2026, 6, 10),
+      incomeCategoryId: 'c',
+      incomeSubcategoryId: 's',
+      amountOriginal: 100,
+      currencyCode: 'USD',
+      manualFxRateToUsd: 1,
+      amountUsd: 100,
+      recurringSeriesId: 'r',
+      expectationStatus: PaymentExpectationStatus.confirmedPaid,
+      expectationConfirmedOn: DateTime(2026, 6, 10),
+    );
+    final expected = IncomeEntry(
+      id: 'b',
+      receivedOn: DateTime(2026, 6, 5),
+      incomeCategoryId: 'c',
+      incomeSubcategoryId: 's',
+      amountOriginal: 40,
+      currencyCode: 'USD',
+      manualFxRateToUsd: 1,
+      amountUsd: 40,
+      recurringSeriesId: 'r',
+      expectationStatus: PaymentExpectationStatus.expected,
+    );
+    final split = monthCashflowOriginalUsdSplitForIncome(
+      [received, expected],
+      today,
+    );
+    expect(split.usdSettled, 100);
+    expect(split.usdPending, 40);
+    expect(split.usdTotal, 140);
+  });
+
   test('totalIncomeUsd excludes skipped and waived', () {
     final skipped = IncomeEntry(
       id: 's',

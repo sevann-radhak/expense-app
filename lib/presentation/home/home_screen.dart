@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -8,8 +7,8 @@ import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/expenses/expense_summary_list_tile.dart';
 import 'package:expense_app/presentation/home/expense_form_dialog.dart';
 import 'package:expense_app/presentation/home/recurring_expense_menu_handler.dart';
-import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
+import 'package:expense_app/presentation/widgets/month_cashflow_summary_card.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -87,7 +86,8 @@ class HomeScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _MonthSpendSummary(
+                  _monthExpenseSummaryCard(
+                    context: context,
                     expenses: expenses,
                     locale: locale,
                     l10n: l10n,
@@ -164,232 +164,23 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class _MonthSpendSummary extends StatelessWidget {
-  const _MonthSpendSummary({
-    required this.expenses,
-    required this.locale,
-    required this.l10n,
-  });
+Widget _monthExpenseSummaryCard({
+  required BuildContext context,
+  required List<Expense> expenses,
+  required Locale locale,
+  required AppLocalizations l10n,
+}) {
+  final split = monthCashflowOriginalUsdSplitForExpenses(
+    expenses,
+    calendarTodayLocal(),
+  );
 
-  final List<Expense> expenses;
-  final Locale locale;
-  final AppLocalizations l10n;
-
-  /// Horizontal [ListView] needs a bounded cross-axis height; inside a parent
-  /// [ListView] the [Row] otherwise gets unbounded vertical constraints → 0-size
-  /// viewport and "Cannot hit test a render box with no size" on web.
-  static double _chipStripHeight(BuildContext context) {
-    const base = kMinInteractiveDimension + 8;
-    return MediaQuery.textScalerOf(context).scale(base).clamp(48.0, 80.0);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    final included = expenses
-        .where((e) => !isExpenseExcludedFromCashflowTotals(e))
-        .toList();
-    final byCurrency = <String, double>{};
-    for (final e in included) {
-      final c = e.currencyCode.toUpperCase();
-      byCurrency[c] = (byCurrency[c] ?? 0) + e.amountOriginal;
-    }
-    final leftCodes = byCurrency.keys.where((c) => c != 'USD').toList()..sort();
-
-    final usdTotal = included.fold<double>(0, (s, e) => s + e.amountUsd);
-    final usdLine = formatDisplayCurrencyLine(
-      'USD',
-      usdTotal,
-      locale.toString(),
-    );
-    final usdAccessibilityAmount = NumberFormat.decimalPatternDigits(
-      locale: locale.toString(),
-      decimalDigits: 2,
-    ).format(usdTotal);
-
-    return Card(
-      elevation: 0,
-      clipBehavior: Clip.none,
-      color: scheme.surfaceContainerHighest,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.monthSummaryTitle,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
-              ),
-            ),
-            const SizedBox(height: 10),
-            if (expenses.isEmpty)
-              Text(
-                l10n.monthSummaryNoExpenses,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
-              )
-            else
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: leftCodes.isEmpty
-                        ? const SizedBox(height: 40)
-                        : SizedBox(
-                            height:
-                                _chipStripHeight(context) + (kIsWeb ? 10 : 0),
-                            child: _MonthTotalsCurrencyStrip(
-                              currencyCodes: leftCodes,
-                              amountByCurrency: byCurrency,
-                              localeName: locale.toString(),
-                            ),
-                          ),
-                  ),
-                  const SizedBox(width: 12),
-                  Semantics(
-                    label: l10n.monthSummaryUsdTotal(usdAccessibilityAmount),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            scheme.primaryContainer,
-                            Color.alphaBlend(
-                              scheme.primary.withValues(alpha: 0.12),
-                              scheme.primaryContainer,
-                            ),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: [
-                          BoxShadow(
-                            color: scheme.primary.withValues(alpha: 0.18),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                        child: Text(
-                          usdLine,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: scheme.onPrimaryContainer,
-                            letterSpacing: 0.15,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MonthTotalsCurrencyStrip extends StatefulWidget {
-  const _MonthTotalsCurrencyStrip({
-    required this.currencyCodes,
-    required this.amountByCurrency,
-    required this.localeName,
-  });
-
-  final List<String> currencyCodes;
-  final Map<String, double> amountByCurrency;
-  final String localeName;
-
-  @override
-  State<_MonthTotalsCurrencyStrip> createState() =>
-      _MonthTotalsCurrencyStripState();
-}
-
-class _MonthTotalsCurrencyStripState extends State<_MonthTotalsCurrencyStrip> {
-  late final ScrollController _controller = ScrollController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final codes = widget.currencyCodes;
-    return Scrollbar(
-      controller: _controller,
-      thumbVisibility: kIsWeb,
-      thickness: kIsWeb ? 5 : null,
-      radius: const Radius.circular(4),
-      child: ListView.separated(
-        controller: _controller,
-        scrollDirection: Axis.horizontal,
-        primary: false,
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        padding: EdgeInsets.only(right: 8, bottom: kIsWeb ? 6 : 0),
-        itemCount: codes.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 8),
-        itemBuilder: (context, i) {
-          return Align(
-            alignment: Alignment.centerLeft,
-            child: _MonthSummaryCurrencyChip(
-              label: formatDisplayCurrencyLine(
-                codes[i],
-                widget.amountByCurrency[codes[i]]!,
-                widget.localeName,
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _MonthSummaryCurrencyChip extends StatelessWidget {
-  const _MonthSummaryCurrencyChip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Material(
-      color: scheme.surface,
-      elevation: 0,
-      shadowColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(999),
-        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.9)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        child: Text(
-          label,
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.1,
-            color: scheme.onSurface,
-          ),
-        ),
-      ),
-    );
-  }
+  return MonthCashflowSummaryCard(
+    title: l10n.monthSummaryTitle,
+    locale: locale,
+    l10n: l10n,
+    split: split,
+    emptyStateMessage:
+        expenses.isEmpty ? l10n.monthSummaryNoExpenses : null,
+  );
 }

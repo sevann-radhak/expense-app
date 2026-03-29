@@ -4,11 +4,11 @@ import 'package:intl/intl.dart';
 
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
-import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/income/income_form_dialog.dart';
 import 'package:expense_app/presentation/incomes/income_summary_list_tile.dart';
 import 'package:expense_app/presentation/incomes/recurring_income_menu_handler.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
+import 'package:expense_app/presentation/widgets/month_cashflow_summary_card.dart';
 
 class IncomeScreen extends ConsumerWidget {
   const IncomeScreen({super.key});
@@ -101,25 +101,18 @@ class IncomeScreen extends ConsumerWidget {
                   ),
                 );
               }
-              final totalUsd = entries.fold<double>(0, (s, e) => s + e.amountUsd);
+              final split = monthCashflowOriginalUsdSplitForIncome(
+                entries,
+                today,
+              );
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        l10n.incomeThisMonthHeading,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.reportsIncomeThisMonthLine(
-                      formatUsdAmountOnly(totalUsd, locale),
-                    ),
-                    style: Theme.of(context).textTheme.titleSmall,
+                  MonthCashflowSummaryCard(
+                    title: l10n.incomeThisMonthHeading,
+                    locale: Localizations.localeOf(context),
+                    l10n: l10n,
+                    split: split,
                   ),
                   const SizedBox(height: 16),
                   ...entries.map(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:expense_app/application/application.dart';
+import 'package:expense_app/data/local/book_backup_export.dart';
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/expenses/expense_summary_list_tile.dart';
@@ -11,6 +12,7 @@ import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/home/expense_form_dialog.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 import 'package:expense_app/presentation/reports/report_csv_download.dart';
+import 'package:expense_app/presentation/reports/report_file_download.dart';
 import 'package:expense_app/presentation/reports/reports_category_pie_chart.dart';
 import 'package:expense_app/presentation/reports/reports_monthly_bar_chart.dart';
 
@@ -33,6 +35,41 @@ String _reportCsvFilename({
       return 'report_by_category_${year}_$mm.csv';
     default:
       return 'report_export.csv';
+  }
+}
+
+enum _ReportsExportFormat { csv, json }
+
+Future<void> _handleReportsJsonExport(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+) async {
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  if (!kIsWeb) {
+    messenger?.showSnackBar(
+      SnackBar(content: Text(l10n.reportsExportJsonWebOnly)),
+    );
+    return;
+  }
+  try {
+    final db = ref.read(appDatabaseProvider);
+    final snap = await exportFullBookSnapshot(db);
+    final json = encodeBookBackupPretty(snap);
+    final ymd = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final filename = 'expense_book_backup_$ymd.json';
+    triggerReportFileDownload(
+      filename,
+      json,
+      'application/json;charset=utf-8',
+    );
+    messenger?.showSnackBar(
+      SnackBar(content: Text(l10n.reportsExportJsonSuccess)),
+    );
+  } on Object catch (e) {
+    messenger?.showSnackBar(
+      SnackBar(content: Text('${l10n.reportsExportJsonFailed}: $e')),
+    );
   }
 }
 
@@ -99,16 +136,32 @@ void _handleReportsCsvExport(
   );
 }
 
-class _ReportsCsvExportButton extends ConsumerWidget {
-  const _ReportsCsvExportButton();
+class _ReportsExportMenuButton extends ConsumerWidget {
+  const _ReportsExportMenuButton();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    return IconButton(
+    return PopupMenuButton<_ReportsExportFormat>(
       icon: const Icon(Icons.download_outlined),
-      tooltip: l10n.reportsExportCsvTooltip,
-      onPressed: () => _handleReportsCsvExport(context, ref, l10n),
+      tooltip: l10n.reportsExportMenuTooltip,
+      onSelected: (format) async {
+        if (format == _ReportsExportFormat.csv) {
+          _handleReportsCsvExport(context, ref, l10n);
+        } else {
+          await _handleReportsJsonExport(context, ref, l10n);
+        }
+      },
+      itemBuilder: (ctx) => [
+        PopupMenuItem(
+          value: _ReportsExportFormat.csv,
+          child: Text(l10n.reportsExportFormatCsv),
+        ),
+        PopupMenuItem(
+          value: _ReportsExportFormat.json,
+          child: Text(l10n.reportsExportFormatJson),
+        ),
+      ],
     );
   }
 }
@@ -154,7 +207,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen>
       appBar: AppBar(
         title: Text(l10n.reportsTitle),
         actions: const [
-          _ReportsCsvExportButton(),
+          _ReportsExportMenuButton(),
         ],
         bottom: TabBar(
           controller: _tabController,

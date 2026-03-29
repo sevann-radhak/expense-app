@@ -328,6 +328,106 @@ abstract class AppLocalizations {
   /// **'Report data is still loading; try again in a moment.'**
   String get reportsExportCsvLoading;
 
+  /// App bar menu: choose CSV (scoped report) or JSON (full book backup).
+  ///
+  /// In en, this message translates to:
+  /// **'Export data'**
+  String get reportsExportMenuTooltip;
+
+  /// Menu item: export visible report slice as CSV.
+  ///
+  /// In en, this message translates to:
+  /// **'Current report as CSV'**
+  String get reportsExportFormatCsv;
+
+  /// Menu item: export entire local book as JSON.
+  ///
+  /// In en, this message translates to:
+  /// **'Full book as JSON backup'**
+  String get reportsExportFormatJson;
+
+  /// After starting a web JSON full-book download.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON backup download started.'**
+  String get reportsExportJsonSuccess;
+
+  /// Prefix when full-book JSON export fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export JSON backup'**
+  String get reportsExportJsonFailed;
+
+  /// Non-web: full JSON export unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON backup export is available on the web app in this version.'**
+  String get reportsExportJsonWebOnly;
+
+  /// Heading for JSON import of a full book backup.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup'**
+  String get settingsBackupSectionTitle;
+
+  /// Explains destructive JSON import and points to export location.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore a file created with Reports → Full book as JSON backup. This replaces all expenses, categories, subcategories, and card profiles in this browser.'**
+  String get settingsBackupImportDescription;
+
+  /// Opens file picker for backup JSON.
+  ///
+  /// In en, this message translates to:
+  /// **'Import JSON backup…'**
+  String get settingsBackupImportButton;
+
+  /// Confirm dialog title for JSON import.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace everything from backup?'**
+  String get settingsBackupImportTitle;
+
+  /// Confirm dialog body for JSON import.
+  ///
+  /// In en, this message translates to:
+  /// **'All current data will be deleted and replaced by the backup. This cannot be undone.'**
+  String get settingsBackupImportMessage;
+
+  /// Confirm destructive import.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace all data'**
+  String get settingsBackupImportConfirm;
+
+  /// Snackbar after successful JSON import.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup imported.'**
+  String get settingsBackupImportSuccess;
+
+  /// Snackbar when import succeeded after dropping or fixing inconsistent rows.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup imported. Skipped {expensesSkipped} expense(s) with invalid links; cleared {paymentLinksCleared} invalid card link(s); dropped {subcategoriesDropped} orphan subcategor(ies).'**
+  String settingsBackupImportRepaired(
+    int expensesSkipped,
+    int paymentLinksCleared,
+    int subcategoriesDropped,
+  );
+
+  /// Prefix when JSON import fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not import backup'**
+  String get settingsBackupImportFailed;
+
+  /// Non-web: backup import unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON import is available on the web app in this version.'**
+  String get settingsImportJsonWebOnly;
+
   /// Short intro under the categories screen app bar.
   ///
   /// In en, this message translates to:

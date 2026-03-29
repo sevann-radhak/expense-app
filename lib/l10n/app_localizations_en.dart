@@ -134,6 +134,64 @@ class AppLocalizationsEn extends AppLocalizations {
       'Report data is still loading; try again in a moment.';
 
   @override
+  String get reportsExportMenuTooltip => 'Export data';
+
+  @override
+  String get reportsExportFormatCsv => 'Current report as CSV';
+
+  @override
+  String get reportsExportFormatJson => 'Full book as JSON backup';
+
+  @override
+  String get reportsExportJsonSuccess => 'JSON backup download started.';
+
+  @override
+  String get reportsExportJsonFailed => 'Could not export JSON backup';
+
+  @override
+  String get reportsExportJsonWebOnly =>
+      'JSON backup export is available on the web app in this version.';
+
+  @override
+  String get settingsBackupSectionTitle => 'Backup';
+
+  @override
+  String get settingsBackupImportDescription =>
+      'Restore a file created with Reports → Full book as JSON backup. This replaces all expenses, categories, subcategories, and card profiles in this browser.';
+
+  @override
+  String get settingsBackupImportButton => 'Import JSON backup…';
+
+  @override
+  String get settingsBackupImportTitle => 'Replace everything from backup?';
+
+  @override
+  String get settingsBackupImportMessage =>
+      'All current data will be deleted and replaced by the backup. This cannot be undone.';
+
+  @override
+  String get settingsBackupImportConfirm => 'Replace all data';
+
+  @override
+  String get settingsBackupImportSuccess => 'Backup imported.';
+
+  @override
+  String settingsBackupImportRepaired(
+    int expensesSkipped,
+    int paymentLinksCleared,
+    int subcategoriesDropped,
+  ) {
+    return 'Backup imported. Skipped $expensesSkipped expense(s) with invalid links; cleared $paymentLinksCleared invalid card link(s); dropped $subcategoriesDropped orphan subcategor(ies).';
+  }
+
+  @override
+  String get settingsBackupImportFailed => 'Could not import backup';
+
+  @override
+  String get settingsImportJsonWebOnly =>
+      'JSON import is available on the web app in this version.';
+
+  @override
   String get categoriesScreenSubtitle =>
       'Taxonomy from your local database (debug / admin).';
 

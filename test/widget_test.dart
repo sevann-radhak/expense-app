@@ -124,6 +124,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.settingsPreferencesSectionTitle), findsOneWidget);
+      expect(find.text(l10n.settingsBackupSectionTitle), findsOneWidget);
     } finally {
       await disposeUiAndDb(tester, db);
     }
@@ -149,6 +150,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.settingsPreferencesSectionTitle), findsOneWidget);
+      expect(find.text(l10n.settingsBackupSectionTitle), findsOneWidget);
     } finally {
       await disposeUiAndDb(tester, db);
     }

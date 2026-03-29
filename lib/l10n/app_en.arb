@@ -126,6 +126,81 @@
   "@reportsExportCsvLoading": {
     "description": "When export is tapped while expense stream is loading."
   },
+  "reportsExportMenuTooltip": "Export data",
+  "@reportsExportMenuTooltip": {
+    "description": "App bar menu: choose CSV (scoped report) or JSON (full book backup)."
+  },
+  "reportsExportFormatCsv": "Current report as CSV",
+  "@reportsExportFormatCsv": {
+    "description": "Menu item: export visible report slice as CSV."
+  },
+  "reportsExportFormatJson": "Full book as JSON backup",
+  "@reportsExportFormatJson": {
+    "description": "Menu item: export entire local book as JSON."
+  },
+  "reportsExportJsonSuccess": "JSON backup download started.",
+  "@reportsExportJsonSuccess": {
+    "description": "After starting a web JSON full-book download."
+  },
+  "reportsExportJsonFailed": "Could not export JSON backup",
+  "@reportsExportJsonFailed": {
+    "description": "Prefix when full-book JSON export fails."
+  },
+  "reportsExportJsonWebOnly": "JSON backup export is available on the web app in this version.",
+  "@reportsExportJsonWebOnly": {
+    "description": "Non-web: full JSON export unavailable."
+  },
+  "settingsBackupSectionTitle": "Backup",
+  "@settingsBackupSectionTitle": {
+    "description": "Heading for JSON import of a full book backup."
+  },
+  "settingsBackupImportDescription": "Restore a file created with Reports → Full book as JSON backup. This replaces all expenses, categories, subcategories, and card profiles in this browser.",
+  "@settingsBackupImportDescription": {
+    "description": "Explains destructive JSON import and points to export location."
+  },
+  "settingsBackupImportButton": "Import JSON backup…",
+  "@settingsBackupImportButton": {
+    "description": "Opens file picker for backup JSON."
+  },
+  "settingsBackupImportTitle": "Replace everything from backup?",
+  "@settingsBackupImportTitle": {
+    "description": "Confirm dialog title for JSON import."
+  },
+  "settingsBackupImportMessage": "All current data will be deleted and replaced by the backup. This cannot be undone.",
+  "@settingsBackupImportMessage": {
+    "description": "Confirm dialog body for JSON import."
+  },
+  "settingsBackupImportConfirm": "Replace all data",
+  "@settingsBackupImportConfirm": {
+    "description": "Confirm destructive import."
+  },
+  "settingsBackupImportSuccess": "Backup imported.",
+  "@settingsBackupImportSuccess": {
+    "description": "Snackbar after successful JSON import."
+  },
+  "settingsBackupImportRepaired": "Backup imported. Skipped {expensesSkipped} expense(s) with invalid links; cleared {paymentLinksCleared} invalid card link(s); dropped {subcategoriesDropped} orphan subcategor(ies).",
+  "@settingsBackupImportRepaired": {
+    "description": "Snackbar when import succeeded after dropping or fixing inconsistent rows.",
+    "placeholders": {
+      "expensesSkipped": {
+        "type": "int"
+      },
+      "paymentLinksCleared": {
+        "type": "int"
+      },
+      "subcategoriesDropped": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsBackupImportFailed": "Could not import backup",
+  "@settingsBackupImportFailed": {
+    "description": "Prefix when JSON import fails."
+  },
+  "settingsImportJsonWebOnly": "JSON import is available on the web app in this version.",
+  "@settingsImportJsonWebOnly": {
+    "description": "Non-web: backup import unavailable."
+  },
   "categoriesScreenSubtitle": "Taxonomy from your local database (debug / admin).",
   "@categoriesScreenSubtitle": {
     "description": "Short intro under the categories screen app bar."

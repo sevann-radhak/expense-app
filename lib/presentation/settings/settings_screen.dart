@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
+import 'package:expense_app/presentation/settings/settings_backup_section.dart';
 import 'package:expense_app/presentation/settings/settings_card_profiles_section.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -110,6 +111,8 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 32),
                 const SettingsCardProfilesSection(),
+                const SizedBox(height: 32),
+                const SettingsBackupSection(),
                 const SizedBox(height: 32),
                 Text(
                   l10n.settingsAccountSectionTitle,

@@ -157,11 +157,6 @@ class _SettlementBucketBlock extends StatelessWidget {
     final scheme = theme.colorScheme;
     final leftCodes = byCurrency.keys.where((c) => c != 'USD').toList()..sort();
 
-    final usdLine = formatDisplayCurrencyLine(
-      'USD',
-      usdSum,
-      localeName,
-    );
     final usdAccessibilityAmount = NumberFormat.decimalPatternDigits(
       locale: localeName,
       decimalDigits: 2,
@@ -205,7 +200,8 @@ class _SettlementBucketBlock extends StatelessWidget {
             Semantics(
               label: l10n.monthSummaryUsdTotal(usdAccessibilityAmount),
               child: _UsdSummaryChip(
-                label: usdLine,
+                usdAmount: usdSum,
+                localeName: localeName,
                 muted: muted,
               ),
             ),
@@ -218,11 +214,13 @@ class _SettlementBucketBlock extends StatelessWidget {
 
 class _UsdSummaryChip extends StatelessWidget {
   const _UsdSummaryChip({
-    required this.label,
+    required this.usdAmount,
+    required this.localeName,
     required this.muted,
   });
 
-  final String label;
+  final double usdAmount;
+  final String localeName;
   final bool muted;
 
   @override
@@ -231,6 +229,11 @@ class _UsdSummaryChip extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     if (muted) {
+      final style = theme.textTheme.titleSmall?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: scheme.onSurfaceVariant.withValues(alpha: 0.92),
+        letterSpacing: 0.12,
+      );
       return DecoratedBox(
         decoration: BoxDecoration(
           color: scheme.surfaceContainerHigh.withValues(alpha: 0.55),
@@ -241,18 +244,26 @@ class _UsdSummaryChip extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Text(
-            label,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: scheme.onSurfaceVariant.withValues(alpha: 0.92),
-              letterSpacing: 0.12,
+          child: Text.rich(
+            TextSpan(
+              style: style,
+              children: displayCurrencyInlineSpans(
+                'USD',
+                usdAmount,
+                localeName,
+                style: style,
+              ),
             ),
           ),
         ),
       );
     }
 
+    final style = theme.textTheme.titleSmall?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: scheme.onPrimaryContainer,
+      letterSpacing: 0.15,
+    );
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -277,12 +288,15 @@ class _UsdSummaryChip extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        child: Text(
-          label,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: scheme.onPrimaryContainer,
-            letterSpacing: 0.15,
+        child: Text.rich(
+          TextSpan(
+            style: style,
+            children: displayCurrencyInlineSpans(
+              'USD',
+              usdAmount,
+              localeName,
+              style: style,
+            ),
           ),
         ),
       ),
@@ -341,11 +355,9 @@ class _MonthTotalsCurrencyStripState extends State<MonthTotalsCurrencyStrip> {
             alignment: Alignment.centerLeft,
             child: _MonthSummaryCurrencyChip(
               muted: widget.muted,
-              label: formatDisplayCurrencyLine(
-                codes[i],
-                widget.amountByCurrency[codes[i]]!,
-                widget.localeName,
-              ),
+              currencyCode: codes[i],
+              amount: widget.amountByCurrency[codes[i]]!,
+              localeName: widget.localeName,
             ),
           );
         },
@@ -356,11 +368,15 @@ class _MonthTotalsCurrencyStripState extends State<MonthTotalsCurrencyStrip> {
 
 class _MonthSummaryCurrencyChip extends StatelessWidget {
   const _MonthSummaryCurrencyChip({
-    required this.label,
+    required this.currencyCode,
+    required this.amount,
+    required this.localeName,
     required this.muted,
   });
 
-  final String label;
+  final String currencyCode;
+  final double amount;
+  final String localeName;
   final bool muted;
 
   @override
@@ -375,6 +391,11 @@ class _MonthSummaryCurrencyChip extends StatelessWidget {
     final textColor = muted
         ? scheme.onSurfaceVariant.withValues(alpha: 0.92)
         : scheme.onSurface;
+    final style = theme.textTheme.labelLarge?.copyWith(
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.1,
+      color: textColor,
+    );
 
     return Material(
       color: fill,
@@ -388,12 +409,15 @@ class _MonthSummaryCurrencyChip extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        child: Text(
-          label,
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.1,
-            color: textColor,
+        child: Text.rich(
+          TextSpan(
+            style: style,
+            children: displayCurrencyInlineSpans(
+              currencyCode,
+              amount,
+              localeName,
+              style: style,
+            ),
           ),
         ),
       ),

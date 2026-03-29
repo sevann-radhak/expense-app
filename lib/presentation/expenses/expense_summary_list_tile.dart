@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
-import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/formatting/payment_expectation_display.dart';
 import 'package:expense_app/presentation/expenses/recurring_expense_ui.dart';
 import 'package:expense_app/presentation/widgets/cashflow_summary_list_row.dart';
@@ -40,16 +39,6 @@ class ExpenseSummaryListTile extends StatelessWidget {
     final theme = Theme.of(context);
     final localeName = Localizations.localeOf(context).toString();
     final dateStr = ExpenseDates.toStorageDate(expense.occurredOn);
-    final originalLabel = formatDisplayCurrencyLine(
-      expense.currencyCode,
-      expense.amountOriginal,
-      localeName,
-    );
-    final usdLabel = formatDisplayCurrencyLine(
-      'USD',
-      expense.amountUsd,
-      localeName,
-    );
     final note = expense.description.trim();
     final today = calendarTodayLocal();
     final expectationChip =
@@ -159,6 +148,10 @@ class ExpenseSummaryListTile extends StatelessWidget {
             ),
           ),
           CashflowSummaryTrailing(
+            originalCurrencyCode: expense.currencyCode,
+            originalAmount: expense.amountOriginal,
+            usdAmount: expense.amountUsd,
+            localeName: localeName,
             settlement: showSettlementControl
                 ? ListRowSettlementSegmented(
                     settled: settlementSelected,
@@ -167,8 +160,6 @@ class ExpenseSummaryListTile extends StatelessWidget {
                     onChanged: (v) => onSettlementToggle!(v),
                   )
                 : null,
-            originalLabel: originalLabel,
-            usdLabel: usdLabel,
             menu: menu,
           ),
         ],

@@ -109,8 +109,18 @@ class ReportsCategoryPieChart extends StatelessWidget {
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         TextSpan(
-                          text:
-                              '${formatDisplayCurrencyLine('USD', aggregates[i].totalUsd, localeName)} (${_pct(aggregates[i].totalUsd, periodTotalUsd)})',
+                          children: [
+                            ...displayCurrencyInlineSpans(
+                              'USD',
+                              aggregates[i].totalUsd,
+                              localeName,
+                              style: textTheme.bodyMedium,
+                            ),
+                            TextSpan(
+                              text:
+                                  ' (${_pct(aggregates[i].totalUsd, periodTotalUsd)})',
+                            ),
+                          ],
                         ),
                       ],
                     ),

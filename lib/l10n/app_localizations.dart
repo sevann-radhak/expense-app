@@ -890,6 +890,12 @@ abstract class AppLocalizations {
   /// **'Computed USD: {amount}'**
   String expenseUsdComputedLabel(String amount);
 
+  /// Prefix before the computed USD amount (rich text); include trailing space.
+  ///
+  /// In en, this message translates to:
+  /// **'Computed USD: '**
+  String get expenseUsdComputedPrefix;
+
   /// No description provided for @expensePaidWithCardLabel.
   ///
   /// In en, this message translates to:
@@ -1687,6 +1693,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cash flow (USD)'**
   String get reportsYearCashflowTitle;
+
+  /// Prefix before the USD amount on the annual cash flow card (include trailing space).
+  ///
+  /// In en, this message translates to:
+  /// **'Income: '**
+  String get reportsYearIncomeUsdPrefix;
+
+  /// No description provided for @reportsYearExpenseUsdPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses: '**
+  String get reportsYearExpenseUsdPrefix;
+
+  /// No description provided for @reportsYearNetUsdPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Net: '**
+  String get reportsYearNetUsdPrefix;
+
+  /// No description provided for @reportsByMonthNetUsdPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Net this month (USD): '**
+  String get reportsByMonthNetUsdPrefix;
 
   /// Annual income total in USD.
   ///

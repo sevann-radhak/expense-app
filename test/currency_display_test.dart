@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:expense_app/presentation/formatting/currency_display.dart';
@@ -38,5 +39,20 @@ void main() {
     expect(tryParseDecimalInput('10,000.00', loc), 10000.0);
     expect(tryParseDecimalInput('10000', loc), 10000.0);
     expect(formatUsdAmountOnly(71.43, loc), r'$71.43');
+  });
+
+  test('displayCurrencyInlineSpans uses smaller fontSize for fraction', () {
+    const loc = 'en_US';
+    const base = TextStyle(fontSize: 20);
+    final spans = displayCurrencyInlineSpans(
+      'USD',
+      1234.56,
+      loc,
+      style: base,
+    );
+    expect(spans.length, greaterThanOrEqualTo(3));
+    final frac = spans.last;
+    expect(frac.text, '.56');
+    expect(frac.style?.fontSize, lessThan(20.0));
   });
 }

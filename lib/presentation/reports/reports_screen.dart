@@ -42,6 +42,24 @@ String _reportCsvFilename({
   }
 }
 
+Widget _reportsUsdPrefixedLine({
+  required String prefix,
+  required double amountUsd,
+  required String localeName,
+  required TextStyle? style,
+}) {
+  final base = style ?? const TextStyle();
+  return Text.rich(
+    TextSpan(
+      style: base,
+      children: [
+        TextSpan(text: prefix),
+        ...usdAmountOnlyInlineSpans(amountUsd, localeName, style: base),
+      ],
+    ),
+  );
+}
+
 String _reportIncomeTotalsTitle(
   AppLocalizations l10n,
   ReportCategoryPeriodScope scope,
@@ -507,29 +525,48 @@ class _YearCashflowSummaryCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Text(
-              l10n.reportsYearIncomeUsdLine(
-                formatUsdAmountOnly(incomeUsd, localeName),
-              ),
+            _reportsUsdPrefixedLine(
+              prefix: l10n.reportsYearIncomeUsdPrefix,
+              amountUsd: incomeUsd,
+              localeName: localeName,
               style: theme.textTheme.bodyLarge,
             ),
-            Text(
-              l10n.reportsYearExpenseUsdLine(
-                formatUsdAmountOnly(expenseUsd, localeName),
-              ),
+            _reportsUsdPrefixedLine(
+              prefix: l10n.reportsYearExpenseUsdPrefix,
+              amountUsd: expenseUsd,
+              localeName: localeName,
               style: theme.textTheme.bodyLarge,
             ),
             const SizedBox(height: 6),
-            Text(
-              l10n.reportsYearNetUsdLine(
-                formatUsdAmountOnly(netUsd, localeName),
-              ),
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: netUsd >= 0
-                    ? scheme.primary
-                    : scheme.error,
-              ),
+            Builder(
+              builder: (context) {
+                final netStyle = theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: netUsd >= 0
+                      ? scheme.primary
+                      : scheme.error,
+                );
+                if (netStyle == null) {
+                  return const SizedBox.shrink();
+                }
+                final fracStyle = amountFractionTextStyle(netStyle).copyWith(
+                  color: netStyle.color,
+                );
+                return Text.rich(
+                  TextSpan(
+                    style: netStyle,
+                    children: [
+                      TextSpan(text: l10n.reportsYearNetUsdPrefix),
+                      ...usdAmountOnlyInlineSpans(
+                        netUsd,
+                        localeName,
+                        style: netStyle,
+                        fractionStyle: fracStyle,
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -759,16 +796,30 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                   ],
                   if (incomeUsd > 0 || expenseUsd > 0) ...[
                     const SizedBox(height: 16),
-                    Text(
-                      l10n.reportsByMonthNetLine(
-                        formatUsdAmountOnly(
-                          incomeUsd - expenseUsd,
-                          localeName,
-                        ),
-                      ),
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
+                    Builder(
+                      builder: (ctx) {
+                        final net = incomeUsd - expenseUsd;
+                        final baseStyle =
+                            Theme.of(ctx).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                );
+                        if (baseStyle == null) {
+                          return const SizedBox.shrink();
+                        }
+                        return Text.rich(
+                          TextSpan(
+                            style: baseStyle,
+                            children: [
+                              TextSpan(text: l10n.reportsByMonthNetUsdPrefix),
+                              ...usdAmountOnlyInlineSpans(
+                                net,
+                                localeName,
+                                style: baseStyle,
+                              ),
+                            ],
                           ),
+                        );
+                      },
                     ),
                   ],
               ],
@@ -1089,9 +1140,19 @@ class _CategoryBreakdownTable extends StatelessWidget {
             return ExpansionTile(
               key: PageStorageKey<String>('cat-${row.categoryId}'),
               title: Text(name),
-              subtitle: Text(
-                '${formatDisplayCurrencyLine('USD', row.totalUsd, localeName)} · ${_pct(share)}',
-                style: theme.textTheme.bodySmall,
+              subtitle: Text.rich(
+                TextSpan(
+                  style: theme.textTheme.bodySmall,
+                  children: [
+                    ...displayCurrencyInlineSpans(
+                      'USD',
+                      row.totalUsd,
+                      localeName,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    TextSpan(text: ' · ${_pct(share)}'),
+                  ],
+                ),
               ),
               children: [
                 if (subRows.isEmpty)
@@ -1116,6 +1177,10 @@ class _CategoryBreakdownTable extends StatelessWidget {
                           );
                           final subLabel = subcategoryName[s.subcategoryId] ??
                               l10n.taxonomyUnknownLabel;
+                          final subAmtStyle =
+                              theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          );
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             child: Row(
@@ -1126,14 +1191,15 @@ class _CategoryBreakdownTable extends StatelessWidget {
                                     style: theme.textTheme.bodyMedium,
                                   ),
                                 ),
-                                Text(
-                                  formatDisplayCurrencyLine(
-                                    'USD',
-                                    s.totalUsd,
-                                    localeName,
-                                  ),
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
+                                Text.rich(
+                                  TextSpan(
+                                    style: subAmtStyle,
+                                    children: displayCurrencyInlineSpans(
+                                      'USD',
+                                      s.totalUsd,
+                                      localeName,
+                                      style: subAmtStyle,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(
@@ -1242,9 +1308,19 @@ class _IncomeCategoryBreakdownTable extends StatelessWidget {
             return ExpansionTile(
               key: PageStorageKey<String>('inc-cat-${row.categoryId}'),
               title: Text(name),
-              subtitle: Text(
-                '${formatDisplayCurrencyLine('USD', row.totalUsd, localeName)} · ${_pct(share)}',
-                style: theme.textTheme.bodySmall,
+              subtitle: Text.rich(
+                TextSpan(
+                  style: theme.textTheme.bodySmall,
+                  children: [
+                    ...displayCurrencyInlineSpans(
+                      'USD',
+                      row.totalUsd,
+                      localeName,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    TextSpan(text: ' · ${_pct(share)}'),
+                  ],
+                ),
               ),
               children: [
                 if (subRows.isEmpty)
@@ -1269,6 +1345,10 @@ class _IncomeCategoryBreakdownTable extends StatelessWidget {
                           );
                           final subLabel = subcategoryName[s.subcategoryId] ??
                               l10n.taxonomyUnknownLabel;
+                          final subAmtStyle =
+                              theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          );
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             child: Row(
@@ -1279,14 +1359,15 @@ class _IncomeCategoryBreakdownTable extends StatelessWidget {
                                     style: theme.textTheme.bodyMedium,
                                   ),
                                 ),
-                                Text(
-                                  formatDisplayCurrencyLine(
-                                    'USD',
-                                    s.totalUsd,
-                                    localeName,
-                                  ),
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
+                                Text.rich(
+                                  TextSpan(
+                                    style: subAmtStyle,
+                                    children: displayCurrencyInlineSpans(
+                                      'USD',
+                                      s.totalUsd,
+                                      localeName,
+                                      style: subAmtStyle,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(
@@ -1374,16 +1455,26 @@ class _MonthlyUsdTable extends StatelessWidget {
           ),
         );
 
-    Widget cellValue(double v) => Padding(
-          padding: const EdgeInsets.fromLTRB(6, 10, 6, 10),
-          child: Text(
-            formatDisplayCurrencyLine('USD', v, localeName),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
+    Widget cellValue(double v) {
+      final st = theme.textTheme.bodyMedium?.copyWith(
+        fontWeight: FontWeight.w500,
+      );
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(6, 10, 6, 10),
+        child: Text.rich(
+          TextSpan(
+            style: st,
+            children: displayCurrencyInlineSpans(
+              'USD',
+              v,
+              localeName,
+              style: st,
             ),
-            textAlign: TextAlign.end,
           ),
-        );
+          textAlign: TextAlign.end,
+        ),
+      );
+    }
 
     return Card(
       elevation: 0,
@@ -1436,15 +1527,34 @@ class _MonthlyUsdTable extends StatelessWidget {
                     cellValue(exp),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(6, 10, 12, 10),
-                      child: Text(
-                        formatDisplayCurrencyLine('USD', net, localeName),
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: net >= 0
-                              ? scheme.primary
-                              : scheme.error,
-                        ),
-                        textAlign: TextAlign.end,
+                      child: Builder(
+                        builder: (ctx) {
+                          final netStyle =
+                              theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: net >= 0
+                                ? scheme.primary
+                                : scheme.error,
+                          );
+                          if (netStyle == null) {
+                            return const SizedBox.shrink();
+                          }
+                          final fracStyle = amountFractionTextStyle(netStyle)
+                              .copyWith(color: netStyle.color);
+                          return Text.rich(
+                            TextSpan(
+                              style: netStyle,
+                              children: displayCurrencyInlineSpans(
+                                'USD',
+                                net,
+                                localeName,
+                                style: netStyle,
+                                fractionStyle: fracStyle,
+                              ),
+                            ),
+                            textAlign: TextAlign.end,
+                          );
+                        },
                       ),
                     ),
                   ],

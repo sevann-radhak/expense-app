@@ -197,56 +197,65 @@ class ReportsMonthlyCashflowBarChart extends StatelessWidget {
                           final m = DateFormat.MMM(
                             localeName,
                           ).format(DateTime(year, i + 1));
+                          final tipStyle =
+                              (textTheme.bodySmall ?? const TextStyle()).copyWith(
+                            color: scheme.onInverseSurface,
+                            fontSize: 11,
+                            height: 1.25,
+                          );
                           if (rodIndex == 0) {
                             final s = monthlyIncomeSettledUsd[i];
                             final p = monthlyIncomePendingUsd[i];
-                            final sLine = formatDisplayCurrencyLine(
-                              'USD',
-                              s,
-                              localeName,
-                            );
-                            final pLine = formatDisplayCurrencyLine(
-                              'USD',
-                              p,
-                              localeName,
-                            );
-                            final body =
-                                '$m\n${l10n.reportsChartLegendIncome}\n'
-                                '${l10n.reportsChartTooltipPaidReceived}: $sLine\n'
-                                '${l10n.reportsChartTooltipStillScheduled}: $pLine';
                             return BarTooltipItem(
-                              body,
-                              (textTheme.bodySmall ?? const TextStyle())
-                                  .copyWith(
-                                color: scheme.onInverseSurface,
-                                fontSize: 11,
-                                height: 1.25,
-                              ),
+                              '$m\n${l10n.reportsChartLegendIncome}\n'
+                              '${l10n.reportsChartTooltipPaidReceived}: ',
+                              tipStyle,
+                              children: [
+                                ...displayCurrencyInlineSpans(
+                                  'USD',
+                                  s,
+                                  localeName,
+                                  style: tipStyle,
+                                ),
+                                TextSpan(
+                                  text:
+                                      '\n${l10n.reportsChartTooltipStillScheduled}: ',
+                                  style: tipStyle,
+                                ),
+                                ...displayCurrencyInlineSpans(
+                                  'USD',
+                                  p,
+                                  localeName,
+                                  style: tipStyle,
+                                ),
+                              ],
                             );
                           }
                           final s = monthlyExpenseSettledUsd[i];
                           final p = monthlyExpensePendingUsd[i];
-                          final sLine = formatDisplayCurrencyLine(
-                            'USD',
-                            s,
-                            localeName,
-                          );
-                          final pLine = formatDisplayCurrencyLine(
-                            'USD',
-                            p,
-                            localeName,
-                          );
-                          final body =
-                              '$m\n${l10n.reportsChartLegendExpenses}\n'
-                              '${l10n.reportsChartTooltipPaidReceived}: $sLine\n'
-                              '${l10n.reportsChartTooltipStillScheduled}: $pLine';
                           return BarTooltipItem(
-                            body,
-                            (textTheme.bodySmall ?? const TextStyle()).copyWith(
-                              color: scheme.onInverseSurface,
-                              fontSize: 11,
-                              height: 1.25,
-                            ),
+                            '$m\n${l10n.reportsChartLegendExpenses}\n'
+                            '${l10n.reportsChartTooltipPaidReceived}: ',
+                            tipStyle,
+                            children: [
+                              ...displayCurrencyInlineSpans(
+                                'USD',
+                                s,
+                                localeName,
+                                style: tipStyle,
+                              ),
+                              TextSpan(
+                                text:
+                                    '\n${l10n.reportsChartTooltipStillScheduled}: ',
+                                style: tipStyle,
+                              ),
+                              ...displayCurrencyInlineSpans(
+                                'USD',
+                                p,
+                                localeName,
+                                style: tipStyle,
+                              ),
+                            ],
                           );
                         },
                       ),
@@ -499,25 +508,35 @@ class ReportsPeriodCashflowBarChart extends StatelessWidget {
                           final title = isIncome
                               ? l10n.reportsChartLegendIncome
                               : l10n.reportsChartLegendExpenses;
-                          final sLine = formatDisplayCurrencyLine(
-                            'USD',
-                            s,
-                            localeName,
-                          );
-                          final pLine = formatDisplayCurrencyLine(
-                            'USD',
-                            p,
-                            localeName,
+                          final tipStyle =
+                              (textTheme.bodySmall ?? const TextStyle()).copyWith(
+                            color: scheme.onInverseSurface,
+                            fontSize: 12,
+                            height: 1.25,
                           );
                           return BarTooltipItem(
                             '$title\n'
-                            '${l10n.reportsChartTooltipPaidReceived}: $sLine\n'
-                            '${l10n.reportsChartTooltipStillScheduled}: $pLine',
-                            (textTheme.bodySmall ?? const TextStyle()).copyWith(
-                              color: scheme.onInverseSurface,
-                              fontSize: 12,
-                              height: 1.25,
-                            ),
+                            '${l10n.reportsChartTooltipPaidReceived}: ',
+                            tipStyle,
+                            children: [
+                              ...displayCurrencyInlineSpans(
+                                'USD',
+                                s,
+                                localeName,
+                                style: tipStyle,
+                              ),
+                              TextSpan(
+                                text:
+                                    '\n${l10n.reportsChartTooltipStillScheduled}: ',
+                                style: tipStyle,
+                              ),
+                              ...displayCurrencyInlineSpans(
+                                'USD',
+                                p,
+                                localeName,
+                                style: tipStyle,
+                              ),
+                            ],
                           );
                         },
                       ),

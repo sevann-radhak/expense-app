@@ -458,6 +458,10 @@
       }
     }
   },
+  "expenseUsdComputedPrefix": "Computed USD: ",
+  "@expenseUsdComputedPrefix": {
+    "description": "Prefix before the computed USD amount (rich text); include trailing space."
+  },
   "expensePaidWithCardLabel": "Paid with credit card",
   "expenseCardProfileLabel": "Card profile (optional)",
   "@expenseCardProfileLabel": {
@@ -704,6 +708,13 @@
   "@reportsYearCashflowTitle": {
     "description": "Heading for annual income vs expense summary."
   },
+  "reportsYearIncomeUsdPrefix": "Income: ",
+  "@reportsYearIncomeUsdPrefix": {
+    "description": "Prefix before the USD amount on the annual cash flow card (include trailing space)."
+  },
+  "reportsYearExpenseUsdPrefix": "Expenses: ",
+  "reportsYearNetUsdPrefix": "Net: ",
+  "reportsByMonthNetUsdPrefix": "Net this month (USD): ",
   "reportsYearIncomeUsdLine": "Income: {amount}",
   "@reportsYearIncomeUsdLine": {
     "description": "Annual income total in USD.",

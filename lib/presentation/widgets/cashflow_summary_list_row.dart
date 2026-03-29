@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/theme/category_accent_colors.dart';
 
 const Widget kListRowOverflowMenuIconChild = SizedBox(
@@ -37,21 +38,29 @@ class ListRowCategoryLeadingAccent extends StatelessWidget {
 
 class CashflowSummaryTrailing extends StatelessWidget {
   const CashflowSummaryTrailing({
-    required this.originalLabel,
-    required this.usdLabel,
+    required this.originalCurrencyCode,
+    required this.originalAmount,
+    required this.usdAmount,
+    required this.localeName,
     super.key,
     this.settlement,
     this.menu,
   });
 
+  final String originalCurrencyCode;
+  final double originalAmount;
+  final double usdAmount;
+  final String localeName;
   final Widget? settlement;
-  final String originalLabel;
-  final String usdLabel;
   final Widget? menu;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final originalStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontWeight: FontWeight.w600,
+    );
+    final usdStyle = theme.textTheme.titleSmall;
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -65,14 +74,29 @@ class CashflowSummaryTrailing extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              originalLabel,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+            Text.rich(
+              TextSpan(
+                style: originalStyle,
+                children: displayCurrencyInlineSpans(
+                  originalCurrencyCode,
+                  originalAmount,
+                  localeName,
+                  style: originalStyle,
+                ),
               ),
             ),
             const SizedBox(width: 10),
-            Text(usdLabel, style: theme.textTheme.titleSmall),
+            Text.rich(
+              TextSpan(
+                style: usdStyle,
+                children: displayCurrencyInlineSpans(
+                  'USD',
+                  usdAmount,
+                  localeName,
+                  style: usdStyle,
+                ),
+              ),
+            ),
             if (menu != null) ...[
               const SizedBox(width: 2),
               menu!,

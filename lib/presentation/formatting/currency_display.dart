@@ -1,7 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// Symbols for common ISO 4217 codes. Prefer this over [NumberFormat.currencySymbol]
-/// in `en` locale, which often repeats the code (e.g. "ARS" instead of "\$").
 const Map<String, String> kDisplayCurrencySymbols = {
   'ARS': r'$',
   'USD': r'$',
@@ -31,7 +30,6 @@ const Map<String, String> kDisplayCurrencySymbols = {
   'DKK': 'kr',
 };
 
-/// CLDR-backed locales that usually yield a real symbol (not the ISO code).
 String? _intlLocaleHintForCurrency(String code) {
   switch (code) {
     case 'ARS':
@@ -74,7 +72,6 @@ String _symbolFromIntl(String code, String intlLocale) {
   }
 }
 
-/// Resolved display symbol, never the raw ISO code when a better symbol exists.
 String resolveDisplayCurrencySymbol(String currencyCode) {
   final code = currencyCode.toUpperCase();
   final mapped = kDisplayCurrencySymbols[code];
@@ -95,9 +92,160 @@ String resolveDisplayCurrencySymbol(String currencyCode) {
   return '';
 }
 
-/// Human line: `ARS $1,160,025.00`, `EUR €5.00`, `BRL R$123.45`, `PYG ₲…`.
-///
-/// [localeName] is an ICU locale string (e.g. from [Locale.toString]).
+({String whole, String? fractionWithSep}) _splitFormattedAmount(
+  NumberFormat format,
+  String formatted,
+) {
+  final sep = format.symbols.DECIMAL_SEP;
+  if (sep.isEmpty) {
+    return (whole: formatted, fractionWithSep: null);
+  }
+  final i = formatted.lastIndexOf(sep);
+  if (i < 0) {
+    return (whole: formatted, fractionWithSep: null);
+  }
+  return (
+    whole: formatted.substring(0, i),
+    fractionWithSep: formatted.substring(i),
+  );
+}
+
+NumberFormat _amountFormat(String localeName, int decimalDigits) {
+  return NumberFormat.decimalPatternDigits(
+    locale: localeName,
+    decimalDigits: decimalDigits,
+  );
+}
+
+/// Smaller style for fractional digits (separator + decimals) relative to [base].
+TextStyle amountFractionTextStyle(TextStyle base, {double scale = 0.72}) {
+  final fs = base.fontSize ?? 14.0;
+  return base.copyWith(
+    fontSize: fs * scale,
+    height: 1.05,
+  );
+}
+
+List<TextSpan> displayCurrencyInlineSpans(
+  String currencyCode,
+  double amount,
+  String localeName, {
+  int decimalDigits = 2,
+  TextStyle? style,
+  TextStyle? fractionStyle,
+}) {
+  final base = style ?? const TextStyle();
+  final fracStyle = fractionStyle ?? amountFractionTextStyle(base);
+  final code = currencyCode.toUpperCase();
+  final symbol = resolveDisplayCurrencySymbol(code);
+  final fmt = _amountFormat(localeName, decimalDigits);
+  final numStr = fmt.format(amount);
+  final parts = _splitFormattedAmount(fmt, numStr);
+  final prefix = symbol.isEmpty ? '$code ' : '$code $symbol';
+  return [
+    TextSpan(text: prefix, style: base),
+    TextSpan(text: parts.whole, style: base),
+    if (parts.fractionWithSep != null)
+      TextSpan(text: parts.fractionWithSep!, style: fracStyle),
+  ];
+}
+
+TextSpan displayCurrencyLineTextSpan(
+  String currencyCode,
+  double amount,
+  String localeName, {
+  int decimalDigits = 2,
+  TextStyle? style,
+  TextStyle? fractionStyle,
+}) {
+  final base = style ?? const TextStyle();
+  return TextSpan(
+    style: base,
+    children: displayCurrencyInlineSpans(
+      currencyCode,
+      amount,
+      localeName,
+      decimalDigits: decimalDigits,
+      style: base,
+      fractionStyle: fractionStyle,
+    ),
+  );
+}
+
+List<TextSpan> usdAmountOnlyInlineSpans(
+  double amount,
+  String localeName, {
+  TextStyle? style,
+  TextStyle? fractionStyle,
+}) {
+  final base = style ?? const TextStyle();
+  final sym = resolveDisplayCurrencySymbol('USD');
+  final fmt = _amountFormat(localeName, 2);
+  final numStr = fmt.format(amount);
+  final parts = _splitFormattedAmount(fmt, numStr);
+  final fracStyle = fractionStyle ?? amountFractionTextStyle(base);
+  return [
+    TextSpan(text: sym, style: base),
+    TextSpan(text: parts.whole, style: base),
+    if (parts.fractionWithSep != null)
+      TextSpan(text: parts.fractionWithSep!, style: fracStyle),
+  ];
+}
+
+TextSpan usdAmountOnlyTextSpan(
+  double amount,
+  String localeName, {
+  TextStyle? style,
+  TextStyle? fractionStyle,
+}) {
+  final base = style ?? const TextStyle();
+  return TextSpan(
+    style: base,
+    children: usdAmountOnlyInlineSpans(
+      amount,
+      localeName,
+      style: base,
+      fractionStyle: fractionStyle,
+    ),
+  );
+}
+
+List<TextSpan> groupedAmountInlineSpans(
+  double value,
+  String localeName, {
+  TextStyle? style,
+  TextStyle? fractionStyle,
+}) {
+  final base = style ?? const TextStyle();
+  final fmt = _amountFormat(localeName, 2);
+  final numStr = fmt.format(value);
+  final parts = _splitFormattedAmount(fmt, numStr);
+  final fracStyle = fractionStyle ?? amountFractionTextStyle(base);
+  return [
+    TextSpan(text: parts.whole, style: base),
+    if (parts.fractionWithSep != null)
+      TextSpan(text: parts.fractionWithSep!, style: fracStyle),
+  ];
+}
+
+TextSpan groupedAmountTextSpan(
+  double value,
+  String localeName, {
+  TextStyle? style,
+  TextStyle? fractionStyle,
+}) {
+  final base = style ?? const TextStyle();
+  return TextSpan(
+    style: base,
+    children: groupedAmountInlineSpans(
+      value,
+      localeName,
+      style: base,
+      fractionStyle: fractionStyle,
+    ),
+  );
+}
+
 String formatDisplayCurrencyLine(
   String currencyCode,
   double amount,
@@ -106,25 +254,17 @@ String formatDisplayCurrencyLine(
 }) {
   final code = currencyCode.toUpperCase();
   final symbol = resolveDisplayCurrencySymbol(code);
-  final number = NumberFormat.decimalPatternDigits(
-    locale: localeName,
-    decimalDigits: decimalDigits,
-  ).format(amount);
+  final number = _amountFormat(localeName, decimalDigits).format(amount);
   if (symbol.isEmpty) {
     return '$code $number';
   }
   return '$code $symbol$number';
 }
 
-/// Grouped number for display (e.g. `10,000.00` in `en_US`).
 String formatAmountGrouped(double value, String localeName) {
-  return NumberFormat.decimalPatternDigits(
-    locale: localeName,
-    decimalDigits: 2,
-  ).format(value);
+  return _amountFormat(localeName, 2).format(value);
 }
 
-/// Plain amount while editing (no thousands), minimal decimals.
 String formatAmountPlainForEdit(double value) {
   if (value == value.roundToDouble()) {
     return value.toInt().toString();
@@ -132,7 +272,6 @@ String formatAmountPlainForEdit(double value) {
   return value.toString();
 }
 
-/// Parses amount from field text (grouped or plain, locale-aware).
 double? tryParseDecimalInput(String raw, String localeName) {
   final t = raw.trim();
   if (t.isEmpty) {
@@ -147,12 +286,8 @@ double? tryParseDecimalInput(String raw, String localeName) {
   }
 }
 
-/// For labels like "Computed USD: $71.43" (symbol + number only).
 String formatUsdAmountOnly(double amount, String localeName) {
   final sym = resolveDisplayCurrencySymbol('USD');
-  final number = NumberFormat.decimalPatternDigits(
-    locale: localeName,
-    decimalDigits: 2,
-  ).format(amount);
+  final number = _amountFormat(localeName, 2).format(amount);
   return '$sym$number';
 }

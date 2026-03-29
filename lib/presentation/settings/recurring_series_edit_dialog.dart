@@ -148,18 +148,28 @@ class _RecurringSeriesEditDialogState
                 maxLength: 500,
               ),
               const SizedBox(height: 8),
-              Text(
-                l10n.expenseUsdComputedLabel(
-                  formatUsdAmountOnly(
-                    Expense.computeUsd(
-                      tryParseDecimalInput(_amountController.text, localeName) ??
-                          widget.series.amountOriginal,
-                      widget.series.manualFxRateToUsd,
+              Builder(
+                builder: (ctx) {
+                  final preview = Expense.computeUsd(
+                    tryParseDecimalInput(_amountController.text, localeName) ??
+                        widget.series.amountOriginal,
+                    widget.series.manualFxRateToUsd,
+                  );
+                  final st = Theme.of(ctx).textTheme.titleSmall;
+                  return Text.rich(
+                    TextSpan(
+                      style: st,
+                      children: [
+                        TextSpan(text: l10n.expenseUsdComputedPrefix),
+                        ...usdAmountOnlyInlineSpans(
+                          preview,
+                          localeName,
+                          style: st,
+                        ),
+                      ],
                     ),
-                    localeName,
-                  ),
-                ),
-                style: Theme.of(context).textTheme.titleSmall,
+                  );
+                },
               ),
             ],
           ),

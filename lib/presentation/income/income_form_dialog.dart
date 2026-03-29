@@ -863,11 +863,23 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
                   },
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  l10n.expenseUsdComputedLabel(
-                    formatUsdAmountOnly(_previewUsd, localeName),
-                  ),
-                  style: Theme.of(context).textTheme.titleSmall,
+                Builder(
+                  builder: (ctx) {
+                    final st = Theme.of(ctx).textTheme.titleSmall;
+                    return Text.rich(
+                      TextSpan(
+                        style: st,
+                        children: [
+                          TextSpan(text: l10n.expenseUsdComputedPrefix),
+                          ...usdAmountOnlyInlineSpans(
+                            _previewUsd,
+                            localeName,
+                            style: st,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
                 if (widget.initial == null) ...[
                   const SizedBox(height: 8),

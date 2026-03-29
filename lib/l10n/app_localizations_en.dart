@@ -453,6 +453,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get expenseUsdComputedPrefix => 'Computed USD: ';
+
+  @override
   String get expensePaidWithCardLabel => 'Paid with credit card';
 
   @override
@@ -892,6 +895,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportsYearCashflowTitle => 'Cash flow (USD)';
+
+  @override
+  String get reportsYearIncomeUsdPrefix => 'Income: ';
+
+  @override
+  String get reportsYearExpenseUsdPrefix => 'Expenses: ';
+
+  @override
+  String get reportsYearNetUsdPrefix => 'Net: ';
+
+  @override
+  String get reportsByMonthNetUsdPrefix => 'Net this month (USD): ';
 
   @override
   String reportsYearIncomeUsdLine(String amount) {

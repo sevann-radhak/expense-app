@@ -75,19 +75,22 @@ class ReportsMonthlyBarChart extends StatelessWidget {
                             return null;
                           }
                           final v = monthlyUsd[i];
-                          final line = formatDisplayCurrencyLine(
-                            'USD',
-                            v,
-                            localeName,
-                          );
                           final m = DateFormat.MMM(
                             localeName,
                           ).format(DateTime(year, i + 1));
+                          final tipStyle =
+                              (textTheme.bodySmall ?? const TextStyle()).copyWith(
+                            color: scheme.onInverseSurface,
+                            fontSize: 12,
+                          );
                           return BarTooltipItem(
-                            '$m\n$line',
-                            (textTheme.bodySmall ?? const TextStyle()).copyWith(
-                              color: scheme.onInverseSurface,
-                              fontSize: 12,
+                            '$m\n',
+                            tipStyle,
+                            children: displayCurrencyInlineSpans(
+                              'USD',
+                              v,
+                              localeName,
+                              style: tipStyle,
                             ),
                           );
                         },

@@ -385,6 +385,11 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
           )
         : (widget.initial?.id ?? Uuid().v4());
 
+    final today = calendarTodayLocal();
+    final occDay = calendarDateOnly(_occurredOn);
+    final firstOccurrenceSettled =
+        makeRecurring && !occDay.isAfter(calendarDateOnly(today));
+
     final expense = Expense(
       id: expenseId,
       occurredOn: _occurredOn,
@@ -401,9 +406,14 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
       recurringSeriesId: widget.initial?.recurringSeriesId ??
           (makeRecurring ? seriesId : null),
       paymentExpectationStatus: widget.initial?.paymentExpectationStatus ??
-          (makeRecurring ? PaymentExpectationStatus.expected : null),
+          (makeRecurring
+              ? (firstOccurrenceSettled
+                  ? PaymentExpectationStatus.confirmedPaid
+                  : PaymentExpectationStatus.expected)
+              : null),
       paymentExpectationConfirmedOn:
-          widget.initial?.paymentExpectationConfirmedOn,
+          widget.initial?.paymentExpectationConfirmedOn ??
+              (firstOccurrenceSettled ? occDay : null),
     );
 
     try {

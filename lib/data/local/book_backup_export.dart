@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:expense_app/application/book_backup_snapshot.dart';
 import 'package:expense_app/data/local/app_database.dart';
 import 'package:expense_app/data/local/expense_recurring_series_drift_mapper.dart';
+import 'package:expense_app/data/local/income_recurring_series_drift_mapper.dart';
 import 'package:expense_app/domain/domain.dart';
 
 /// Reads the full Drift book into a [BookBackupSnapshot].
@@ -45,6 +46,9 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
           (t) => OrderingTerm.asc(t.categoryId),
           (t) => OrderingTerm.asc(t.sortOrder),
         ]))
+      .get();
+  final incSeriesRows = await (db.select(db.incomeRecSeries)
+        ..orderBy([(t) => OrderingTerm.asc(t.id)]))
       .get();
 
   final categories = catRows
@@ -153,6 +157,21 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
   final subIds = subcategories.map((s) => s.id).toSet();
   final incCatIds = incomeCategories.map((c) => c.id).toSet();
   final incSubIds = incomeSubcategories.map((s) => s.id).toSet();
+
+  final incomeRecurringSeriesRaw =
+      incSeriesRows.map(incomeRecurringSeriesFromDriftRow).toList();
+  final incomeRecurringSeries = <IncomeRecurringSeries>[];
+  for (final s in incomeRecurringSeriesRaw) {
+    if (!incCatIds.contains(s.incomeCategoryId) ||
+        !incSubIds.contains(s.incomeSubcategoryId)) {
+      continue;
+    }
+    if (s.manualFxRateToUsd <= 0) {
+      continue;
+    }
+    incomeRecurringSeries.add(s);
+  }
+  final incomeSeriesIds = incomeRecurringSeries.map((s) => s.id).toSet();
   final piIds = paymentInstruments.map((p) => p.id).toSet();
 
   final installmentPlansRaw = planRows
@@ -215,6 +234,14 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
           manualFxRateToUsd: r.manualFxRateToUsd,
           amountUsd: r.amountUsd,
           description: r.description,
+          recurringSeriesId: r.recurringSeriesId,
+          expectationStatus:
+              paymentExpectationStatusFromStorage(r.expectationStatus),
+          expectationConfirmedOn:
+              r.expectationConfirmedOn != null &&
+                      r.expectationConfirmedOn!.isNotEmpty
+                  ? ExpenseDates.fromStorageDate(r.expectationConfirmedOn!)
+                  : null,
         ),
       )
       .toList();
@@ -228,7 +255,12 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
     if (inc.manualFxRateToUsd <= 0) {
       continue;
     }
-    incomeEntries.add(inc);
+    var next = inc;
+    final rs = inc.recurringSeriesId;
+    if (rs != null && rs.isNotEmpty && !incomeSeriesIds.contains(rs)) {
+      next = next.copyWith(clearRecurringSeriesId: true, clearExpectation: true);
+    }
+    incomeEntries.add(next);
   }
 
   final expenseRecurringSeries = <ExpenseRecurringSeries>[];
@@ -287,6 +319,7 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
     expenseRecurringSeries: expenseRecurringSeries,
     expenses: expenses,
     incomeEntries: incomeEntries,
+    incomeRecurringSeries: incomeRecurringSeries,
     installmentPlans: installmentPlans,
     partialPayments: const [],
   );

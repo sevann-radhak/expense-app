@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:expense_app/data/local/app_database.dart';
 import 'package:expense_app/data/local/app_database_reset.dart';
 import 'package:expense_app/data/local/example_expenses_seed.dart';
+import 'package:expense_app/data/local/example_incomes_seed.dart';
 import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/data/local/drift_category_repository.dart';
 import 'package:expense_app/data/local/drift_expense_repository.dart';
@@ -11,6 +12,7 @@ import 'package:expense_app/data/local/drift_income_taxonomy_repository.dart';
 import 'package:expense_app/data/local/drift_installment_plan_repository.dart';
 import 'package:expense_app/data/local/drift_payment_instrument_repository.dart';
 import 'package:expense_app/data/local/drift_recurring_expense_series_repository.dart';
+import 'package:expense_app/data/local/drift_recurring_income_series_repository.dart';
 import 'package:expense_app/domain/domain.dart';
 
 export 'app_user_settings_provider.dart';
@@ -35,6 +37,16 @@ final recurringExpenseSeriesRepositoryProvider =
 final recurringExpenseSeriesListProvider =
     StreamProvider<List<ExpenseRecurringSeries>>((ref) {
   return ref.watch(recurringExpenseSeriesRepositoryProvider).watchAll();
+});
+
+final recurringIncomeSeriesRepositoryProvider =
+    Provider<RecurringIncomeSeriesRepository>((ref) {
+  return DriftRecurringIncomeSeriesRepository(ref.watch(appDatabaseProvider));
+});
+
+final recurringIncomeSeriesListProvider =
+    StreamProvider<List<IncomeRecurringSeries>>((ref) {
+  return ref.watch(recurringIncomeSeriesRepositoryProvider).watchAll();
 });
 
 final paymentInstrumentRepositoryProvider =
@@ -101,7 +113,23 @@ final incomeForReportDetailMonthProvider = StreamProvider<List<IncomeEntry>>((
 ) {
   final year = ref.watch(selectedReportYearProvider);
   final month = ref.watch(selectedReportDetailMonthProvider);
-  return ref.watch(incomeRepositoryProvider).watchForMonth(year, month);
+  final inc = ref.watch(reportExpenseInclusionProvider);
+  final today = calendarTodayLocal();
+  return ref.watch(incomeRepositoryProvider).watchForMonth(year, month).map(
+        (list) => applyIncomeInclusion(list, inc, today),
+      );
+});
+
+/// Income lines for the selected report year (same inclusion filter as expenses).
+final incomeForSelectedReportYearProvider = StreamProvider<List<IncomeEntry>>((
+  ref,
+) {
+  final year = ref.watch(selectedReportYearProvider);
+  final inc = ref.watch(reportExpenseInclusionProvider);
+  final today = calendarTodayLocal();
+  return ref.watch(incomeRepositoryProvider).watchForYear(year).map(
+        (list) => applyIncomeInclusion(list, inc, today),
+      );
 });
 
 final incomeUsdTotalSelectedMonthProvider = Provider<AsyncValue<double>>((ref) {
@@ -128,7 +156,9 @@ Future<void> resetLocalAppDatabase(WidgetRef ref) async {
 
 /// Development / QA: insert removable demo expenses ([populateExampleExpenses]).
 Future<void> populateExampleDemoData(WidgetRef ref) async {
-  await populateExampleExpenses(ref.read(appDatabaseProvider));
+  final db = ref.read(appDatabaseProvider);
+  await populateExampleExpenses(db);
+  await populateExampleIncomes(db);
 }
 
 /// First day of the currently selected calendar month (local).

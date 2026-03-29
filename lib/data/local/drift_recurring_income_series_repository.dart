@@ -4,63 +4,60 @@ import 'package:drift/drift.dart';
 
 import 'package:expense_app/application/recurrence_json_codec.dart';
 import 'package:expense_app/data/local/app_database.dart';
-import 'package:expense_app/data/local/expense_recurring_series_drift_mapper.dart';
+import 'package:expense_app/data/local/income_recurring_series_drift_mapper.dart';
 import 'package:expense_app/domain/domain.dart';
 
-class DriftRecurringExpenseSeriesRepository
-    implements RecurringExpenseSeriesRepository {
-  DriftRecurringExpenseSeriesRepository(this._db);
+class DriftRecurringIncomeSeriesRepository
+    implements RecurringIncomeSeriesRepository {
+  DriftRecurringIncomeSeriesRepository(this._db);
 
   final AppDatabase _db;
 
   @override
-  Future<void> upsert(ExpenseRecurringSeries series) async {
+  Future<void> upsert(IncomeRecurringSeries series) async {
     series.validate();
-    await _assertSubcategoryBelongsToCategory(
-      categoryId: series.categoryId,
-      subcategoryId: series.subcategoryId,
+    await _assertIncomeSubcategoryBelongsToCategory(
+      incomeCategoryId: series.incomeCategoryId,
+      incomeSubcategoryId: series.incomeSubcategoryId,
     );
-    await _assertPaymentInstrumentIfSet(series.paymentInstrumentId);
     final payload = encodeRecurrencePayload(
       rule: series.rule,
       endCondition: series.endCondition,
     );
     final json = jsonEncode(payload);
-    final usd = Expense.computeUsd(
+    final usd = IncomeEntry.computeUsd(
       series.amountOriginal,
       series.manualFxRateToUsd,
     );
-    await _db.into(_db.recExpenseSeries).insert(
-          RecExpenseSeriesCompanion.insert(
+    await _db.into(_db.incomeRecSeries).insert(
+          IncomeRecSeriesCompanion.insert(
             id: series.id,
-            anchorOccurredOn:
-                ExpenseDates.toStorageDate(series.anchorOccurredOn),
+            anchorReceivedOn:
+                ExpenseDates.toStorageDate(series.anchorReceivedOn),
             recurrenceJson: json,
             horizonMonths: series.horizonMonths,
-            categoryId: series.categoryId,
-            subcategoryId: series.subcategoryId,
+            incomeCategoryId: series.incomeCategoryId,
+            incomeSubcategoryId: series.incomeSubcategoryId,
             amountOriginal: series.amountOriginal,
             amountUsd: usd,
             active: Value(series.active),
             currencyCode: Value(series.currencyCode),
             manualFxRateToUsd: Value(series.manualFxRateToUsd),
-            paidWithCreditCard: Value(series.paidWithCreditCard),
             description: Value(series.description),
-            paymentInstrumentId: Value(series.paymentInstrumentId),
           ),
           mode: InsertMode.insertOrReplace,
         );
   }
 
   @override
-  Future<ExpenseRecurringSeries?> getById(String id) async {
-    final row = await (_db.select(_db.recExpenseSeries)
+  Future<IncomeRecurringSeries?> getById(String id) async {
+    final row = await (_db.select(_db.incomeRecSeries)
           ..where((s) => s.id.equals(id)))
         .getSingleOrNull();
     if (row == null) {
       return null;
     }
-    return expenseRecurringSeriesFromDriftRow(row);
+    return incomeRecurringSeriesFromDriftRow(row);
   }
 
   @override
@@ -68,23 +65,23 @@ class DriftRecurringExpenseSeriesRepository
     required String seriesId,
     required DateTime todayDateOnly,
   }) async {
-    final row = await (_db.select(_db.recExpenseSeries)
+    final row = await (_db.select(_db.incomeRecSeries)
           ..where((s) => s.id.equals(seriesId)))
         .getSingleOrNull();
     if (row == null || !row.active) {
       return;
     }
-    final series = expenseRecurringSeriesFromDriftRow(row);
+    final series = incomeRecurringSeriesFromDriftRow(row);
     series.validate();
 
     final todayIso = ExpenseDates.toStorageDate(
       calendarDateOnly(todayDateOnly),
     );
-    await (_db.delete(_db.expenses)
+    await (_db.delete(_db.incomeEntries)
           ..where(
             (e) =>
                 e.recurringSeriesId.equals(seriesId) &
-                e.occurredOn.isBiggerThanValue(todayIso),
+                e.receivedOn.isBiggerThanValue(todayIso),
           ))
         .go();
 
@@ -93,42 +90,40 @@ class DriftRecurringExpenseSeriesRepository
       series.horizonMonths,
     );
     final dates = expandRecurrenceOccurrences(
-      anchor: series.anchorOccurredOn,
+      anchor: series.anchorReceivedOn,
       rule: series.rule,
       endCondition: series.endCondition,
       capEndInclusive: horizonEnd,
     );
 
-    final usd = Expense.computeUsd(
+    final usd = IncomeEntry.computeUsd(
       series.amountOriginal,
       series.manualFxRateToUsd,
     );
 
     for (final d in dates) {
-      final id = materializedExpenseIdForSeriesDate(
+      final id = materializedIncomeIdForSeriesDate(
         seriesId: seriesId,
-        occurredOn: d,
+        receivedOn: d,
       );
       final exp = expectationForMaterializedRecurringDate(
         occurrenceDate: d,
         todayDateOnly: todayDateOnly,
       );
-      await _db.into(_db.expenses).insert(
-            ExpensesCompanion.insert(
+      await _db.into(_db.incomeEntries).insert(
+            IncomeEntriesCompanion.insert(
               id: id,
-              occurredOn: ExpenseDates.toStorageDate(d),
-              categoryId: series.categoryId,
-              subcategoryId: series.subcategoryId,
+              receivedOn: ExpenseDates.toStorageDate(d),
+              incomeCategoryId: series.incomeCategoryId,
+              incomeSubcategoryId: series.incomeSubcategoryId,
               amountOriginal: series.amountOriginal,
               currencyCode: Value(series.currencyCode),
               manualFxRateToUsd: Value(series.manualFxRateToUsd),
               amountUsd: usd,
-              paidWithCreditCard: Value(series.paidWithCreditCard),
               description: Value(series.description),
-              paymentInstrumentId: Value(series.paymentInstrumentId),
               recurringSeriesId: Value(seriesId),
-              paymentExpectationStatus: Value(exp.status.storageName),
-              paymentExpectationConfirmedOn: exp.confirmedOn != null
+              expectationStatus: Value(exp.status.storageName),
+              expectationConfirmedOn: exp.confirmedOn != null
                   ? Value(ExpenseDates.toStorageDate(exp.confirmedOn!))
                   : const Value.absent(),
             ),
@@ -138,15 +133,15 @@ class DriftRecurringExpenseSeriesRepository
   }
 
   @override
-  Stream<List<ExpenseRecurringSeries>> watchAll() {
-    return (_db.select(_db.recExpenseSeries)
+  Stream<List<IncomeRecurringSeries>> watchAll() {
+    return (_db.select(_db.incomeRecSeries)
           ..orderBy([
             (s) => OrderingTerm.desc(s.active),
             (s) => OrderingTerm.asc(s.description),
             (s) => OrderingTerm.asc(s.id),
           ]))
         .watch()
-        .map((rows) => rows.map(expenseRecurringSeriesFromDriftRow).toList());
+        .map((rows) => rows.map(incomeRecurringSeriesFromDriftRow).toList());
   }
 
   @override
@@ -154,47 +149,31 @@ class DriftRecurringExpenseSeriesRepository
     required String seriesId,
     required DateTime todayDateOnly,
   }) async {
-    await (_db.update(_db.recExpenseSeries)
+    await (_db.update(_db.incomeRecSeries)
           ..where((s) => s.id.equals(seriesId)))
-        .write(const RecExpenseSeriesCompanion(active: Value(false)));
+        .write(const IncomeRecSeriesCompanion(active: Value(false)));
     final todayIso = ExpenseDates.toStorageDate(
       calendarDateOnly(todayDateOnly),
     );
-    await (_db.delete(_db.expenses)
+    await (_db.delete(_db.incomeEntries)
           ..where(
             (e) =>
                 e.recurringSeriesId.equals(seriesId) &
-                e.occurredOn.isBiggerThanValue(todayIso),
+                e.receivedOn.isBiggerThanValue(todayIso),
           ))
         .go();
   }
 
-  Future<void> _assertPaymentInstrumentIfSet(String? id) async {
-    if (id == null || id.isEmpty) {
-      return;
-    }
-    final pi = await (_db.select(_db.paymentInstruments)
-          ..where((p) => p.id.equals(id)))
-        .getSingleOrNull();
-    if (pi == null) {
-      throw ArgumentError.value(
-        id,
-        'paymentInstrumentId',
-        'Unknown payment instrument',
-      );
-    }
-  }
-
-  Future<void> _assertSubcategoryBelongsToCategory({
-    required String categoryId,
-    required String subcategoryId,
+  Future<void> _assertIncomeSubcategoryBelongsToCategory({
+    required String incomeCategoryId,
+    required String incomeSubcategoryId,
   }) async {
-    final sRow = await (_db.select(_db.subcategories)
-          ..where((s) => s.id.equals(subcategoryId)))
+    final sRow = await (_db.select(_db.incomeSubcategories)
+          ..where((s) => s.id.equals(incomeSubcategoryId)))
         .getSingleOrNull();
-    if (sRow == null || sRow.categoryId != categoryId) {
+    if (sRow == null || sRow.categoryId != incomeCategoryId) {
       throw InvalidSubcategoryPairingException(
-        'Subcategory does not belong to the selected category.',
+        'Income subcategory does not belong to the selected income category.',
       );
     }
   }

@@ -10,6 +10,8 @@ import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 import 'package:expense_app/presentation/theme/category_accent_colors.dart';
 
+enum _IncomeRecurrenceFormKind { monthly, weekly }
+
 class IncomeFormDialog extends ConsumerWidget {
   const IncomeFormDialog({super.key, this.initial});
 
@@ -66,6 +68,9 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
   String? _incomeCategoryId;
   String? _incomeSubcategoryId;
   bool _appliedInitialAmountMask = false;
+  bool _makeRecurring = false;
+  _IncomeRecurrenceFormKind _recurrenceKind = _IncomeRecurrenceFormKind.monthly;
+  final _horizonMonthsController = TextEditingController(text: '12');
 
   @override
   void initState() {
@@ -149,6 +154,7 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
     _fxController.dispose();
     _categorySearch.dispose();
     _subcategorySearch.dispose();
+    _horizonMonthsController.dispose();
     super.dispose();
   }
 
@@ -236,10 +242,34 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
       return;
     }
 
+    if (widget.initial == null && _makeRecurring) {
+      final h = int.tryParse(_horizonMonthsController.text.trim());
+      if (h == null || h < 1 || h > 120) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.expenseFormHorizonMonthsInvalid)),
+        );
+        return;
+      }
+    }
+
     final manualFx = 1.0 / localPerUsd;
     final repo = ref.read(incomeRepositoryProvider);
+    final seriesId = const Uuid().v4();
+    final makeRecurring = widget.initial == null && _makeRecurring;
+    final incomeId = makeRecurring
+        ? materializedIncomeIdForSeriesDate(
+            seriesId: seriesId,
+            receivedOn: _receivedOn,
+          )
+        : (widget.initial?.id ?? const Uuid().v4());
+
+    final today = calendarTodayLocal();
+    final recvDay = calendarDateOnly(_receivedOn);
+    final firstOccurrenceSettled =
+        makeRecurring && !recvDay.isAfter(calendarDateOnly(today));
+
     final entry = IncomeEntry(
-      id: widget.initial?.id ?? const Uuid().v4(),
+      id: incomeId,
       receivedOn: _receivedOn,
       incomeCategoryId: _incomeCategoryId!,
       incomeSubcategoryId: _incomeSubcategoryId!,
@@ -248,11 +278,48 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
       manualFxRateToUsd: manualFx,
       amountUsd: IncomeEntry.computeUsd(amount, manualFx),
       description: _descriptionController.text.trim(),
+      recurringSeriesId: widget.initial?.recurringSeriesId ??
+          (makeRecurring ? seriesId : null),
+      expectationStatus: widget.initial?.expectationStatus ??
+          (makeRecurring
+              ? (firstOccurrenceSettled
+                  ? PaymentExpectationStatus.confirmedPaid
+                  : PaymentExpectationStatus.expected)
+              : null),
+      expectationConfirmedOn: widget.initial?.expectationConfirmedOn ??
+          (firstOccurrenceSettled ? recvDay : null),
     );
 
     try {
       if (widget.initial == null) {
         await repo.create(entry);
+        if (makeRecurring) {
+          final h = int.parse(_horizonMonthsController.text.trim());
+          final rule = _recurrenceKind == _IncomeRecurrenceFormKind.monthly
+              ? RecurrenceMonthlyByCalendarDay(calendarDay: _receivedOn.day)
+              : RecurrenceWeekly(
+                  intervalWeeks: 1,
+                  weekdays: {_receivedOn.weekday},
+                );
+          final series = IncomeRecurringSeries(
+            id: seriesId,
+            anchorReceivedOn: _receivedOn,
+            rule: rule,
+            endCondition: const RecurrenceEndNever(),
+            horizonMonths: h,
+            active: true,
+            incomeCategoryId: entry.incomeCategoryId,
+            incomeSubcategoryId: entry.incomeSubcategoryId,
+            amountOriginal: entry.amountOriginal,
+            currencyCode: entry.currencyCode,
+            manualFxRateToUsd: entry.manualFxRateToUsd,
+            amountUsd: entry.amountUsd,
+            description: entry.description,
+          );
+          await ref
+              .read(recurringIncomeSeriesRepositoryProvider)
+              .upsertAndRematerialize(series, calendarTodayLocal());
+        }
       } else {
         await repo.update(entry);
       }
@@ -357,6 +424,30 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (widget.initial?.recurringSeriesId != null &&
+                    widget.initial!.recurringSeriesId!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          l10n.incomeFromRecurringBanner,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ),
                 if (widget.initial != null)
                   Align(
                     alignment: Alignment.centerRight,
@@ -597,6 +688,49 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
                   ),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
+                if (widget.initial == null) ...[
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.incomeFormMakeRecurringLabel),
+                    value: _makeRecurring,
+                    onChanged: (v) => setState(() => _makeRecurring = v),
+                  ),
+                  if (_makeRecurring) ...[
+                    DropdownButtonFormField<_IncomeRecurrenceFormKind>(
+                      // ignore: deprecated_member_use
+                      value: _recurrenceKind,
+                      decoration: InputDecoration(
+                        labelText: l10n.expenseFormRecurrenceLabel,
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: _IncomeRecurrenceFormKind.monthly,
+                          child: Text(l10n.expenseFormRecurrenceMonthly),
+                        ),
+                        DropdownMenuItem(
+                          value: _IncomeRecurrenceFormKind.weekly,
+                          child: Text(l10n.expenseFormRecurrenceWeekly),
+                        ),
+                      ],
+                      onChanged: (v) => setState(
+                        () => _recurrenceKind =
+                            v ?? _IncomeRecurrenceFormKind.monthly,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _horizonMonthsController,
+                      decoration: InputDecoration(
+                        labelText: l10n.expenseFormHorizonMonthsLabel,
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                    ),
+                  ],
+                ],
               ],
             ),
           ),

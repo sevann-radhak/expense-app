@@ -282,3 +282,12 @@ String materializedExpenseIdForSeriesDate({
   final iso = ExpenseDates.toStorageDate(occurredOn);
   return 'sr_${seriesId}_$iso';
 }
+
+/// Deterministic id for a materialized income from a series and date (prefix `sir_`).
+String materializedIncomeIdForSeriesDate({
+  required String seriesId,
+  required DateTime receivedOn,
+}) {
+  final iso = ExpenseDates.toStorageDate(receivedOn);
+  return 'sir_${seriesId}_$iso';
+}

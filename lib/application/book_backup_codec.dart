@@ -18,6 +18,7 @@ abstract final class BookBackupJsonKeys {
   static const partialPayments = 'partialPayments';
   static const incomeCategories = 'incomeCategories';
   static const incomeSubcategories = 'incomeSubcategories';
+  static const incomeRecurringSeries = 'incomeRecurringSeries';
 }
 
 String encodeBookBackupPretty(BookBackupSnapshot snapshot) {
@@ -106,6 +107,18 @@ BookBackupSnapshot decodeBookBackup(String jsonUtf8) {
     incomeEntries = incRaw.map((e) => _incomeEntryFromJson(e)).toList();
   }
 
+  List<IncomeRecurringSeries> incomeRecurringSeries = const [];
+  if (v >= 8) {
+    final irs = root[BookBackupJsonKeys.incomeRecurringSeries];
+    if (irs != null) {
+      if (irs is! List) {
+        throw const FormatException('incomeRecurringSeries must be an array');
+      }
+      incomeRecurringSeries =
+          irs.map((e) => _incomeRecurringSeriesFromJson(e)).toList();
+    }
+  }
+
   List<InstallmentPlan> installmentPlans = const [];
   final instRaw = root[BookBackupJsonKeys.installmentPlans];
   if (instRaw != null) {
@@ -135,6 +148,7 @@ BookBackupSnapshot decodeBookBackup(String jsonUtf8) {
     expenseRecurringSeries: expenseRecurringSeries,
     expenses: expenses,
     incomeEntries: incomeEntries,
+    incomeRecurringSeries: incomeRecurringSeries,
     installmentPlans: installmentPlans,
     partialPayments: partialPayments,
   );
@@ -156,6 +170,8 @@ Map<String, dynamic> _snapshotToMap(BookBackupSnapshot s) {
         s.expenseRecurringSeries.map(_expenseRecurringSeriesToMap).toList(),
     BookBackupJsonKeys.expenses: s.expenses.map(_expenseToMap).toList(),
     BookBackupJsonKeys.incomeEntries: s.incomeEntries.map(_incomeEntryToMap).toList(),
+    BookBackupJsonKeys.incomeRecurringSeries:
+        s.incomeRecurringSeries.map(_incomeRecurringSeriesToMap).toList(),
     BookBackupJsonKeys.installmentPlans:
         s.installmentPlans.map(_installmentPlanToMap).toList(),
     BookBackupJsonKeys.partialPayments:
@@ -529,8 +545,75 @@ Expense _expenseFromJson(dynamic e) {
   );
 }
 
-Map<String, dynamic> _incomeEntryToMap(IncomeEntry x) {
+Map<String, dynamic> _incomeRecurringSeriesToMap(IncomeRecurringSeries s) {
   return <String, dynamic>{
+    'id': s.id,
+    'anchorReceivedOn': ExpenseDates.toStorageDate(s.anchorReceivedOn),
+    'recurrence': encodeRecurrencePayload(
+      rule: s.rule,
+      endCondition: s.endCondition,
+    ),
+    'horizonMonths': s.horizonMonths,
+    'active': s.active,
+    'incomeCategoryId': s.incomeCategoryId,
+    'incomeSubcategoryId': s.incomeSubcategoryId,
+    'amountOriginal': s.amountOriginal,
+    'currencyCode': s.currencyCode,
+    'manualFxRateToUsd': s.manualFxRateToUsd,
+    'amountUsd': s.amountUsd,
+    'description': s.description,
+  };
+}
+
+IncomeRecurringSeries _incomeRecurringSeriesFromJson(dynamic e) {
+  if (e is! Map<String, dynamic>) {
+    throw const FormatException('incomeRecurringSeries entry must be an object');
+  }
+  final id = e['id'];
+  final anchor = e['anchorReceivedOn'];
+  final rec = e['recurrence'];
+  final hm = e['horizonMonths'];
+  final active = e['active'];
+  final incomeCategoryId = e['incomeCategoryId'];
+  final incomeSubcategoryId = e['incomeSubcategoryId'];
+  final amountOriginal = e['amountOriginal'];
+  final currencyCode = e['currencyCode'];
+  final manualFx = e['manualFxRateToUsd'];
+  final amountUsd = e['amountUsd'];
+  if (id is! String ||
+      anchor is! String ||
+      rec is! Map<String, dynamic> ||
+      hm is! int ||
+      active is! bool ||
+      incomeCategoryId is! String ||
+      incomeSubcategoryId is! String ||
+      amountOriginal is! num ||
+      currencyCode is! String ||
+      manualFx is! num ||
+      amountUsd is! num) {
+    throw const FormatException('incomeRecurringSeries required fields');
+  }
+  final (rule, end) = decodeRecurrencePayloadMap(rec);
+  final desc = e['description'];
+  return IncomeRecurringSeries(
+    id: id,
+    anchorReceivedOn: ExpenseDates.fromStorageDate(anchor),
+    rule: rule,
+    endCondition: end,
+    horizonMonths: hm,
+    active: active,
+    incomeCategoryId: incomeCategoryId,
+    incomeSubcategoryId: incomeSubcategoryId,
+    amountOriginal: amountOriginal.toDouble(),
+    currencyCode: currencyCode,
+    manualFxRateToUsd: manualFx.toDouble(),
+    amountUsd: amountUsd.toDouble(),
+    description: desc is String ? desc : '',
+  );
+}
+
+Map<String, dynamic> _incomeEntryToMap(IncomeEntry x) {
+  final m = <String, dynamic>{
     'id': x.id,
     'receivedOn': ExpenseDates.toStorageDate(x.receivedOn),
     'incomeCategoryId': x.incomeCategoryId,
@@ -541,6 +624,19 @@ Map<String, dynamic> _incomeEntryToMap(IncomeEntry x) {
     'amountUsd': x.amountUsd,
     'description': x.description,
   };
+  final rs = x.recurringSeriesId;
+  if (rs != null && rs.isNotEmpty) {
+    m['recurringSeriesId'] = rs;
+  }
+  final es = x.expectationStatus;
+  if (es != null) {
+    m['expectationStatus'] = es.storageName;
+  }
+  final ec = x.expectationConfirmedOn;
+  if (ec != null) {
+    m['expectationConfirmedOn'] = ExpenseDates.toStorageDate(ec);
+  }
+  return m;
 }
 
 IncomeEntry _incomeEntryFromJson(dynamic e) {
@@ -566,6 +662,9 @@ IncomeEntry _incomeEntryFromJson(dynamic e) {
     throw const FormatException('income required fields');
   }
   final desc = e['description'];
+  final rs = e['recurringSeriesId'];
+  final exs = e['expectationStatus'];
+  final exc = e['expectationConfirmedOn'];
   return IncomeEntry(
     id: id,
     receivedOn: ExpenseDates.fromStorageDate(receivedOn),
@@ -576,6 +675,13 @@ IncomeEntry _incomeEntryFromJson(dynamic e) {
     manualFxRateToUsd: manualFx.toDouble(),
     amountUsd: amountUsd.toDouble(),
     description: desc is String ? desc : '',
+    recurringSeriesId: rs is String && rs.isNotEmpty ? rs : null,
+    expectationStatus: exs is String
+        ? paymentExpectationStatusFromStorage(exs)
+        : null,
+    expectationConfirmedOn: exc is String && exc.isNotEmpty
+        ? ExpenseDates.fromStorageDate(exc)
+        : null,
   );
 }
 

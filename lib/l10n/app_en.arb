@@ -40,7 +40,14 @@
   },
   "reportsMonthColumnMonth": "Month",
   "reportsMonthColumnUsdTotal": "USD (total)",
-  "reportsFxFootnote": "USD uses each expense’s stored FX snapshot; original-currency chips are for reference.",
+  "reportsMonthColumnIncomeUsd": "Income",
+  "reportsMonthColumnExpenseUsd": "Expenses",
+  "reportsMonthColumnNetUsd": "Net",
+  "reportsYearMonthlyCashflowHeading": "Monthly income and expenses (USD)",
+  "@reportsYearMonthlyCashflowHeading": {
+    "description": "Section title above the annual month table and dual bar chart."
+  },
+  "reportsFxFootnote": "USD uses each line’s stored FX snapshot (expenses and income); original-currency amounts in forms are for reference.",
   "@reportsFxFootnote": {
     "description": "Short note under the year summary when expenses exist."
   },
@@ -86,6 +93,13 @@
   "@reportsChartMonthlySemanticLabel": {
     "description": "Screen reader summary for the monthly bar chart."
   },
+  "reportsChartMonthlyCashflowTitle": "Income vs expenses (chart)",
+  "reportsChartLegendIncome": "Income",
+  "reportsChartLegendExpenses": "Expenses",
+  "reportsChartCashflowSemanticLabel": "Grouped bar chart of monthly income and expenses in U.S. dollars for the selected year.",
+  "@reportsChartCashflowSemanticLabel": {
+    "description": "Accessibility label for the annual cashflow bar chart."
+  },
   "reportsChartCategorySemanticLabel": "Doughnut chart of USD share by category for the selected period, with a text legend.",
   "@reportsChartCategorySemanticLabel": {
     "description": "Screen reader summary for the category chart."
@@ -102,7 +116,7 @@
   "@reportsExpenseInclusionScheduled": {
     "description": "Reports filter: expenses with date after local today (projected)."
   },
-  "reportsExpenseInclusionFootnote": "Realized = occurred on or before today; scheduled = after today, using your device’s local calendar date (time ignored). Totals refresh when data changes; they do not auto-update at midnight.",
+  "reportsExpenseInclusionFootnote": "Realized = date on or before today; scheduled = after today (local calendar; time ignored). Applies to both expenses and income. Totals refresh when data changes; they do not auto-update at midnight.",
   "@reportsExpenseInclusionFootnote": {
     "description": "Explains realized vs scheduled rules under the Reports segmented control."
   },
@@ -204,6 +218,12 @@
   "categoriesScreenSubtitle": "Taxonomy from your local database (debug / admin).",
   "@categoriesScreenSubtitle": {
     "description": "Short intro under the categories screen app bar."
+  },
+  "categoriesTabExpenses": "Expenses",
+  "categoriesTabIncome": "Income",
+  "categoriesIncomeScreenSubtitle": "Income categories and subcategories (separate from expense taxonomy).",
+  "@categoriesIncomeScreenSubtitle": {
+    "description": "Intro under the income categories tab."
   },
   "taxonomyUnknownLabel": "Unknown",
   "@taxonomyUnknownLabel": {
@@ -470,13 +490,17 @@
   "@settingsPopulateExampleDataSuccess": {
     "description": "Snackbar after demo populate succeeds."
   },
-  "settingsRecurringSeriesTileTitle": "Recurring expenses",
+  "settingsRecurringSeriesTileTitle": "Recurring series",
   "@settingsRecurringSeriesTileTitle": {
     "description": "Settings list tile title linking to recurring series management."
   },
-  "settingsRecurringSeriesTileSubtitle": "Manage scheduled series and horizon",
+  "settingsRecurringSeriesTileSubtitle": "Scheduled expenses and income",
+  "recurringHubAppBarTitle": "Recurring series",
+  "recurringSeriesTabExpenses": "Expenses",
+  "recurringSeriesTabIncome": "Income",
   "recurringSeriesScreenTitle": "Recurring expenses",
-  "recurringSeriesEmpty": "No recurring series yet. Add an expense and turn on “Make repeating”.",
+  "recurringSeriesEmpty": "No recurring expense series yet. Add an expense and turn on “Make repeating”.",
+  "recurringSeriesIncomeEmpty": "No recurring income series yet. Add income and turn on “Make repeating”.",
   "recurringSeriesActive": "Active",
   "recurringSeriesInactive": "Stopped",
   "recurringSeriesHorizonMonths": "{count, plural, one{# month ahead} other{# months ahead}}",
@@ -490,7 +514,7 @@
   "recurringSeriesEdit": "Edit",
   "recurringSeriesStop": "Stop series",
   "recurringSeriesStopTitle": "Stop this series?",
-  "recurringSeriesStopBody": "Future scheduled expenses after today will be removed. Past and today’s rows stay in the book.",
+  "recurringSeriesStopBody": "Future scheduled rows after today will be removed. Past and today’s lines stay in the book.",
   "recurringSeriesStoppedSnackbar": "Series stopped.",
   "recurringSeriesEditTitle": "Edit recurring series",
   "recurringSeriesAmountLabel": "Amount",
@@ -499,13 +523,20 @@
   "recurringSeriesSave": "Save",
   "recurringSeriesReadOnlyRule": "Repeat pattern",
   "recurringSeriesDefaultTitle": "Recurring expense",
+  "recurringSeriesDefaultTitleIncome": "Recurring income",
+  "recurringIncomeSeriesEditTitle": "Edit recurring income",
+  "incomeFormMakeRecurringLabel": "Make repeating income",
+  "incomeFromRecurringBanner": "This line comes from a recurring income series. Edits here apply only to this row. Change the series in Settings → Recurring series.",
+  "incomeRecurringMenuTooltip": "Scheduled income actions",
+  "incomeRecurringActionConfirmReceived": "Mark received (on schedule)",
+  "incomeRecurringActionReceivedEarly": "Mark received early…",
   "expenseFormMakeRecurringLabel": "Make repeating expense",
   "expenseFormRecurrenceLabel": "Repeat",
   "expenseFormRecurrenceMonthly": "Monthly (same calendar day)",
   "expenseFormRecurrenceWeekly": "Weekly (same weekday)",
   "expenseFormHorizonMonthsLabel": "Generate months ahead",
   "expenseFormHorizonMonthsInvalid": "Enter a horizon between 1 and 120 months.",
-  "expenseFromRecurringBanner": "This line comes from a recurring series. Edits here apply only to this row. Change the series in Settings → Recurring expenses.",
+  "expenseFromRecurringBanner": "This line comes from a recurring series. Edits here apply only to this row. Change the series in Settings → Recurring series.",
   "recurringMenuTooltip": "Scheduled expense actions",
   "recurringActionConfirmPaid": "Mark paid (on schedule)",
   "recurringActionPaidEarly": "Mark paid early…",
@@ -598,6 +629,40 @@
   "expenseFormInstallmentCountInvalid": "Enter a number between 2 and 60.",
   "expenseFormInstallmentNeedsCard": "Choose a card profile to use installments.",
   "expenseFormInstallmentConflictRecurring": "Turn off repeating expense to use installments.",
+  "reportsYearCashflowTitle": "Cash flow (USD)",
+  "@reportsYearCashflowTitle": {
+    "description": "Heading for annual income vs expense summary."
+  },
+  "reportsYearIncomeUsdLine": "Income: {amount}",
+  "@reportsYearIncomeUsdLine": {
+    "description": "Annual income total in USD.",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "reportsYearExpenseUsdLine": "Expenses: {amount}",
+  "@reportsYearExpenseUsdLine": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "reportsYearNetUsdLine": "Net: {amount}",
+  "@reportsYearNetUsdLine": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "reportsCashflowFootnote": "Net = income minus expenses in USD (same inclusion filter as above). FX uses each line’s stored rate.",
+  "@reportsCashflowFootnote": {
+    "description": "Explains annual net and FX."
+  },
+  "reportsByMonthIncomeHeading": "Income",
+  "reportsByMonthNetLine": "Net this month (USD): {amount}",
+  "@reportsByMonthNetLine": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
   "reportsIncomeThisMonthLine": "Income this month (USD): {amount}",
   "@reportsIncomeThisMonthLine": {
     "placeholders": {

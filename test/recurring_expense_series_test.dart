@@ -58,6 +58,19 @@ void main() {
       march.every((r) => r.recurringSeriesId == seriesId),
       isTrue,
     );
+    final marchRow = march.first;
+    expect(marchRow.paymentExpectationStatus, 'confirmedPaid');
+    expect(marchRow.paymentExpectationConfirmedOn, '2026-03-01');
+
+    final april = all
+        .where(
+          (r) =>
+              r.occurredOn.compareTo('2026-04-01') >= 0 &&
+              r.occurredOn.compareTo('2026-05-01') < 0,
+        )
+        .toList();
+    expect(april, isNotEmpty);
+    expect(april.first.paymentExpectationStatus, 'expected');
 
     final june = all
         .where(

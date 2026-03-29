@@ -1,4 +1,5 @@
 import 'package:expense_app/domain/expense.dart';
+import 'package:expense_app/domain/income_entry.dart';
 
 /// January at index `0`, December at index `11`.
 List<double> monthlyUsdTotalsByCalendarMonth(Iterable<Expense> expenses) {
@@ -12,10 +13,30 @@ List<double> monthlyUsdTotalsByCalendarMonth(Iterable<Expense> expenses) {
   return list;
 }
 
+/// Same bucketing as [monthlyUsdTotalsByCalendarMonth] for [IncomeEntry.receivedOn].
+List<double> monthlyUsdTotalsByCalendarMonthForIncome(Iterable<IncomeEntry> incomes) {
+  final list = List<double>.filled(12, 0);
+  for (final e in incomes) {
+    final m = e.receivedOn.month;
+    if (m >= 1 && m <= 12) {
+      list[m - 1] += e.amountUsd;
+    }
+  }
+  return list;
+}
+
 /// Sum of [Expense.amountUsd] (already FX-converted at save time).
 double totalUsd(Iterable<Expense> expenses) {
   var s = 0.0;
   for (final e in expenses) {
+    s += e.amountUsd;
+  }
+  return s;
+}
+
+double totalIncomeUsd(Iterable<IncomeEntry> incomes) {
+  var s = 0.0;
+  for (final e in incomes) {
     s += e.amountUsd;
   }
   return s;

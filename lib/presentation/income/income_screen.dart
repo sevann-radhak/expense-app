@@ -6,8 +6,9 @@ import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/income/income_form_dialog.dart';
+import 'package:expense_app/presentation/incomes/income_summary_list_tile.dart';
+import 'package:expense_app/presentation/incomes/recurring_income_menu_handler.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
-import 'package:expense_app/presentation/theme/category_accent_colors.dart';
 
 class IncomeScreen extends ConsumerWidget {
   const IncomeScreen({super.key});
@@ -24,6 +25,7 @@ class IncomeScreen extends ConsumerWidget {
         ref.watch(allIncomeSubcategoriesStreamProvider).valueOrNull ?? [];
     final categoryName = {for (final c in categories) c.id: c.name};
     final subcategoryName = {for (final s in allSubs) s.id: s.name};
+    final today = calendarTodayLocal();
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.incomeScreenTitle)),
@@ -121,13 +123,34 @@ class IncomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   ...entries.map(
-                    (e) => _IncomeListTile(
+                    (e) => IncomeSummaryListTile(
                       entry: e,
+                      categoryId: e.incomeCategoryId,
                       categoryName:
                           categoryName[e.incomeCategoryId] ?? l10n.taxonomyUnknownLabel,
                       subcategoryName: subcategoryName[e.incomeSubcategoryId] ??
                           l10n.taxonomyUnknownLabel,
-                      locale: locale,
+                      emphasizeAsScheduled: !isRealizedOnLocalCalendar(
+                        e.receivedOn,
+                        today,
+                      ),
+                      showRecurringOverflowMenu:
+                          e.recurringSeriesId != null &&
+                              e.recurringSeriesId!.isNotEmpty &&
+                              !isRealizedOnLocalCalendar(
+                                e.receivedOn,
+                                today,
+                              ) &&
+                              e.effectiveExpectationStatus ==
+                                  PaymentExpectationStatus.expected,
+                      onRecurringMenuAction: (action) {
+                        handleRecurringIncomeTileAction(
+                          context,
+                          ref,
+                          e,
+                          action,
+                        );
+                      },
                       onTap: () {
                         showDialog<void>(
                           context: context,
@@ -143,80 +166,6 @@ class IncomeScreen extends ConsumerWidget {
             error: (e, _) => Text('$e'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _IncomeListTile extends StatelessWidget {
-  const _IncomeListTile({
-    required this.entry,
-    required this.categoryName,
-    required this.subcategoryName,
-    required this.locale,
-    required this.onTap,
-  });
-
-  final IncomeEntry entry;
-  final String categoryName;
-  final String subcategoryName;
-  final String locale;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final original = formatDisplayCurrencyLine(
-      entry.currencyCode,
-      entry.amountOriginal,
-      locale,
-    );
-    final usd = formatDisplayCurrencyLine('USD', entry.amountUsd, locale);
-    final dateStr = ExpenseDates.toStorageDate(entry.receivedOn);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 4,
-                constraints: const BoxConstraints(minHeight: 40),
-                decoration: BoxDecoration(
-                  color: categoryAccentColor(entry.incomeCategoryId),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$categoryName · $subcategoryName',
-                      style: theme.textTheme.titleSmall,
-                    ),
-                    Text(dateStr, style: theme.textTheme.bodySmall),
-                    if (entry.description.trim().isNotEmpty)
-                      Text(
-                        entry.description.trim(),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    const SizedBox(height: 4),
-                    Text(original, style: theme.textTheme.bodyMedium),
-                    Text(usd, style: theme.textTheme.labelMedium),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

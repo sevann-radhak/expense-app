@@ -48,8 +48,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsMonthColumnUsdTotal => 'USD (total)';
 
   @override
+  String get reportsMonthColumnIncomeUsd => 'Income';
+
+  @override
+  String get reportsMonthColumnExpenseUsd => 'Expenses';
+
+  @override
+  String get reportsMonthColumnNetUsd => 'Net';
+
+  @override
+  String get reportsYearMonthlyCashflowHeading =>
+      'Monthly income and expenses (USD)';
+
+  @override
   String get reportsFxFootnote =>
-      'USD uses each expense’s stored FX snapshot; original-currency chips are for reference.';
+      'USD uses each line’s stored FX snapshot (expenses and income); original-currency amounts in forms are for reference.';
 
   @override
   String get reportsTabAnnual => 'Annual';
@@ -100,6 +113,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Bar chart of total USD spent per calendar month for the selected year.';
 
   @override
+  String get reportsChartMonthlyCashflowTitle => 'Income vs expenses (chart)';
+
+  @override
+  String get reportsChartLegendIncome => 'Income';
+
+  @override
+  String get reportsChartLegendExpenses => 'Expenses';
+
+  @override
+  String get reportsChartCashflowSemanticLabel =>
+      'Grouped bar chart of monthly income and expenses in U.S. dollars for the selected year.';
+
+  @override
   String get reportsChartCategorySemanticLabel =>
       'Doughnut chart of USD share by category for the selected period, with a text legend.';
 
@@ -114,7 +140,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportsExpenseInclusionFootnote =>
-      'Realized = occurred on or before today; scheduled = after today, using your device’s local calendar date (time ignored). Totals refresh when data changes; they do not auto-update at midnight.';
+      'Realized = date on or before today; scheduled = after today (local calendar; time ignored). Applies to both expenses and income. Totals refresh when data changes; they do not auto-update at midnight.';
 
   @override
   String get reportsExportCsvTooltip => 'Export current report as CSV';
@@ -194,6 +220,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get categoriesScreenSubtitle =>
       'Taxonomy from your local database (debug / admin).';
+
+  @override
+  String get categoriesTabExpenses => 'Expenses';
+
+  @override
+  String get categoriesTabIncome => 'Income';
+
+  @override
+  String get categoriesIncomeScreenSubtitle =>
+      'Income categories and subcategories (separate from expense taxonomy).';
 
   @override
   String get taxonomyUnknownLabel => 'Unknown';
@@ -477,18 +513,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPopulateExampleDataSuccess => 'Example data loaded.';
 
   @override
-  String get settingsRecurringSeriesTileTitle => 'Recurring expenses';
+  String get settingsRecurringSeriesTileTitle => 'Recurring series';
 
   @override
   String get settingsRecurringSeriesTileSubtitle =>
-      'Manage scheduled series and horizon';
+      'Scheduled expenses and income';
+
+  @override
+  String get recurringHubAppBarTitle => 'Recurring series';
+
+  @override
+  String get recurringSeriesTabExpenses => 'Expenses';
+
+  @override
+  String get recurringSeriesTabIncome => 'Income';
 
   @override
   String get recurringSeriesScreenTitle => 'Recurring expenses';
 
   @override
   String get recurringSeriesEmpty =>
-      'No recurring series yet. Add an expense and turn on “Make repeating”.';
+      'No recurring expense series yet. Add an expense and turn on “Make repeating”.';
+
+  @override
+  String get recurringSeriesIncomeEmpty =>
+      'No recurring income series yet. Add income and turn on “Make repeating”.';
 
   @override
   String get recurringSeriesActive => 'Active';
@@ -518,7 +567,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recurringSeriesStopBody =>
-      'Future scheduled expenses after today will be removed. Past and today’s rows stay in the book.';
+      'Future scheduled rows after today will be removed. Past and today’s lines stay in the book.';
 
   @override
   String get recurringSeriesStoppedSnackbar => 'Series stopped.';
@@ -545,6 +594,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringSeriesDefaultTitle => 'Recurring expense';
 
   @override
+  String get recurringSeriesDefaultTitleIncome => 'Recurring income';
+
+  @override
+  String get recurringIncomeSeriesEditTitle => 'Edit recurring income';
+
+  @override
+  String get incomeFormMakeRecurringLabel => 'Make repeating income';
+
+  @override
+  String get incomeFromRecurringBanner =>
+      'This line comes from a recurring income series. Edits here apply only to this row. Change the series in Settings → Recurring series.';
+
+  @override
+  String get incomeRecurringMenuTooltip => 'Scheduled income actions';
+
+  @override
+  String get incomeRecurringActionConfirmReceived =>
+      'Mark received (on schedule)';
+
+  @override
+  String get incomeRecurringActionReceivedEarly => 'Mark received early…';
+
+  @override
   String get expenseFormMakeRecurringLabel => 'Make repeating expense';
 
   @override
@@ -565,7 +637,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expenseFromRecurringBanner =>
-      'This line comes from a recurring series. Edits here apply only to this row. Change the series in Settings → Recurring expenses.';
+      'This line comes from a recurring series. Edits here apply only to this row. Change the series in Settings → Recurring series.';
 
   @override
   String get recurringMenuTooltip => 'Scheduled expense actions';
@@ -715,6 +787,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get expenseFormInstallmentConflictRecurring =>
       'Turn off repeating expense to use installments.';
+
+  @override
+  String get reportsYearCashflowTitle => 'Cash flow (USD)';
+
+  @override
+  String reportsYearIncomeUsdLine(String amount) {
+    return 'Income: $amount';
+  }
+
+  @override
+  String reportsYearExpenseUsdLine(String amount) {
+    return 'Expenses: $amount';
+  }
+
+  @override
+  String reportsYearNetUsdLine(String amount) {
+    return 'Net: $amount';
+  }
+
+  @override
+  String get reportsCashflowFootnote =>
+      'Net = income minus expenses in USD (same inclusion filter as above). FX uses each line’s stored rate.';
+
+  @override
+  String get reportsByMonthIncomeHeading => 'Income';
+
+  @override
+  String reportsByMonthNetLine(String amount) {
+    return 'Net this month (USD): $amount';
+  }
 
   @override
   String reportsIncomeThisMonthLine(String amount) {

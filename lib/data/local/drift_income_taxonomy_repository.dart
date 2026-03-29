@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
 
 import 'package:expense_app/data/local/app_database.dart';
+import 'package:expense_app/domain/category.dart';
+import 'package:expense_app/domain/category_repository.dart';
 import 'package:expense_app/domain/income_category.dart';
 import 'package:expense_app/domain/income_taxonomy_repository.dart';
 
@@ -74,5 +76,46 @@ class DriftIncomeTaxonomyRepository implements IncomeTaxonomyRepository {
               )
               .toList(),
         );
+  }
+
+  @override
+  Future<void> deleteIncomeSubcategory(String id) async {
+    final row = await (_db.select(_db.incomeSubcategories)
+          ..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+    if (row == null) {
+      return;
+    }
+    if (row.isSystemReserved || row.slug == kOtherSubcategorySlug) {
+      throw ReservedSubcategoryException(
+        'Cannot delete reserved income subcategory "${row.name}".',
+      );
+    }
+    await (_db.delete(_db.incomeSubcategories)..where((t) => t.id.equals(id)))
+        .go();
+  }
+
+  @override
+  Future<void> setIncomeCategoryDescription(String id, String? description) async {
+    final normalized = description?.trim();
+    final stored =
+        normalized == null || normalized.isEmpty ? null : normalized;
+    await (_db.update(_db.incomeCategories)..where((t) => t.id.equals(id))).write(
+      IncomeCategoriesCompanion(description: Value(stored)),
+    );
+  }
+
+  @override
+  Future<void> setIncomeSubcategoryDescription(
+    String id,
+    String? description,
+  ) async {
+    final normalized = description?.trim();
+    final stored =
+        normalized == null || normalized.isEmpty ? null : normalized;
+    await (_db.update(_db.incomeSubcategories)..where((t) => t.id.equals(id)))
+        .write(
+      IncomeSubcategoriesCompanion(description: Value(stored)),
+    );
   }
 }

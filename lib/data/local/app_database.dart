@@ -3,6 +3,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 
 import 'package:expense_app/data/local/category_seed.dart';
 import 'package:expense_app/data/local/income_category_seed.dart';
+import 'package:expense_app/data/local/payment_instrument_seed.dart';
 
 part 'app_database.g.dart';
 
@@ -211,6 +212,48 @@ class RecExpenseSeries extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+@DataClassName('IncomeRecurringSeriesRow')
+class IncomeRecSeries extends Table {
+  @override
+  String get tableName => 'income_recurring_series';
+
+  TextColumn get id => text()();
+
+  TextColumn get anchorReceivedOn => text()();
+
+  /// Recurrence payload JSON (application/recurrence_json_codec.dart v1).
+  TextColumn get recurrenceJson => text()();
+
+  IntColumn get horizonMonths => integer()();
+
+  BoolColumn get active => boolean().withDefault(const Constant(true))();
+
+  TextColumn get incomeCategoryId => text().references(
+        IncomeCategories,
+        #id,
+        onDelete: KeyAction.restrict,
+      )();
+
+  TextColumn get incomeSubcategoryId => text().references(
+        IncomeSubcategories,
+        #id,
+        onDelete: KeyAction.restrict,
+      )();
+
+  RealColumn get amountOriginal => real()();
+
+  TextColumn get currencyCode => text().withDefault(const Constant('USD'))();
+
+  RealColumn get manualFxRateToUsd => real().withDefault(const Constant(1.0))();
+
+  RealColumn get amountUsd => real()();
+
+  TextColumn get description => text().withDefault(const Constant(''))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DataClassName('ExpenseRow')
 class Expenses extends Table {
   TextColumn get id => text()();
@@ -296,6 +339,16 @@ class IncomeEntries extends Table {
 
   TextColumn get description => text().withDefault(const Constant(''))();
 
+  TextColumn get recurringSeriesId => text().nullable().references(
+        IncomeRecSeries,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
+
+  TextColumn get expectationStatus => text().nullable()();
+
+  TextColumn get expectationConfirmedOn => text().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -309,6 +362,7 @@ class IncomeEntries extends Table {
     PaymentInstruments,
     InstallmentPlans,
     RecExpenseSeries,
+    IncomeRecSeries,
     Expenses,
     IncomeEntries,
   ],
@@ -329,7 +383,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -387,10 +441,20 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(expenses, expenses.installmentIndex);
           }
           if (from < 14) {
+            await m.createTable(incomeRecSeries);
             await m.createTable(incomeCategories);
             await m.createTable(incomeSubcategories);
             await IncomeCategorySeeder.ensureSeedData(this);
             await migrateIncomeEntriesToIncomeTaxonomyV14(m);
+          }
+          if (from < 15) {
+            if (from >= 14) {
+              await m.createTable(incomeRecSeries);
+            }
+            await m.addColumn(incomeEntries, incomeEntries.recurringSeriesId);
+            await m.addColumn(incomeEntries, incomeEntries.expectationStatus);
+            await m.addColumn(incomeEntries, incomeEntries.expectationConfirmedOn);
+            await ensureIncomeSeriesReceivedUniqueIndex();
           }
         },
         beforeOpen: (OpeningDetails details) async {
@@ -404,6 +468,8 @@ class AppDatabase extends _$AppDatabase {
           await ensureExpenseInstallmentColumns();
           await backfillPaymentInstrumentDefaultsIfNeeded();
           await ensureIncomeTaxonomyDescriptionColumns();
+          await ensureIncomeRecurringSeriesColumns();
+          await ensureIncomeSeriesReceivedUniqueIndex();
           await IncomeCategorySeeder.ensureSeedData(this);
         },
       );
@@ -445,6 +511,45 @@ class AppDatabase extends _$AppDatabase {
           await customStatement('DROP TABLE IF EXISTS income_entries');
         } catch (_) {}
         await m.createTable(incomeEntries);
+        return;
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> ensureIncomeRecurringSeriesColumns() async {
+    const stmts = <String>[
+      'ALTER TABLE income_entries ADD COLUMN recurring_series_id TEXT '
+          'REFERENCES income_recurring_series (id) ON DELETE CASCADE',
+      'ALTER TABLE income_entries ADD COLUMN expectation_status TEXT',
+      'ALTER TABLE income_entries ADD COLUMN expectation_confirmed_on TEXT',
+    ];
+    for (final sql in stmts) {
+      try {
+        await customStatement(sql);
+      } catch (e) {
+        final msg = e.toString().toLowerCase();
+        if (msg.contains('duplicate column') || msg.contains('already exists')) {
+          continue;
+        }
+        if (msg.contains('no such table')) {
+          continue;
+        }
+        rethrow;
+      }
+    }
+  }
+
+  Future<void> ensureIncomeSeriesReceivedUniqueIndex() async {
+    try {
+      await customStatement(
+        'CREATE UNIQUE INDEX IF NOT EXISTS ux_income_series_received '
+        'ON income_entries (recurring_series_id, received_on) '
+        'WHERE recurring_series_id IS NOT NULL',
+      );
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('no such column')) {
         return;
       }
       rethrow;
@@ -696,8 +801,11 @@ Future<AppDatabase> initializeAppDatabase() async {
   await db.ensureExpensePaymentExpectationColumns();
   await db.ensurePaymentInstrumentV2Columns();
   await db.ensureExpenseInstallmentColumns();
+  await PaymentInstrumentSeeder.ensureSeedData(db);
   await db.backfillPaymentInstrumentDefaultsIfNeeded();
   await db.ensureIncomeTaxonomyDescriptionColumns();
+  await db.ensureIncomeRecurringSeriesColumns();
+  await db.ensureIncomeSeriesReceivedUniqueIndex();
   await IncomeCategorySeeder.ensureSeedData(db);
   _appDatabase = db;
   return db;

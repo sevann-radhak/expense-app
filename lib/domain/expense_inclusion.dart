@@ -1,4 +1,29 @@
 import 'package:expense_app/domain/expense.dart';
+import 'package:expense_app/domain/income_entry.dart';
+
+/// Filters any list with a calendar [dateOnly] using the same rules as [ExpenseInclusion].
+List<T> applyCalendarDateInclusion<T>(
+  List<T> items,
+  ExpenseInclusion inclusion,
+  DateTime todayDateOnly,
+  DateTime Function(T item) dateOnly,
+) {
+  if (inclusion == ExpenseInclusion.all) {
+    return List<T>.from(items);
+  }
+  final t = calendarDateOnly(todayDateOnly);
+  return items.where((item) {
+    final d = calendarDateOnly(dateOnly(item));
+    switch (inclusion) {
+      case ExpenseInclusion.all:
+        return true;
+      case ExpenseInclusion.realizedOnly:
+        return !d.isAfter(t);
+      case ExpenseInclusion.scheduledOnly:
+        return d.isAfter(t);
+    }
+  }).toList();
+}
 
 /// How expenses are included when comparing [Expense.occurredOn] to local calendar
 /// "today" (date-only; time-of-day is ignored).
@@ -33,21 +58,6 @@ bool isRealizedOnLocalCalendar(
   return !o.isAfter(t);
 }
 
-bool _matchesInclusion(
-  DateTime occurredOn,
-  ExpenseInclusion inclusion,
-  DateTime todayDateOnly,
-) {
-  switch (inclusion) {
-    case ExpenseInclusion.all:
-      return true;
-    case ExpenseInclusion.realizedOnly:
-      return isRealizedOnLocalCalendar(occurredOn, todayDateOnly);
-    case ExpenseInclusion.scheduledOnly:
-      return !isRealizedOnLocalCalendar(occurredOn, todayDateOnly);
-  }
-}
-
 /// Filters [expenses] in memory. Prefer this for small books; DB predicates are
 /// optional if lists grow large.
 List<Expense> applyExpenseInclusion(
@@ -55,12 +65,24 @@ List<Expense> applyExpenseInclusion(
   ExpenseInclusion inclusion,
   DateTime todayDateOnly,
 ) {
-  if (inclusion == ExpenseInclusion.all) {
-    return List<Expense>.from(expenses);
-  }
-  return expenses
-      .where(
-        (e) => _matchesInclusion(e.occurredOn, inclusion, todayDateOnly),
-      )
-      .toList();
+  return applyCalendarDateInclusion<Expense>(
+    expenses,
+    inclusion,
+    todayDateOnly,
+    (e) => e.occurredOn,
+  );
+}
+
+/// Same date filter as [applyExpenseInclusion], using [IncomeEntry.receivedOn].
+List<IncomeEntry> applyIncomeInclusion(
+  List<IncomeEntry> incomes,
+  ExpenseInclusion inclusion,
+  DateTime todayDateOnly,
+) {
+  return applyCalendarDateInclusion<IncomeEntry>(
+    incomes,
+    inclusion,
+    todayDateOnly,
+    (e) => e.receivedOn,
+  );
 }

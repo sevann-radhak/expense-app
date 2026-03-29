@@ -15,11 +15,12 @@ final class BookBackupSnapshot {
     required this.expenseRecurringSeries,
     required this.expenses,
     required this.incomeEntries,
+    this.incomeRecurringSeries = const [],
     required this.installmentPlans,
     required this.partialPayments,
   });
 
-  static const int currentSchemaVersion = 7;
+  static const int currentSchemaVersion = 8;
 
   final int schemaVersion;
   final DateTime exportedAt;
@@ -31,6 +32,7 @@ final class BookBackupSnapshot {
   final List<ExpenseRecurringSeries> expenseRecurringSeries;
   final List<Expense> expenses;
   final List<IncomeEntry> incomeEntries;
+  final List<IncomeRecurringSeries> incomeRecurringSeries;
   final List<InstallmentPlan> installmentPlans;
 
   /// Reserved for Phase 5+; export uses an empty array in Phase 4.8.

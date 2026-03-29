@@ -172,10 +172,34 @@ abstract class AppLocalizations {
   /// **'USD (total)'**
   String get reportsMonthColumnUsdTotal;
 
+  /// No description provided for @reportsMonthColumnIncomeUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get reportsMonthColumnIncomeUsd;
+
+  /// No description provided for @reportsMonthColumnExpenseUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get reportsMonthColumnExpenseUsd;
+
+  /// No description provided for @reportsMonthColumnNetUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'Net'**
+  String get reportsMonthColumnNetUsd;
+
+  /// Section title above the annual month table and dual bar chart.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly income and expenses (USD)'**
+  String get reportsYearMonthlyCashflowHeading;
+
   /// Short note under the year summary when expenses exist.
   ///
   /// In en, this message translates to:
-  /// **'USD uses each expense’s stored FX snapshot; original-currency chips are for reference.'**
+  /// **'USD uses each line’s stored FX snapshot (expenses and income); original-currency amounts in forms are for reference.'**
   String get reportsFxFootnote;
 
   /// Reports tab: year overview.
@@ -268,6 +292,30 @@ abstract class AppLocalizations {
   /// **'Bar chart of total USD spent per calendar month for the selected year.'**
   String get reportsChartMonthlySemanticLabel;
 
+  /// No description provided for @reportsChartMonthlyCashflowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Income vs expenses (chart)'**
+  String get reportsChartMonthlyCashflowTitle;
+
+  /// No description provided for @reportsChartLegendIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get reportsChartLegendIncome;
+
+  /// No description provided for @reportsChartLegendExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get reportsChartLegendExpenses;
+
+  /// Accessibility label for the annual cashflow bar chart.
+  ///
+  /// In en, this message translates to:
+  /// **'Grouped bar chart of monthly income and expenses in U.S. dollars for the selected year.'**
+  String get reportsChartCashflowSemanticLabel;
+
   /// Screen reader summary for the category chart.
   ///
   /// In en, this message translates to:
@@ -295,7 +343,7 @@ abstract class AppLocalizations {
   /// Explains realized vs scheduled rules under the Reports segmented control.
   ///
   /// In en, this message translates to:
-  /// **'Realized = occurred on or before today; scheduled = after today, using your device’s local calendar date (time ignored). Totals refresh when data changes; they do not auto-update at midnight.'**
+  /// **'Realized = date on or before today; scheduled = after today (local calendar; time ignored). Applies to both expenses and income. Totals refresh when data changes; they do not auto-update at midnight.'**
   String get reportsExpenseInclusionFootnote;
 
   /// App bar action: download expenses for the active Reports tab as CSV.
@@ -433,6 +481,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Taxonomy from your local database (debug / admin).'**
   String get categoriesScreenSubtitle;
+
+  /// No description provided for @categoriesTabExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get categoriesTabExpenses;
+
+  /// No description provided for @categoriesTabIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get categoriesTabIncome;
+
+  /// Intro under the income categories tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Income categories and subcategories (separate from expense taxonomy).'**
+  String get categoriesIncomeScreenSubtitle;
 
   /// Fallback label when a category or subcategory name cannot be resolved (ids are not shown).
   ///
@@ -947,14 +1013,32 @@ abstract class AppLocalizations {
   /// Settings list tile title linking to recurring series management.
   ///
   /// In en, this message translates to:
-  /// **'Recurring expenses'**
+  /// **'Recurring series'**
   String get settingsRecurringSeriesTileTitle;
 
   /// No description provided for @settingsRecurringSeriesTileSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Manage scheduled series and horizon'**
+  /// **'Scheduled expenses and income'**
   String get settingsRecurringSeriesTileSubtitle;
+
+  /// No description provided for @recurringHubAppBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring series'**
+  String get recurringHubAppBarTitle;
+
+  /// No description provided for @recurringSeriesTabExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get recurringSeriesTabExpenses;
+
+  /// No description provided for @recurringSeriesTabIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get recurringSeriesTabIncome;
 
   /// No description provided for @recurringSeriesScreenTitle.
   ///
@@ -965,8 +1049,14 @@ abstract class AppLocalizations {
   /// No description provided for @recurringSeriesEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No recurring series yet. Add an expense and turn on “Make repeating”.'**
+  /// **'No recurring expense series yet. Add an expense and turn on “Make repeating”.'**
   String get recurringSeriesEmpty;
+
+  /// No description provided for @recurringSeriesIncomeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring income series yet. Add income and turn on “Make repeating”.'**
+  String get recurringSeriesIncomeEmpty;
 
   /// No description provided for @recurringSeriesActive.
   ///
@@ -1007,7 +1097,7 @@ abstract class AppLocalizations {
   /// No description provided for @recurringSeriesStopBody.
   ///
   /// In en, this message translates to:
-  /// **'Future scheduled expenses after today will be removed. Past and today’s rows stay in the book.'**
+  /// **'Future scheduled rows after today will be removed. Past and today’s lines stay in the book.'**
   String get recurringSeriesStopBody;
 
   /// No description provided for @recurringSeriesStoppedSnackbar.
@@ -1058,6 +1148,48 @@ abstract class AppLocalizations {
   /// **'Recurring expense'**
   String get recurringSeriesDefaultTitle;
 
+  /// No description provided for @recurringSeriesDefaultTitleIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring income'**
+  String get recurringSeriesDefaultTitleIncome;
+
+  /// No description provided for @recurringIncomeSeriesEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit recurring income'**
+  String get recurringIncomeSeriesEditTitle;
+
+  /// No description provided for @incomeFormMakeRecurringLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Make repeating income'**
+  String get incomeFormMakeRecurringLabel;
+
+  /// No description provided for @incomeFromRecurringBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This line comes from a recurring income series. Edits here apply only to this row. Change the series in Settings → Recurring series.'**
+  String get incomeFromRecurringBanner;
+
+  /// No description provided for @incomeRecurringMenuTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled income actions'**
+  String get incomeRecurringMenuTooltip;
+
+  /// No description provided for @incomeRecurringActionConfirmReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark received (on schedule)'**
+  String get incomeRecurringActionConfirmReceived;
+
+  /// No description provided for @incomeRecurringActionReceivedEarly.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark received early…'**
+  String get incomeRecurringActionReceivedEarly;
+
   /// No description provided for @expenseFormMakeRecurringLabel.
   ///
   /// In en, this message translates to:
@@ -1097,7 +1229,7 @@ abstract class AppLocalizations {
   /// No description provided for @expenseFromRecurringBanner.
   ///
   /// In en, this message translates to:
-  /// **'This line comes from a recurring series. Edits here apply only to this row. Change the series in Settings → Recurring expenses.'**
+  /// **'This line comes from a recurring series. Edits here apply only to this row. Change the series in Settings → Recurring series.'**
   String get expenseFromRecurringBanner;
 
   /// No description provided for @recurringMenuTooltip.
@@ -1363,6 +1495,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Turn off repeating expense to use installments.'**
   String get expenseFormInstallmentConflictRecurring;
+
+  /// Heading for annual income vs expense summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash flow (USD)'**
+  String get reportsYearCashflowTitle;
+
+  /// Annual income total in USD.
+  ///
+  /// In en, this message translates to:
+  /// **'Income: {amount}'**
+  String reportsYearIncomeUsdLine(String amount);
+
+  /// No description provided for @reportsYearExpenseUsdLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses: {amount}'**
+  String reportsYearExpenseUsdLine(String amount);
+
+  /// No description provided for @reportsYearNetUsdLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Net: {amount}'**
+  String reportsYearNetUsdLine(String amount);
+
+  /// Explains annual net and FX.
+  ///
+  /// In en, this message translates to:
+  /// **'Net = income minus expenses in USD (same inclusion filter as above). FX uses each line’s stored rate.'**
+  String get reportsCashflowFootnote;
+
+  /// No description provided for @reportsByMonthIncomeHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get reportsByMonthIncomeHeading;
+
+  /// No description provided for @reportsByMonthNetLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Net this month (USD): {amount}'**
+  String reportsByMonthNetLine(String amount);
 
   /// No description provided for @reportsIncomeThisMonthLine.
   ///

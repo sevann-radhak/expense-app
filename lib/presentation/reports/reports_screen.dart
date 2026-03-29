@@ -10,11 +10,14 @@ import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/expenses/expense_summary_list_tile.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/home/expense_form_dialog.dart';
+import 'package:expense_app/presentation/income/income_form_dialog.dart';
+import 'package:expense_app/presentation/incomes/income_summary_list_tile.dart';
+import 'package:expense_app/presentation/incomes/recurring_income_menu_handler.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 import 'package:expense_app/presentation/reports/report_csv_download.dart';
 import 'package:expense_app/presentation/reports/report_file_download.dart';
 import 'package:expense_app/presentation/reports/reports_category_pie_chart.dart';
-import 'package:expense_app/presentation/reports/reports_monthly_bar_chart.dart';
+import 'package:expense_app/presentation/reports/reports_monthly_cashflow_bar_chart.dart';
 
 String _reportCsvFilename({
   required int tabIndex,
@@ -327,48 +330,91 @@ class _ReportsAnnualTabBody extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toString();
     final year = ref.watch(selectedReportYearProvider);
     final expensesAsync = ref.watch(expensesForSelectedReportYearProvider);
+    final incomeAsync = ref.watch(incomeForSelectedReportYearProvider);
 
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
         expensesAsync.when(
           data: (expenses) {
-            final loc = Localizations.localeOf(context);
-            final monthlyUsd = monthlyUsdTotalsByCalendarMonth(expenses);
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _YearSpendSummary(expenses: expenses, locale: loc, l10n: l10n),
-                if (expenses.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.reportsFxFootnote,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    l10n.reportsByMonthHeading,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  _MonthlyUsdTable(
-                    year: year,
-                    monthlyUsd: monthlyUsd,
-                    localeName: locale,
-                    l10n: l10n,
-                  ),
-                  const SizedBox(height: 16),
-                  ReportsMonthlyBarChart(
-                    year: year,
-                    monthlyUsd: monthlyUsd,
-                    localeName: locale,
-                    l10n: l10n,
-                  ),
-                ],
-              ],
+            return incomeAsync.when(
+              data: (incomes) {
+                final loc = Localizations.localeOf(context);
+                final monthlyExpenseUsd =
+                    monthlyUsdTotalsByCalendarMonth(expenses);
+                final monthlyIncomeUsd =
+                    monthlyUsdTotalsByCalendarMonthForIncome(incomes);
+                final incomeTotal = totalIncomeUsd(incomes);
+                final expenseTotal = totalUsd(expenses);
+                final net = incomeTotal - expenseTotal;
+                final hasSpendOrIncome =
+                    expenses.isNotEmpty || incomeTotal > 0;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _YearSpendSummary(expenses: expenses, locale: loc, l10n: l10n),
+                    if (incomeTotal > 0 || expenseTotal > 0) ...[
+                      const SizedBox(height: 16),
+                      _YearCashflowSummaryCard(
+                        l10n: l10n,
+                        localeName: locale,
+                        incomeUsd: incomeTotal,
+                        expenseUsd: expenseTotal,
+                        netUsd: net,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.reportsCashflowFootnote,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                    if (hasSpendOrIncome) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.reportsFxFootnote,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                    if (hasSpendOrIncome) ...[
+                      const SizedBox(height: 20),
+                      Text(
+                        l10n.reportsYearMonthlyCashflowHeading,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      _MonthlyUsdTable(
+                        year: year,
+                        monthlyExpenseUsd: monthlyExpenseUsd,
+                        monthlyIncomeUsd: monthlyIncomeUsd,
+                        localeName: locale,
+                        l10n: l10n,
+                      ),
+                      const SizedBox(height: 16),
+                      ReportsMonthlyCashflowBarChart(
+                        year: year,
+                        monthlyIncomeUsd: monthlyIncomeUsd,
+                        monthlyExpenseUsd: monthlyExpenseUsd,
+                        localeName: locale,
+                        l10n: l10n,
+                      ),
+                    ],
+                  ],
+                );
+              },
+              loading: () => const Padding(
+                padding: EdgeInsets.all(32),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, _) => Text('$e'),
             );
           },
           loading: () => const Padding(
@@ -378,6 +424,72 @@ class _ReportsAnnualTabBody extends ConsumerWidget {
           error: (e, _) => Text('$e'),
         ),
       ],
+    );
+  }
+}
+
+class _YearCashflowSummaryCard extends StatelessWidget {
+  const _YearCashflowSummaryCard({
+    required this.l10n,
+    required this.localeName,
+    required this.incomeUsd,
+    required this.expenseUsd,
+    required this.netUsd,
+  });
+
+  final AppLocalizations l10n;
+  final String localeName;
+  final double incomeUsd;
+  final double expenseUsd;
+  final double netUsd;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Card(
+      elevation: 0,
+      color: scheme.surfaceContainerHighest,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.reportsYearCashflowTitle,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              l10n.reportsYearIncomeUsdLine(
+                formatUsdAmountOnly(incomeUsd, localeName),
+              ),
+              style: theme.textTheme.bodyLarge,
+            ),
+            Text(
+              l10n.reportsYearExpenseUsdLine(
+                formatUsdAmountOnly(expenseUsd, localeName),
+              ),
+              style: theme.textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              l10n.reportsYearNetUsdLine(
+                formatUsdAmountOnly(netUsd, localeName),
+              ),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: netUsd >= 0
+                    ? scheme.primary
+                    : scheme.error,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -401,6 +513,14 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
     final instruments =
         ref.watch(paymentInstrumentsStreamProvider).valueOrNull ?? [];
     final instrumentLabel = {for (final p in instruments) p.id: p.label};
+    final incomeCats =
+        ref.watch(incomeCategoriesStreamProvider).valueOrNull ?? [];
+    final allIncomeSubs =
+        ref.watch(allIncomeSubcategoriesStreamProvider).valueOrNull ?? [];
+    final incomeCategoryName = {for (final c in incomeCats) c.id: c.name};
+    final incomeSubcategoryName = {
+      for (final s in allIncomeSubs) s.id: s.name,
+    };
     final today = calendarTodayLocal();
 
     return ListView(
@@ -441,6 +561,8 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
             final incomeList = incomeAsync.valueOrNull ?? [];
             final incomeUsd =
                 incomeList.fold<double>(0, (sum, e) => sum + e.amountUsd);
+            final expenseUsd =
+                expenses.fold<double>(0, (sum, e) => sum + e.amountUsd);
             if (expenses.isEmpty && incomeUsd <= 0) {
               return Text(
                 l10n.reportsByMonthEmpty,
@@ -460,16 +582,53 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                     ),
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.reportsByMonthIncomeHeading,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  ...incomeList.map(
+                    (e) => IncomeSummaryListTile(
+                      entry: e,
+                      categoryId: e.incomeCategoryId,
+                      categoryName: incomeCategoryName[e.incomeCategoryId] ??
+                          l10n.taxonomyUnknownLabel,
+                      subcategoryName:
+                          incomeSubcategoryName[e.incomeSubcategoryId] ??
+                              l10n.taxonomyUnknownLabel,
+                      emphasizeAsScheduled: !isRealizedOnLocalCalendar(
+                        e.receivedOn,
+                        today,
+                      ),
+                      showRecurringOverflowMenu:
+                          e.recurringSeriesId != null &&
+                              e.recurringSeriesId!.isNotEmpty &&
+                              !isRealizedOnLocalCalendar(
+                                e.receivedOn,
+                                today,
+                              ) &&
+                              e.effectiveExpectationStatus ==
+                                  PaymentExpectationStatus.expected,
+                      onRecurringMenuAction: (action) {
+                        handleRecurringIncomeTileAction(
+                          context,
+                          ref,
+                          e,
+                          action,
+                        );
+                      },
+                      onTap: () {
+                        showDialog<void>(
+                          context: context,
+                          builder: (ctx) => IncomeFormDialog(initial: e),
+                        );
+                      },
+                    ),
+                  ),
                   const SizedBox(height: 16),
                 ],
-                if (expenses.isEmpty)
-                  Text(
-                    l10n.reportsByMonthEmpty,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  )
-                else ...[
+                if (expenses.isNotEmpty) ...[
                   Text(
                     l10n.expensesThisMonthHeading,
                     style: Theme.of(context).textTheme.titleMedium,
@@ -497,6 +656,27 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                         );
                       },
                     ),
+                  ),
+                ] else if (incomeUsd <= 0) ...[
+                  Text(
+                    l10n.reportsByMonthEmpty,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+                if (incomeUsd > 0 || expenseUsd > 0) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.reportsByMonthNetLine(
+                      formatUsdAmountOnly(
+                        incomeUsd - expenseUsd,
+                        localeName,
+                      ),
+                    ),
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ],
               ],
@@ -1008,13 +1188,15 @@ class _YearSummaryCurrencyChip extends StatelessWidget {
 class _MonthlyUsdTable extends StatelessWidget {
   const _MonthlyUsdTable({
     required this.year,
-    required this.monthlyUsd,
+    required this.monthlyExpenseUsd,
+    required this.monthlyIncomeUsd,
     required this.localeName,
     required this.l10n,
   });
 
   final int year;
-  final List<double> monthlyUsd;
+  final List<double> monthlyExpenseUsd;
+  final List<double> monthlyIncomeUsd;
   final String localeName;
   final AppLocalizations l10n;
 
@@ -1023,67 +1205,96 @@ class _MonthlyUsdTable extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
+    Widget cellHeader(String t) => Padding(
+          padding: const EdgeInsets.fromLTRB(6, 8, 6, 8),
+          child: Text(
+            t,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.end,
+            maxLines: 2,
+          ),
+        );
+
+    Widget cellValue(double v) => Padding(
+          padding: const EdgeInsets.fromLTRB(6, 10, 6, 10),
+          child: Text(
+            formatDisplayCurrencyLine('USD', v, localeName),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.end,
+          ),
+        );
+
     return Card(
       elevation: 0,
       color: scheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-        child: Table(
-          columnWidths: const {
-            0: FlexColumnWidth(1.1),
-            1: FlexColumnWidth(1.4),
-          },
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: [
-            TableRow(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
-                  child: Text(
-                    l10n.reportsMonthColumnMonth,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
-                  child: Text(
-                    l10n.reportsMonthColumnUsdTotal,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            ...List.generate(12, (i) {
-              final month = i + 1;
-              final total = monthlyUsd[i];
-              final monthLabel = DateFormat.MMM(
-                localeName,
-              ).format(DateTime(year, month));
-              return TableRow(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: Table(
+            columnWidths: const {
+              0: FixedColumnWidth(56),
+              1: FixedColumnWidth(92),
+              2: FixedColumnWidth(92),
+              3: FixedColumnWidth(88),
+            },
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: [
+              TableRow(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
-                    child: Text(monthLabel, style: theme.textTheme.bodyLarge),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 10, 12, 10),
+                    padding: const EdgeInsets.fromLTRB(12, 8, 6, 8),
                     child: Text(
-                      formatDisplayCurrencyLine('USD', total, localeName),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      l10n.reportsMonthColumnMonth,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: scheme.onSurfaceVariant,
                       ),
-                      textAlign: TextAlign.end,
                     ),
                   ),
+                  cellHeader(l10n.reportsMonthColumnIncomeUsd),
+                  cellHeader(l10n.reportsMonthColumnExpenseUsd),
+                  cellHeader(l10n.reportsMonthColumnNetUsd),
                 ],
-              );
-            }),
-          ],
+              ),
+              ...List.generate(12, (i) {
+                final month = i + 1;
+                final inc = monthlyIncomeUsd[i];
+                final exp = monthlyExpenseUsd[i];
+                final net = inc - exp;
+                final monthLabel = DateFormat.MMM(
+                  localeName,
+                ).format(DateTime(year, month));
+                return TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
+                      child: Text(monthLabel, style: theme.textTheme.bodyLarge),
+                    ),
+                    cellValue(inc),
+                    cellValue(exp),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(6, 10, 12, 10),
+                      child: Text(
+                        formatDisplayCurrencyLine('USD', net, localeName),
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: net >= 0
+                              ? scheme.primary
+                              : scheme.error,
+                        ),
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ],
+          ),
         ),
       ),
     );

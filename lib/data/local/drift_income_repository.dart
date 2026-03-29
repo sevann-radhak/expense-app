@@ -59,6 +59,8 @@ class DriftIncomeRepository implements IncomeRepository {
   }
 
   IncomeEntry _toDomain(IncomeEntryRow r) {
+    final pxs = r.expectationStatus;
+    final pxc = r.expectationConfirmedOn;
     return IncomeEntry(
       id: r.id,
       receivedOn: ExpenseDates.fromStorageDate(r.receivedOn),
@@ -69,6 +71,11 @@ class DriftIncomeRepository implements IncomeRepository {
       manualFxRateToUsd: r.manualFxRateToUsd,
       amountUsd: r.amountUsd,
       description: r.description,
+      recurringSeriesId: r.recurringSeriesId,
+      expectationStatus: paymentExpectationStatusFromStorage(pxs),
+      expectationConfirmedOn: pxc != null && pxc.isNotEmpty
+          ? ExpenseDates.fromStorageDate(pxc)
+          : null,
     );
   }
 
@@ -117,6 +124,13 @@ class DriftIncomeRepository implements IncomeRepository {
             manualFxRateToUsd: Value(e.manualFxRateToUsd),
             amountUsd: e.amountUsd,
             description: Value(e.description),
+            recurringSeriesId: Value(e.recurringSeriesId),
+            expectationStatus: Value(e.expectationStatus?.storageName),
+            expectationConfirmedOn: Value(
+              e.expectationConfirmedOn != null
+                  ? ExpenseDates.toStorageDate(e.expectationConfirmedOn!)
+                  : null,
+            ),
           ),
         );
   }
@@ -146,6 +160,13 @@ class DriftIncomeRepository implements IncomeRepository {
         manualFxRateToUsd: Value(e.manualFxRateToUsd),
         amountUsd: Value(e.amountUsd),
         description: Value(e.description),
+        recurringSeriesId: Value(e.recurringSeriesId),
+        expectationStatus: Value(e.expectationStatus?.storageName),
+        expectationConfirmedOn: Value(
+          e.expectationConfirmedOn != null
+              ? ExpenseDates.toStorageDate(e.expectationConfirmedOn!)
+              : null,
+        ),
       ),
     );
     if (n == 0) {

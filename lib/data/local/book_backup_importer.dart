@@ -154,6 +154,22 @@ BookBackupSanitizeReport sanitizeBookBackupForImport(BookBackupSnapshot raw) {
   final defIncCat = IncomeCategorySeeder.kMigrationDefaultCategoryId;
   final defIncSub = IncomeCategorySeeder.kMigrationDefaultSubcategoryId;
 
+  final keptIncomeRecurring = <IncomeRecurringSeries>[];
+  for (final s in raw.incomeRecurringSeries) {
+    if (!incCatIds.contains(s.incomeCategoryId) ||
+        !incSubIds.contains(s.incomeSubcategoryId) ||
+        s.manualFxRateToUsd <= 0) {
+      continue;
+    }
+    try {
+      s.validate();
+    } catch (_) {
+      continue;
+    }
+    keptIncomeRecurring.add(s);
+  }
+  final incomeSeriesIds = keptIncomeRecurring.map((x) => x.id).toSet();
+
   final keptIncome = <IncomeEntry>[];
   var incomeSkipped = 0;
   for (final inc in raw.incomeEntries) {
@@ -167,9 +183,12 @@ BookBackupSanitizeReport sanitizeBookBackupForImport(BookBackupSnapshot raw) {
       catId = defIncCat;
       subId = defIncSub;
     }
-    keptIncome.add(
-      inc.copyWith(incomeCategoryId: catId, incomeSubcategoryId: subId),
-    );
+    var next = inc.copyWith(incomeCategoryId: catId, incomeSubcategoryId: subId);
+    final rec = next.recurringSeriesId;
+    if (rec != null && rec.isNotEmpty && !incomeSeriesIds.contains(rec)) {
+      next = next.copyWith(clearRecurringSeriesId: true, clearExpectation: true);
+    }
+    keptIncome.add(next);
   }
 
   final cleaned = BookBackupSnapshot(
@@ -183,6 +202,7 @@ BookBackupSanitizeReport sanitizeBookBackupForImport(BookBackupSnapshot raw) {
     expenseRecurringSeries: cleanedSeries,
     expenses: keptExpenses,
     incomeEntries: keptIncome,
+    incomeRecurringSeries: keptIncomeRecurring,
     installmentPlans: keptPlans,
     partialPayments: const [],
   );
@@ -245,6 +265,24 @@ void validateBookBackupSnapshot(BookBackupSnapshot snapshot) {
     }
     incSubIds.add(s.id);
   }
+  final incomeSeriesIds = <String>{};
+  for (final s in snapshot.incomeRecurringSeries) {
+    if (!incCatIds.contains(s.incomeCategoryId)) {
+      throw ArgumentError(
+        'Income recurring series ${s.id} references missing income category',
+      );
+    }
+    if (!incSubIds.contains(s.incomeSubcategoryId)) {
+      throw ArgumentError(
+        'Income recurring series ${s.id} references missing income subcategory',
+      );
+    }
+    if (s.manualFxRateToUsd <= 0) {
+      throw ArgumentError('Income recurring series ${s.id} has invalid FX');
+    }
+    s.validate();
+    incomeSeriesIds.add(s.id);
+  }
   for (final inc in snapshot.incomeEntries) {
     if (!incCatIds.contains(inc.incomeCategoryId)) {
       throw ArgumentError('Income ${inc.id} references missing income category');
@@ -254,6 +292,10 @@ void validateBookBackupSnapshot(BookBackupSnapshot snapshot) {
     }
     if (inc.manualFxRateToUsd <= 0) {
       throw ArgumentError('Income ${inc.id} has invalid FX');
+    }
+    final irs = inc.recurringSeriesId;
+    if (irs != null && irs.isNotEmpty && !incomeSeriesIds.contains(irs)) {
+      throw ArgumentError('Income ${inc.id} references missing income recurring series');
     }
   }
   final seriesIds = <String>{};
@@ -313,6 +355,7 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
   await db.transaction(() async {
     await db.delete(db.expenses).go();
     await db.delete(db.incomeEntries).go();
+    await db.delete(db.incomeRecSeries).go();
     await db.delete(db.recExpenseSeries).go();
     await db.delete(db.installmentPlans).go();
     await db.delete(db.paymentInstruments).go();
@@ -437,6 +480,30 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
           ),
         );
       }
+      for (final s in toImport.incomeRecurringSeries) {
+        final payload = encodeRecurrencePayload(
+          rule: s.rule,
+          endCondition: s.endCondition,
+        );
+        b.insert(
+          db.incomeRecSeries,
+          IncomeRecSeriesCompanion.insert(
+            id: s.id,
+            anchorReceivedOn:
+                ExpenseDates.toStorageDate(s.anchorReceivedOn),
+            recurrenceJson: jsonEncode(payload),
+            horizonMonths: s.horizonMonths,
+            incomeCategoryId: s.incomeCategoryId,
+            incomeSubcategoryId: s.incomeSubcategoryId,
+            amountOriginal: s.amountOriginal,
+            amountUsd: s.amountUsd,
+            active: Value(s.active),
+            currencyCode: Value(s.currencyCode),
+            manualFxRateToUsd: Value(s.manualFxRateToUsd),
+            description: Value(s.description),
+          ),
+        );
+      }
       for (final inc in toImport.incomeEntries) {
         b.insert(
           db.incomeEntries,
@@ -450,6 +517,13 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
             manualFxRateToUsd: Value(inc.manualFxRateToUsd),
             amountUsd: inc.amountUsd,
             description: Value(inc.description),
+            recurringSeriesId: Value(inc.recurringSeriesId),
+            expectationStatus: Value(inc.expectationStatus?.storageName),
+            expectationConfirmedOn: Value(
+              inc.expectationConfirmedOn != null
+                  ? ExpenseDates.toStorageDate(inc.expectationConfirmedOn!)
+                  : null,
+            ),
           ),
         );
       }

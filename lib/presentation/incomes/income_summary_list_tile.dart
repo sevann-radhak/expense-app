@@ -1,0 +1,169 @@
+import 'package:flutter/material.dart';
+
+import 'package:expense_app/domain/domain.dart';
+import 'package:expense_app/l10n/app_localizations.dart';
+import 'package:expense_app/presentation/formatting/currency_display.dart';
+import 'package:expense_app/presentation/incomes/recurring_income_ui.dart';
+import 'package:expense_app/presentation/theme/category_accent_colors.dart';
+
+class IncomeSummaryListTile extends StatelessWidget {
+  const IncomeSummaryListTile({
+    required this.entry,
+    required this.categoryName,
+    required this.subcategoryName,
+    super.key,
+    this.categoryId,
+    this.onTap,
+    this.showRecurringOverflowMenu = false,
+    this.onRecurringMenuAction,
+    this.emphasizeAsScheduled = false,
+  });
+
+  final IncomeEntry entry;
+  final String categoryName;
+  final String subcategoryName;
+  final String? categoryId;
+  final VoidCallback? onTap;
+  final bool showRecurringOverflowMenu;
+  final void Function(RecurringIncomeTileAction action)? onRecurringMenuAction;
+  final bool emphasizeAsScheduled;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final localeName = Localizations.localeOf(context).toString();
+    final dateStr = ExpenseDates.toStorageDate(entry.receivedOn);
+    final originalLabel = formatDisplayCurrencyLine(
+      entry.currencyCode,
+      entry.amountOriginal,
+      localeName,
+    );
+    final usdLabel = formatDisplayCurrencyLine(
+      'USD',
+      entry.amountUsd,
+      localeName,
+    );
+    final note = entry.description.trim();
+    final recurring = entry.recurringSeriesId != null &&
+        entry.recurringSeriesId!.isNotEmpty;
+    final expectationChip =
+        recurring ? recurringIncomeExpectationChipLabel(entry, l10n) : null;
+
+    final menu = showRecurringOverflowMenu && onRecurringMenuAction != null
+        ? PopupMenuButton<RecurringIncomeTileAction>(
+            tooltip: l10n.incomeRecurringMenuTooltip,
+            onSelected: onRecurringMenuAction,
+            itemBuilder: (ctx) => [
+              PopupMenuItem(
+                value: RecurringIncomeTileAction.confirmReceived,
+                child: Text(l10n.incomeRecurringActionConfirmReceived),
+              ),
+              PopupMenuItem(
+                value: RecurringIncomeTileAction.receivedEarly,
+                child: Text(l10n.incomeRecurringActionReceivedEarly),
+              ),
+              PopupMenuItem(
+                value: RecurringIncomeTileAction.skip,
+                child: Text(l10n.recurringActionSkip),
+              ),
+              PopupMenuItem(
+                value: RecurringIncomeTileAction.waive,
+                child: Text(l10n.recurringActionWaive),
+              ),
+            ],
+          )
+        : null;
+
+    final inner = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (categoryId != null) ...[
+            Container(
+              width: 4,
+              constraints: const BoxConstraints(minHeight: 40),
+              decoration: BoxDecoration(
+                color: categoryAccentColor(categoryId!),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$categoryName — $subcategoryName · $dateStr',
+                  style: theme.textTheme.bodyMedium,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (expectationChip != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Chip(
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      label: Text(
+                        expectationChip,
+                        style: theme.textTheme.labelSmall,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                  ),
+                if (note.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      note,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          ?menu,
+          const SizedBox(width: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                originalLabel,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(usdLabel, style: theme.textTheme.titleSmall),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    final child = Opacity(
+      opacity: emphasizeAsScheduled ? 0.82 : 1,
+      child: inner,
+    );
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: onTap == null
+          ? child
+          : InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(12),
+              child: child,
+            ),
+    );
+  }
+}

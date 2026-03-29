@@ -1,3 +1,5 @@
+import 'package:expense_app/domain/payment_expectation_status.dart';
+
 /// Single income line (local-first book). Date is calendar-only like expenses.
 class IncomeEntry {
   const IncomeEntry({
@@ -10,6 +12,9 @@ class IncomeEntry {
     required this.manualFxRateToUsd,
     required this.amountUsd,
     this.description = '',
+    this.recurringSeriesId,
+    this.expectationStatus,
+    this.expectationConfirmedOn,
   });
 
   final String id;
@@ -21,6 +26,15 @@ class IncomeEntry {
   final double manualFxRateToUsd;
   final double amountUsd;
   final String description;
+
+  /// When set, row was generated from an income recurring series.
+  final String? recurringSeriesId;
+
+  /// User disposition for a recurring-generated row (reuses [PaymentExpectationStatus]).
+  final PaymentExpectationStatus? expectationStatus;
+
+  /// Date-only when the user marked received (e.g. confirmed on schedule).
+  final DateTime? expectationConfirmedOn;
 
   static double computeUsd(double amountOriginal, double manualFxRateToUsd) {
     return amountOriginal * manualFxRateToUsd;
@@ -36,7 +50,19 @@ class IncomeEntry {
     double? manualFxRateToUsd,
     double? amountUsd,
     String? description,
+    String? recurringSeriesId,
+    PaymentExpectationStatus? expectationStatus,
+    DateTime? expectationConfirmedOn,
+    bool clearRecurringSeriesId = false,
+    bool clearExpectation = false,
+    bool clearExpectationConfirmedOn = false,
   }) {
+    final nextStatus = clearExpectation
+        ? null
+        : (expectationStatus ?? this.expectationStatus);
+    final nextConfirmed = clearExpectation || clearExpectationConfirmedOn
+        ? null
+        : (expectationConfirmedOn ?? this.expectationConfirmedOn);
     return IncomeEntry(
       id: id ?? this.id,
       receivedOn: receivedOn ?? this.receivedOn,
@@ -47,6 +73,11 @@ class IncomeEntry {
       manualFxRateToUsd: manualFxRateToUsd ?? this.manualFxRateToUsd,
       amountUsd: amountUsd ?? this.amountUsd,
       description: description ?? this.description,
+      recurringSeriesId: clearRecurringSeriesId
+          ? null
+          : (recurringSeriesId ?? this.recurringSeriesId),
+      expectationStatus: nextStatus,
+      expectationConfirmedOn: nextConfirmed,
     );
   }
 }

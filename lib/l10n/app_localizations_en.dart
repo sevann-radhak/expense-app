@@ -133,6 +133,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Grouped bar chart of monthly income and expenses in U.S. dollars for the selected year.';
 
   @override
+  String reportsChartPeriodWholeYearLabel(String year) {
+    return 'Full year $year';
+  }
+
+  @override
+  String reportsChartPeriodCashflowSemanticLabel(String period) {
+    return 'Bar chart comparing total income and total expenses in U.S. dollars for $period.';
+  }
+
+  @override
   String get reportsChartCategorySemanticLabel =>
       'Doughnut chart of USD share by category for the selected period, with a text legend.';
 

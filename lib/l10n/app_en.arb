@@ -108,6 +108,24 @@
   "@reportsChartCashflowSemanticLabel": {
     "description": "Accessibility label for the annual cashflow bar chart."
   },
+  "reportsChartPeriodWholeYearLabel": "Full year {year}",
+  "@reportsChartPeriodWholeYearLabel": {
+    "description": "Subtitle for income vs expenses chart when the scope is the entire calendar year.",
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsChartPeriodCashflowSemanticLabel": "Bar chart comparing total income and total expenses in U.S. dollars for {period}.",
+  "@reportsChartPeriodCashflowSemanticLabel": {
+    "description": "Accessibility label for the single-period income vs expenses bar chart.",
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
   "reportsChartCategorySemanticLabel": "Doughnut chart of USD share by category for the selected period, with a text legend.",
   "@reportsChartCategorySemanticLabel": {
     "description": "Screen reader summary for the category chart."

@@ -328,6 +328,18 @@ abstract class AppLocalizations {
   /// **'Grouped bar chart of monthly income and expenses in U.S. dollars for the selected year.'**
   String get reportsChartCashflowSemanticLabel;
 
+  /// Subtitle for income vs expenses chart when the scope is the entire calendar year.
+  ///
+  /// In en, this message translates to:
+  /// **'Full year {year}'**
+  String reportsChartPeriodWholeYearLabel(String year);
+
+  /// Accessibility label for the single-period income vs expenses bar chart.
+  ///
+  /// In en, this message translates to:
+  /// **'Bar chart comparing total income and total expenses in U.S. dollars for {period}.'**
+  String reportsChartPeriodCashflowSemanticLabel(String period);
+
   /// Screen reader summary for the category chart.
   ///
   /// In en, this message translates to:

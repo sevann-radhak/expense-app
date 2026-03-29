@@ -557,133 +557,148 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         expensesAsync.when(
-          data: (expenses) {
-            final incomeList = incomeAsync.valueOrNull ?? [];
-            final incomeUsd =
-                incomeList.fold<double>(0, (sum, e) => sum + e.amountUsd);
-            final expenseUsd =
-                expenses.fold<double>(0, (sum, e) => sum + e.amountUsd);
-            if (expenses.isEmpty && incomeUsd <= 0) {
-              return Text(
-                l10n.reportsByMonthEmpty,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              );
-            }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (incomeUsd > 0) ...[
-                  Text(
-                    l10n.reportsIncomeThisMonthLine(
-                      formatUsdAmountOnly(incomeUsd, localeName),
-                    ),
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    l10n.reportsByMonthIncomeHeading,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  ...incomeList.map(
-                    (e) => IncomeSummaryListTile(
-                      entry: e,
-                      categoryId: e.incomeCategoryId,
-                      categoryName: incomeCategoryName[e.incomeCategoryId] ??
-                          l10n.taxonomyUnknownLabel,
-                      subcategoryName:
-                          incomeSubcategoryName[e.incomeSubcategoryId] ??
-                              l10n.taxonomyUnknownLabel,
-                      emphasizeAsScheduled: !isRealizedOnLocalCalendar(
-                        e.receivedOn,
-                        today,
-                      ),
-                      showRecurringOverflowMenu:
-                          e.recurringSeriesId != null &&
-                              e.recurringSeriesId!.isNotEmpty &&
-                              !isRealizedOnLocalCalendar(
-                                e.receivedOn,
-                                today,
-                              ) &&
-                              e.effectiveExpectationStatus ==
-                                  PaymentExpectationStatus.expected,
-                      onRecurringMenuAction: (action) {
-                        handleRecurringIncomeTileAction(
-                          context,
-                          ref,
-                          e,
-                          action,
-                        );
-                      },
-                      onTap: () {
-                        showDialog<void>(
-                          context: context,
-                          builder: (ctx) => IncomeFormDialog(initial: e),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                if (expenses.isNotEmpty) ...[
-                  Text(
-                    l10n.expensesThisMonthHeading,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  ...expenses.map(
-                    (e) => ExpenseSummaryListTile(
-                      expense: e,
-                      categoryId: e.categoryId,
-                      categoryName: categoryName[e.categoryId] ??
-                          l10n.taxonomyUnknownLabel,
-                      subcategoryName: subcategoryName[e.subcategoryId] ??
-                          l10n.taxonomyUnknownLabel,
-                      paymentInstrumentLabel: e.paymentInstrumentId != null
-                          ? instrumentLabel[e.paymentInstrumentId!]
-                          : null,
-                      emphasizeAsScheduled: !isRealizedOnLocalCalendar(
-                        e.occurredOn,
-                        today,
-                      ),
-                      onTap: () {
-                        showDialog<void>(
-                          context: context,
-                          builder: (ctx) => ExpenseFormDialog(initial: e),
-                        );
-                      },
-                    ),
-                  ),
-                ] else if (incomeUsd <= 0) ...[
-                  Text(
-                    l10n.reportsByMonthEmpty,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
-                if (incomeUsd > 0 || expenseUsd > 0) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.reportsByMonthNetLine(
-                      formatUsdAmountOnly(
-                        incomeUsd - expenseUsd,
-                        localeName,
-                      ),
-                    ),
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ],
-              ],
-            );
-          },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Text('$e'),
+          data: (expenses) => incomeAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Text('$e'),
+            data: (incomeList) {
+              final incomeUsd =
+                  incomeList.fold<double>(0, (sum, e) => sum + e.amountUsd);
+              final expenseUsd =
+                  expenses.fold<double>(0, (sum, e) => sum + e.amountUsd);
+              if (expenses.isEmpty && incomeUsd <= 0) {
+                return Text(
+                  l10n.reportsByMonthEmpty,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                );
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (incomeUsd > 0 || expenseUsd > 0) ...[
+                    ReportsPeriodCashflowBarChart(
+                      periodLabel: monthLabel,
+                      incomeUsd: incomeUsd,
+                      expenseUsd: expenseUsd,
+                      localeName: localeName,
+                      l10n: l10n,
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                  if (incomeUsd > 0) ...[
+                    Text(
+                      l10n.reportsIncomeThisMonthLine(
+                        formatUsdAmountOnly(incomeUsd, localeName),
+                      ),
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.reportsByMonthIncomeHeading,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    ...incomeList.map(
+                      (e) => IncomeSummaryListTile(
+                        entry: e,
+                        categoryId: e.incomeCategoryId,
+                        categoryName: incomeCategoryName[e.incomeCategoryId] ??
+                            l10n.taxonomyUnknownLabel,
+                        subcategoryName:
+                            incomeSubcategoryName[e.incomeSubcategoryId] ??
+                                l10n.taxonomyUnknownLabel,
+                        emphasizeAsScheduled: !isRealizedOnLocalCalendar(
+                          e.receivedOn,
+                          today,
+                        ),
+                        showRecurringOverflowMenu:
+                            e.recurringSeriesId != null &&
+                                e.recurringSeriesId!.isNotEmpty &&
+                                !isRealizedOnLocalCalendar(
+                                  e.receivedOn,
+                                  today,
+                                ) &&
+                                e.effectiveExpectationStatus ==
+                                    PaymentExpectationStatus.expected,
+                        onRecurringMenuAction: (action) {
+                          handleRecurringIncomeTileAction(
+                            context,
+                            ref,
+                            e,
+                            action,
+                          );
+                        },
+                        onTap: () {
+                          showDialog<void>(
+                            context: context,
+                            builder: (ctx) => IncomeFormDialog(initial: e),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  if (expenses.isNotEmpty) ...[
+                    Text(
+                      l10n.expensesThisMonthHeading,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    ...expenses.map(
+                      (e) => ExpenseSummaryListTile(
+                        expense: e,
+                        categoryId: e.categoryId,
+                        categoryName: categoryName[e.categoryId] ??
+                            l10n.taxonomyUnknownLabel,
+                        subcategoryName: subcategoryName[e.subcategoryId] ??
+                            l10n.taxonomyUnknownLabel,
+                        paymentInstrumentLabel: e.paymentInstrumentId != null
+                            ? instrumentLabel[e.paymentInstrumentId!]
+                            : null,
+                        emphasizeAsScheduled: !isRealizedOnLocalCalendar(
+                          e.occurredOn,
+                          today,
+                        ),
+                        onTap: () {
+                          showDialog<void>(
+                            context: context,
+                            builder: (ctx) => ExpenseFormDialog(initial: e),
+                          );
+                        },
+                      ),
+                    ),
+                  ] else if (incomeUsd <= 0) ...[
+                    Text(
+                      l10n.reportsByMonthEmpty,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                  if (incomeUsd > 0 || expenseUsd > 0) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.reportsByMonthNetLine(
+                        formatUsdAmountOnly(
+                          incomeUsd - expenseUsd,
+                          localeName,
+                        ),
+                      ),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ],
+              ],
+            );
+            },
+          ),
         ),
       ],
     );
@@ -795,6 +810,23 @@ class _ReportsByCategoryTabBody extends ConsumerWidget {
                           ),
                     ),
                     const SizedBox(height: 12),
+                    if (incomeTotal > 0 || expenseTotal > 0) ...[
+                      ReportsPeriodCashflowBarChart(
+                        periodLabel: scope ==
+                                ReportCategoryPeriodScope.fullYear
+                            ? l10n.reportsChartPeriodWholeYearLabel(
+                                year.toString(),
+                              )
+                            : DateFormat.yMMMM(
+                                localeName,
+                              ).format(DateTime(year, month)),
+                        incomeUsd: incomeTotal,
+                        expenseUsd: expenseTotal,
+                        localeName: localeName,
+                        l10n: l10n,
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                     if (incomeTotal > 0) ...[
                       ReportsCategoryPieChart(
                         cardKey: const ValueKey<String>(

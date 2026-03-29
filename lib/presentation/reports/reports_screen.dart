@@ -10,6 +10,7 @@ import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/expenses/expense_summary_list_tile.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/home/expense_form_dialog.dart';
+import 'package:expense_app/presentation/home/recurring_expense_menu_handler.dart';
 import 'package:expense_app/presentation/income/income_form_dialog.dart';
 import 'package:expense_app/presentation/incomes/income_summary_list_tile.dart';
 import 'package:expense_app/presentation/incomes/recurring_income_menu_handler.dart';
@@ -638,15 +639,8 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                                 l10n.taxonomyUnknownLabel,
                         emphasizeAsScheduled:
                             !isEconomicallySettledIncome(e, today),
-                        showRecurringOverflowMenu:
-                            e.recurringSeriesId != null &&
-                                e.recurringSeriesId!.isNotEmpty &&
-                                !isRealizedOnLocalCalendar(
-                                  e.receivedOn,
-                                  today,
-                                ) &&
-                                e.effectiveExpectationStatus ==
-                                    PaymentExpectationStatus.expected,
+                        showRecurringOverflowMenu: e.recurringSeriesId != null &&
+                            e.recurringSeriesId!.isNotEmpty,
                         onRecurringMenuAction: (action) {
                           handleRecurringIncomeTileAction(
                             context,
@@ -701,6 +695,17 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                             : null,
                         emphasizeAsScheduled:
                             !isEconomicallySettledExpense(e, today),
+                        showRecurringOverflowMenu:
+                            e.recurringSeriesId != null &&
+                                e.recurringSeriesId!.isNotEmpty,
+                        onRecurringMenuAction: (action) {
+                          handleRecurringExpenseTileAction(
+                            context,
+                            ref,
+                            e,
+                            action,
+                          );
+                        },
                         onSettlementToggle: (settled) async {
                           try {
                             await ref.read(expenseRepositoryProvider).update(

@@ -13,6 +13,25 @@ class DriftRecurringExpenseSeriesRepository
 
   final AppDatabase _db;
 
+  /// Calendar-safe filter (avoids lexicographic bugs on `occurred_on` strings).
+  Future<List<String>> _materializedExpenseIdsOnOrAfter({
+    required String seriesId,
+    required DateTime fromOccurredOnDateOnly,
+  }) async {
+    final from = calendarDateOnly(fromOccurredOnDateOnly);
+    final rows = await (_db.select(_db.expenses)
+          ..where((e) => e.recurringSeriesId.equals(seriesId)))
+        .get();
+    final out = <String>[];
+    for (final r in rows) {
+      final d = calendarDateOnly(ExpenseDates.fromStorageDate(r.occurredOn));
+      if (!d.isBefore(from)) {
+        out.add(r.id);
+      }
+    }
+    return out;
+  }
+
   @override
   Future<void> upsert(ExpenseRecurringSeries series) async {
     series.validate();
@@ -67,6 +86,7 @@ class DriftRecurringExpenseSeriesRepository
   Future<void> rematerializeForward({
     required String seriesId,
     required DateTime todayDateOnly,
+    DateTime? rematerializeOccurrencesOnOrAfter,
   }) async {
     final row = await (_db.select(_db.recExpenseSeries)
           ..where((s) => s.id.equals(seriesId)))
@@ -77,16 +97,30 @@ class DriftRecurringExpenseSeriesRepository
     final series = expenseRecurringSeriesFromDriftRow(row);
     series.validate();
 
-    final todayIso = ExpenseDates.toStorageDate(
-      calendarDateOnly(todayDateOnly),
-    );
-    await (_db.delete(_db.expenses)
-          ..where(
-            (e) =>
-                e.recurringSeriesId.equals(seriesId) &
-                e.occurredOn.isBiggerThanValue(todayIso),
-          ))
-        .go();
+    final today = calendarDateOnly(todayDateOnly);
+    final cutoff = rematerializeOccurrencesOnOrAfter;
+    final minOccurrence =
+        cutoff != null ? calendarDateOnly(cutoff) : null;
+
+    final existing = await (_db.select(_db.expenses)
+          ..where((e) => e.recurringSeriesId.equals(seriesId)))
+        .get();
+    final toDelete = <String>[];
+    for (final r in existing) {
+      final d = calendarDateOnly(ExpenseDates.fromStorageDate(r.occurredOn));
+      if (!d.isAfter(today)) {
+        continue;
+      }
+      if (minOccurrence != null && d.isBefore(minOccurrence)) {
+        continue;
+      }
+      toDelete.add(r.id);
+    }
+    if (toDelete.isNotEmpty) {
+      await (_db.delete(_db.expenses)
+            ..where((e) => e.id.isIn(toDelete)))
+          .go();
+    }
 
     final horizonEnd = recurrenceMaterializationHorizonEndInclusive(
       todayDateOnly,
@@ -195,6 +229,114 @@ class DriftRecurringExpenseSeriesRepository
     if (sRow == null || sRow.categoryId != categoryId) {
       throw InvalidSubcategoryPairingException(
         'Subcategory does not belong to the selected category.',
+      );
+    }
+  }
+
+  @override
+  Future<void> trimSeriesFromOccurrenceDate({
+    required String seriesId,
+    required DateTime fromOccurredOnDateOnly,
+    required DateTime todayDateOnly,
+  }) async {
+    final row = await (_db.select(_db.recExpenseSeries)
+          ..where((s) => s.id.equals(seriesId)))
+        .getSingleOrNull();
+    if (row == null) {
+      return;
+    }
+    final series = expenseRecurringSeriesFromDriftRow(row);
+    series.validate();
+    final from = calendarDateOnly(fromOccurredOnDateOnly);
+    final fromIso = ExpenseDates.toStorageDate(from);
+
+    await (_db.delete(_db.expenses)
+          ..where(
+            (e) =>
+                e.recurringSeriesId.equals(seriesId) &
+                e.occurredOn.isBiggerOrEqualValue(fromIso),
+          ))
+        .go();
+
+    final prev = lastRecurrenceOccurrenceStrictlyBefore(
+      anchor: series.anchorOccurredOn,
+      rule: series.rule,
+      endCondition: series.endCondition,
+      beforeDateExclusive: from,
+    );
+
+    if (prev == null) {
+      await (_db.delete(_db.expenses)
+            ..where((e) => e.recurringSeriesId.equals(seriesId)))
+          .go();
+      await (_db.update(_db.recExpenseSeries)
+            ..where((s) => s.id.equals(seriesId)))
+          .write(const RecExpenseSeriesCompanion(active: Value(false)));
+      return;
+    }
+
+    final mergedEnd = mergeRecurrenceEndWithUntilInclusive(
+      series.endCondition,
+      prev,
+    );
+    final trimmed = series.copyWith(endCondition: mergedEnd);
+    await upsert(trimmed);
+    await rematerializeForward(
+      seriesId: seriesId,
+      todayDateOnly: todayDateOnly,
+    );
+  }
+
+  @override
+  Future<void> updateSeriesTemplateAndMaterializedFromDate({
+    required ExpenseRecurringSeries updatedSeries,
+    required DateTime fromOccurredOnDateOnly,
+    required DateTime todayDateOnly,
+    required String occurrenceNoteFromEditedDate,
+  }) async {
+    updatedSeries.validate();
+    await upsert(updatedSeries);
+    final usd = Expense.computeUsd(
+      updatedSeries.amountOriginal,
+      updatedSeries.manualFxRateToUsd,
+    );
+    final patchIds = await _materializedExpenseIdsOnOrAfter(
+      seriesId: updatedSeries.id,
+      fromOccurredOnDateOnly: fromOccurredOnDateOnly,
+    );
+    if (patchIds.isNotEmpty) {
+      await (_db.update(_db.expenses)
+            ..where((e) => e.id.isIn(patchIds)))
+          .write(
+        ExpensesCompanion(
+          categoryId: Value(updatedSeries.categoryId),
+          subcategoryId: Value(updatedSeries.subcategoryId),
+          amountOriginal: Value(updatedSeries.amountOriginal),
+          currencyCode: Value(updatedSeries.currencyCode),
+          manualFxRateToUsd: Value(updatedSeries.manualFxRateToUsd),
+          amountUsd: Value(usd),
+          paidWithCreditCard: Value(updatedSeries.paidWithCreditCard),
+          description: Value(occurrenceNoteFromEditedDate),
+          paymentInstrumentId: Value(updatedSeries.paymentInstrumentId),
+        ),
+      );
+    }
+    await rematerializeForward(
+      seriesId: updatedSeries.id,
+      todayDateOnly: todayDateOnly,
+      rematerializeOccurrencesOnOrAfter: fromOccurredOnDateOnly,
+    );
+    final noteIds = await _materializedExpenseIdsOnOrAfter(
+      seriesId: updatedSeries.id,
+      fromOccurredOnDateOnly: fromOccurredOnDateOnly,
+    );
+    if (noteIds.isNotEmpty) {
+      await (_db.update(_db.expenses)
+            ..where((e) => e.id.isIn(noteIds)))
+          .write(
+        ExpensesCompanion(
+          description: Value(occurrenceNoteFromEditedDate),
+        ),
       );
     }
   }

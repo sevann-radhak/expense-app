@@ -2,10 +2,10 @@ import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 
 enum RecurringIncomeTileAction {
-  confirmReceived,
-  receivedEarly,
+  /// Opens the same editor as tapping the row (paid/received uses the row control).
+  update,
   skip,
-  waive,
+  delete,
 }
 
 String recurringIncomeExpectationChipLabel(

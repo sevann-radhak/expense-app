@@ -3,10 +3,9 @@ import 'package:expense_app/l10n/app_localizations.dart';
 
 /// Overflow actions for a scheduled recurring-generated expense (Phase 4.2).
 enum RecurringExpenseTileAction {
-  confirmPaid,
-  paidEarly,
+  update,
   skip,
-  waive,
+  delete,
 }
 
 String recurringPaymentExpectationChipLabel(

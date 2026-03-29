@@ -132,15 +132,8 @@ class IncomeScreen extends ConsumerWidget {
                           l10n.taxonomyUnknownLabel,
                       emphasizeAsScheduled:
                           !isEconomicallySettledIncome(e, today),
-                      showRecurringOverflowMenu:
-                          e.recurringSeriesId != null &&
-                              e.recurringSeriesId!.isNotEmpty &&
-                              !isRealizedOnLocalCalendar(
-                                e.receivedOn,
-                                today,
-                              ) &&
-                              e.effectiveExpectationStatus ==
-                                  PaymentExpectationStatus.expected,
+                      showRecurringOverflowMenu: e.recurringSeriesId != null &&
+                          e.recurringSeriesId!.isNotEmpty,
                       onRecurringMenuAction: (action) {
                         handleRecurringIncomeTileAction(
                           context,

@@ -114,12 +114,7 @@ class HomeScreen extends ConsumerWidget {
                             !isEconomicallySettledExpense(e, today),
                         showRecurringOverflowMenu:
                             e.recurringSeriesId != null &&
-                                !isRealizedOnLocalCalendar(
-                                  e.occurredOn,
-                                  today,
-                                ) &&
-                                e.effectivePaymentExpectationStatus ==
-                                    PaymentExpectationStatus.expected,
+                                e.recurringSeriesId!.isNotEmpty,
                         onRecurringMenuAction: (action) {
                           handleRecurringExpenseTileAction(
                             context,

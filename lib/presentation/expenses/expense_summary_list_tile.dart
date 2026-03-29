@@ -72,20 +72,16 @@ class ExpenseSummaryListTile extends StatelessWidget {
             onSelected: onRecurringMenuAction,
             itemBuilder: (ctx) => [
               PopupMenuItem(
-                value: RecurringExpenseTileAction.confirmPaid,
-                child: Text(l10n.recurringActionConfirmPaid),
-              ),
-              PopupMenuItem(
-                value: RecurringExpenseTileAction.paidEarly,
-                child: Text(l10n.recurringActionPaidEarly),
+                value: RecurringExpenseTileAction.update,
+                child: Text(l10n.recurringTileActionUpdate),
               ),
               PopupMenuItem(
                 value: RecurringExpenseTileAction.skip,
                 child: Text(l10n.recurringActionSkip),
               ),
               PopupMenuItem(
-                value: RecurringExpenseTileAction.waive,
-                child: Text(l10n.recurringActionWaive),
+                value: RecurringExpenseTileAction.delete,
+                child: Text(l10n.recurringTileActionDelete),
               ),
             ],
           )
@@ -180,8 +176,6 @@ class ExpenseSummaryListTile extends StatelessWidget {
                 onChanged: (v) => onSettlementToggle!(v),
               ),
             ),
-          ?menu,
-          const SizedBox(width: 4),
           Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -194,6 +188,10 @@ class ExpenseSummaryListTile extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(usdLabel, style: theme.textTheme.titleSmall),
+              if (menu != null) ...[
+                const SizedBox(width: 2),
+                menu,
+              ],
             ],
           ),
         ],

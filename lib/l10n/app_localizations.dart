@@ -1241,14 +1241,74 @@ abstract class AppLocalizations {
   /// No description provided for @incomeFromRecurringBanner.
   ///
   /// In en, this message translates to:
-  /// **'This line comes from a recurring income series. Edits here apply only to this row. Change the series in Settings → Recurring series.'**
+  /// **'This line is from a repeating income series. Choose whether amount, categories, FX, and notes apply to this date only or to this date and all later materialized rows (earlier rows and the series default note in Settings stay unchanged for notes). Use the row menu to skip or delete.'**
   String get incomeFromRecurringBanner;
 
   /// No description provided for @incomeRecurringMenuTooltip.
   ///
   /// In en, this message translates to:
-  /// **'Scheduled income actions'**
+  /// **'More actions for this scheduled income'**
   String get incomeRecurringMenuTooltip;
+
+  /// No description provided for @recurringTileActionUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update…'**
+  String get recurringTileActionUpdate;
+
+  /// No description provided for @recurringTileActionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete…'**
+  String get recurringTileActionDelete;
+
+  /// No description provided for @recurringDeleteScopeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete scheduled occurrence'**
+  String get recurringDeleteScopeTitle;
+
+  /// No description provided for @recurringDeleteScopeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what to remove from your book.'**
+  String get recurringDeleteScopeBody;
+
+  /// No description provided for @recurringDeleteThisOccurrenceOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This occurrence only'**
+  String get recurringDeleteThisOccurrenceOnly;
+
+  /// No description provided for @recurringDeleteThisAndFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'This and all later occurrences'**
+  String get recurringDeleteThisAndFuture;
+
+  /// No description provided for @recurringFormApplyScopeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply changes to'**
+  String get recurringFormApplyScopeTitle;
+
+  /// No description provided for @recurringFormApplyThisOccurrenceOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This date only'**
+  String get recurringFormApplyThisOccurrenceOnly;
+
+  /// No description provided for @recurringFormApplyThisAndFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'This date and later rows'**
+  String get recurringFormApplyThisAndFuture;
+
+  /// No description provided for @recurringSeriesMissingForUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the recurring series to apply this change.'**
+  String get recurringSeriesMissingForUpdate;
 
   /// No description provided for @incomeRecurringActionConfirmReceived.
   ///
@@ -1301,13 +1361,13 @@ abstract class AppLocalizations {
   /// No description provided for @expenseFromRecurringBanner.
   ///
   /// In en, this message translates to:
-  /// **'This line comes from a recurring series. Edits here apply only to this row. Change the series in Settings → Recurring series.'**
+  /// **'This line is from a repeating expense. Choose whether amount, categories, card, FX, and notes apply to this date only or to this date and all later materialized rows (earlier rows and the series default note in Settings stay unchanged for notes). Use the row menu to skip or delete.'**
   String get expenseFromRecurringBanner;
 
   /// No description provided for @recurringMenuTooltip.
   ///
   /// In en, this message translates to:
-  /// **'Scheduled expense actions'**
+  /// **'More actions for this scheduled expense'**
   String get recurringMenuTooltip;
 
   /// No description provided for @recurringActionConfirmPaid.

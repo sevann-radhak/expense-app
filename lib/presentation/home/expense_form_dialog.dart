@@ -9,6 +9,7 @@ import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
+import 'package:expense_app/presentation/recurring/recurring_occurrence_scope_dialogs.dart';
 import 'package:expense_app/presentation/theme/category_accent_colors.dart';
 
 enum _RecurrenceFormKind { monthly, weekly }
@@ -78,6 +79,16 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
   final _installmentCountController = TextEditingController(text: '12');
   final _categorySearch = SearchController();
   final _subcategorySearch = SearchController();
+  RecurringMaterializedEditScope _recurringSaveScope =
+      RecurringMaterializedEditScope.thisOccurrenceOnly;
+
+  bool get _editingRecurringRow =>
+      widget.initial?.recurringSeriesId?.isNotEmpty == true;
+
+  bool get _dateLockedForRecurringBulk =>
+      _editingRecurringRow &&
+      _recurringSaveScope ==
+          RecurringMaterializedEditScope.thisAndFutureMaterialized;
 
   @override
   void initState() {
@@ -509,7 +520,41 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
               .upsertAndRematerialize(series, calendarTodayLocal());
         }
       } else {
-        await repo.update(expense);
+        if (editingRecurringRow &&
+            _recurringSaveScope ==
+                RecurringMaterializedEditScope.thisAndFutureMaterialized) {
+          final seriesRepo =
+              ref.read(recurringExpenseSeriesRepositoryProvider);
+          final sid = widget.initial!.recurringSeriesId!;
+          final series = await seriesRepo.getById(sid);
+          if (series == null) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.recurringSeriesMissingForUpdate)),
+              );
+            }
+            return;
+          }
+          final updated = series.copyWith(
+            categoryId: expense.categoryId,
+            subcategoryId: expense.subcategoryId,
+            amountOriginal: expense.amountOriginal,
+            currencyCode: expense.currencyCode,
+            manualFxRateToUsd: expense.manualFxRateToUsd,
+            amountUsd: expense.amountUsd,
+            paidWithCreditCard: expense.paidWithCreditCard,
+            paymentInstrumentId: expense.paymentInstrumentId,
+          );
+          await seriesRepo.updateSeriesTemplateAndMaterializedFromDate(
+            updatedSeries: updated,
+            fromOccurredOnDateOnly:
+                calendarDateOnly(widget.initial!.occurredOn),
+            todayDateOnly: today,
+            occurrenceNoteFromEditedDate: expense.description,
+          );
+        } else {
+          await repo.update(expense);
+        }
       }
       if (expense.paidWithCreditCard && expense.paymentInstrumentId != null) {
         await AppUserSettingsStorage.writeLastPaymentInstrumentId(
@@ -531,10 +576,45 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
 
   Future<void> _confirmDelete() async {
     final l10n = AppLocalizations.of(context)!;
-    final id = widget.initial?.id;
-    if (id == null) {
+    final initial = widget.initial;
+    if (initial == null) {
       return;
     }
+    if (initial.recurringSeriesId?.isNotEmpty == true) {
+      final scope = await showRecurringOccurrenceDeleteScopeDialog(context);
+      if (scope == null || !mounted) {
+        return;
+      }
+      final sid = initial.recurringSeriesId!;
+      try {
+        switch (scope) {
+          case RecurringOccurrenceDeleteScope.thisOccurrenceOnly:
+            await ref.read(expenseRepositoryProvider).delete(initial.id);
+            break;
+          case RecurringOccurrenceDeleteScope.thisAndFutureInSeries:
+            await ref
+                .read(recurringExpenseSeriesRepositoryProvider)
+                .trimSeriesFromOccurrenceDate(
+                  seriesId: sid,
+                  fromOccurredOnDateOnly:
+                      calendarDateOnly(initial.occurredOn),
+                  todayDateOnly: calendarTodayLocal(),
+                );
+            break;
+        }
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      } on Object catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('$e')),
+          );
+        }
+      }
+      return;
+    }
+    final id = initial.id;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -645,8 +725,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (widget.initial?.recurringSeriesId != null &&
-                    widget.initial!.recurringSeriesId!.isNotEmpty)
+                if (_editingRecurringRow)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: DecoratedBox(
@@ -658,13 +737,66 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
-                        child: Text(
-                          l10n.expenseFromRecurringBanner,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              l10n.expenseFromRecurringBanner,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              l10n.recurringFormApplyScopeTitle,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 8),
+                            SegmentedButton<RecurringMaterializedEditScope>(
+                              showSelectedIcon: false,
+                              segments: [
+                                ButtonSegment(
+                                  value: RecurringMaterializedEditScope
+                                      .thisOccurrenceOnly,
+                                  label: Text(
+                                    l10n.recurringFormApplyThisOccurrenceOnly,
+                                  ),
+                                ),
+                                ButtonSegment(
+                                  value: RecurringMaterializedEditScope
+                                      .thisAndFutureMaterialized,
+                                  label: Text(
+                                    l10n.recurringFormApplyThisAndFuture,
+                                  ),
+                                ),
+                              ],
+                              selected: {_recurringSaveScope},
+                              onSelectionChanged: (next) {
+                                if (next.isEmpty) {
+                                  return;
+                                }
+                                setState(() {
+                                  _recurringSaveScope = next.single;
+                                  if (_dateLockedForRecurringBulk) {
+                                    final i = widget.initial!;
+                                    _occurredOn = DateTime(
+                                      i.occurredOn.year,
+                                      i.occurredOn.month,
+                                      i.occurredOn.day,
+                                    );
+                                  }
+                                });
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -684,7 +816,8 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                   subtitle: Text(ExpenseDates.toStorageDate(_occurredOn)),
                   trailing: IconButton(
                     icon: const Icon(Icons.calendar_today),
-                    onPressed: _pickDate,
+                    onPressed:
+                        _dateLockedForRecurringBulk ? null : _pickDate,
                   ),
                 ),
                 Text(

@@ -60,20 +60,16 @@ class IncomeSummaryListTile extends StatelessWidget {
             onSelected: onRecurringMenuAction,
             itemBuilder: (ctx) => [
               PopupMenuItem(
-                value: RecurringIncomeTileAction.confirmReceived,
-                child: Text(l10n.incomeRecurringActionConfirmReceived),
-              ),
-              PopupMenuItem(
-                value: RecurringIncomeTileAction.receivedEarly,
-                child: Text(l10n.incomeRecurringActionReceivedEarly),
+                value: RecurringIncomeTileAction.update,
+                child: Text(l10n.recurringTileActionUpdate),
               ),
               PopupMenuItem(
                 value: RecurringIncomeTileAction.skip,
                 child: Text(l10n.recurringActionSkip),
               ),
               PopupMenuItem(
-                value: RecurringIncomeTileAction.waive,
-                child: Text(l10n.recurringActionWaive),
+                value: RecurringIncomeTileAction.delete,
+                child: Text(l10n.recurringTileActionDelete),
               ),
             ],
           )
@@ -150,8 +146,6 @@ class IncomeSummaryListTile extends StatelessWidget {
                 onChanged: (v) => onSettlementToggle!(v),
               ),
             ),
-          ?menu,
-          const SizedBox(width: 4),
           Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -180,6 +174,10 @@ class IncomeSummaryListTile extends StatelessWidget {
                   ),
                   onPressed: onTap,
                 ),
+              ],
+              if (menu != null) ...[
+                const SizedBox(width: 2),
+                menu,
               ],
             ],
           ),

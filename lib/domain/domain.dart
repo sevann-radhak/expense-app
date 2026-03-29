@@ -24,6 +24,7 @@ export 'payment_expectation_status.dart';
 export 'payment_settlement.dart';
 export 'payment_instrument.dart';
 export 'recurrence_expansion.dart';
+export 'recurring_materialized_edit_scope.dart';
 export 'recurrence_rule.dart';
 export 'recurring_expense_series_repository.dart';
 export 'payment_instrument_repository.dart';

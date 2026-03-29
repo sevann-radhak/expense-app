@@ -647,10 +647,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get incomeFromRecurringBanner =>
-      'This line comes from a recurring income series. Edits here apply only to this row. Change the series in Settings → Recurring series.';
+      'This line is from a repeating income series. Choose whether amount, categories, FX, and notes apply to this date only or to this date and all later materialized rows (earlier rows and the series default note in Settings stay unchanged for notes). Use the row menu to skip or delete.';
 
   @override
-  String get incomeRecurringMenuTooltip => 'Scheduled income actions';
+  String get incomeRecurringMenuTooltip =>
+      'More actions for this scheduled income';
+
+  @override
+  String get recurringTileActionUpdate => 'Update…';
+
+  @override
+  String get recurringTileActionDelete => 'Delete…';
+
+  @override
+  String get recurringDeleteScopeTitle => 'Delete scheduled occurrence';
+
+  @override
+  String get recurringDeleteScopeBody =>
+      'Choose what to remove from your book.';
+
+  @override
+  String get recurringDeleteThisOccurrenceOnly => 'This occurrence only';
+
+  @override
+  String get recurringDeleteThisAndFuture => 'This and all later occurrences';
+
+  @override
+  String get recurringFormApplyScopeTitle => 'Apply changes to';
+
+  @override
+  String get recurringFormApplyThisOccurrenceOnly => 'This date only';
+
+  @override
+  String get recurringFormApplyThisAndFuture => 'This date and later rows';
+
+  @override
+  String get recurringSeriesMissingForUpdate =>
+      'Could not load the recurring series to apply this change.';
 
   @override
   String get incomeRecurringActionConfirmReceived =>
@@ -680,10 +713,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expenseFromRecurringBanner =>
-      'This line comes from a recurring series. Edits here apply only to this row. Change the series in Settings → Recurring series.';
+      'This line is from a repeating expense. Choose whether amount, categories, card, FX, and notes apply to this date only or to this date and all later materialized rows (earlier rows and the series default note in Settings stay unchanged for notes). Use the row menu to skip or delete.';
 
   @override
-  String get recurringMenuTooltip => 'Scheduled expense actions';
+  String get recurringMenuTooltip => 'More actions for this scheduled expense';
 
   @override
   String get recurringActionConfirmPaid => 'Mark paid (on schedule)';

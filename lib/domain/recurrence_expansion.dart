@@ -2,6 +2,45 @@ import 'package:expense_app/domain/expense.dart';
 import 'package:expense_app/domain/expense_inclusion.dart';
 import 'package:expense_app/domain/recurrence_rule.dart';
 
+/// Last calendar occurrence strictly before [beforeDateExclusive] (same local calendar rules as [expandRecurrenceOccurrences]).
+DateTime? lastRecurrenceOccurrenceStrictlyBefore({
+  required DateTime anchor,
+  required RecurrenceRule rule,
+  required RecurrenceEndCondition endCondition,
+  required DateTime beforeDateExclusive,
+}) {
+  final b = calendarDateOnly(beforeDateExclusive);
+  final a = calendarDateOnly(anchor);
+  final cap = b.subtract(const Duration(days: 1));
+  if (cap.isBefore(a)) {
+    return null;
+  }
+  final dates = expandRecurrenceOccurrences(
+    anchor: anchor,
+    rule: rule,
+    endCondition: endCondition,
+    capEndInclusive: cap,
+  );
+  return dates.isEmpty ? null : dates.last;
+}
+
+/// Narrows the series end so nothing occurs after [untilInclusive] (inclusive cap).
+RecurrenceEndCondition mergeRecurrenceEndWithUntilInclusive(
+  RecurrenceEndCondition current,
+  DateTime untilInclusive,
+) {
+  final c = calendarDateOnly(untilInclusive);
+  switch (current) {
+    case RecurrenceEndNever():
+      return RecurrenceEndUntilDate(untilDate: c);
+    case RecurrenceEndUntilDate(:final untilDate):
+      final u = calendarDateOnly(untilDate);
+      return RecurrenceEndUntilDate(untilDate: u.isBefore(c) ? u : c);
+    case RecurrenceEndAfterCount():
+      return RecurrenceEndUntilDate(untilDate: c);
+  }
+}
+
 /// Upper bound for generated dates: last calendar day of the month that is
 /// [horizonMonths] months after [referenceDate]'s month (local calendar).
 DateTime recurrenceMaterializationHorizonEndInclusive(

@@ -85,4 +85,25 @@ void main() {
       expect(end, DateTime(2026, 3, 31));
     });
   });
+
+  group('lastRecurrenceOccurrenceStrictlyBefore', () {
+    test('monthly: day before April 10 yields March 10', () {
+      final prev = lastRecurrenceOccurrenceStrictlyBefore(
+        anchor: DateTime(2026, 1, 10),
+        rule: const RecurrenceMonthlyByCalendarDay(calendarDay: 10),
+        endCondition: const RecurrenceEndNever(),
+        beforeDateExclusive: DateTime(2026, 4, 10),
+      );
+      expect(prev, DateTime(2026, 3, 10));
+    });
+
+    test('mergeRecurrenceEndWithUntilDate picks earlier end', () {
+      final m = mergeRecurrenceEndWithUntilInclusive(
+        RecurrenceEndUntilDate(untilDate: DateTime(2026, 6, 30)),
+        DateTime(2026, 3, 10),
+      );
+      expect(m, isA<RecurrenceEndUntilDate>());
+      expect((m as RecurrenceEndUntilDate).untilDate, DateTime(2026, 3, 10));
+    });
+  });
 }

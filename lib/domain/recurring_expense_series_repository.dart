@@ -6,13 +6,18 @@ abstract class RecurringExpenseSeriesRepository {
 
   Future<ExpenseRecurringSeries?> getById(String id);
 
-  /// Deletes materialized rows for [seriesId] with [occurredOn] strictly after
-  /// [todayDateOnly], then inserts missing occurrences through the rolling horizon.
+  /// Refills materialized rows strictly after [todayDateOnly] from the series template.
+  ///
+  /// When [rematerializeOccurrencesOnOrAfter] is set (e.g. “this date and later” save),
+  /// only rows with [occurredOn] **on or after** that calendar date are removed and
+  /// recreated. Earlier future rows (still after today but before the cutoff) are left
+  /// unchanged.
   ///
   /// No-op when the series is inactive.
   Future<void> rematerializeForward({
     required String seriesId,
     required DateTime todayDateOnly,
+    DateTime? rematerializeOccurrencesOnOrAfter,
   });
 
   Stream<List<ExpenseRecurringSeries>> watchAll();
@@ -22,6 +27,21 @@ abstract class RecurringExpenseSeriesRepository {
   Future<void> deactivateSeries({
     required String seriesId,
     required DateTime todayDateOnly,
+  });
+
+  /// Same as [RecurringIncomeSeriesRepository.trimSeriesFromOccurrenceDate] for expenses.
+  Future<void> trimSeriesFromOccurrenceDate({
+    required String seriesId,
+    required DateTime fromOccurredOnDateOnly,
+    required DateTime todayDateOnly,
+  });
+
+  /// Same as income [updateSeriesTemplateAndMaterializedFromDate] for expenses.
+  Future<void> updateSeriesTemplateAndMaterializedFromDate({
+    required ExpenseRecurringSeries updatedSeries,
+    required DateTime fromOccurredOnDateOnly,
+    required DateTime todayDateOnly,
+    required String occurrenceNoteFromEditedDate,
   });
 }
 

@@ -10,8 +10,8 @@ import 'package:expense_app/presentation/home/recurring_expense_menu_handler.dar
 import 'package:expense_app/presentation/providers/providers.dart';
 import 'package:expense_app/presentation/widgets/month_cashflow_summary_card.dart';
 
-class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+class ExpensesScreen extends ConsumerWidget {
+  const ExpensesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -36,7 +36,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    appRouter.go('/home');
+    appRouter.go('/expenses');
     await tester.pumpAndSettle();
   }
 

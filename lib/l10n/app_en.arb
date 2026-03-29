@@ -4,7 +4,7 @@
   "@appTitle": {
     "description": "Application title (window switcher, toolbars)."
   },
-  "navHome": "Home",
+  "navHome": "Expenses",
   "@navHome": {
     "description": "Bottom navigation / rail label for home."
   },
@@ -285,9 +285,9 @@
   "@categoryEditDescriptionTooltip": {
     "description": "Tooltip for edit actions on category and subcategory rows."
   },
-  "homeTitle": "Home",
+  "homeTitle": "Expenses",
   "@homeTitle": {
-    "description": "App bar title on the home route."
+    "description": "App bar title on the monthly expenses route."
   },
   "homeEmptyState": "No expenses for this month yet. Lists and filters will appear here.",
   "@homeEmptyState": {
@@ -478,7 +478,7 @@
   "invalidSubcategoryPairing": "That subcategory does not belong to the selected category.",
   "addExpenseTooltip": "Add expense",
   "expenseListCardBadge": "Card",
-  "expensesThisMonthHeading": "Transactions",
+  "expensesThisMonthHeading": "Expense items",
   "monthSummaryTitle": "Month totals",
   "@monthSummaryTitle": {
     "description": "Heading for per-currency spend summary on the home screen."

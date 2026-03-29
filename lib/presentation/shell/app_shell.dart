@@ -29,8 +29,8 @@ class AppShell extends StatelessWidget {
                   : NavigationRailLabelType.selected,
               destinations: [
                 NavigationRailDestination(
-                  icon: const Icon(Icons.home_outlined),
-                  selectedIcon: const Icon(Icons.home),
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  selectedIcon: const Icon(Icons.receipt_long),
                   label: Text(l10n.navHome),
                 ),
                 NavigationRailDestination(
@@ -69,8 +69,8 @@ class AppShell extends StatelessWidget {
         onDestinationSelected: navigationShell.goBranch,
         destinations: [
           NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home),
+            icon: const Icon(Icons.receipt_long_outlined),
+            selectedIcon: const Icon(Icons.receipt_long),
             label: l10n.navHome,
           ),
           NavigationDestination(

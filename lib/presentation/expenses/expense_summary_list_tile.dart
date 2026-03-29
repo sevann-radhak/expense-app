@@ -72,6 +72,8 @@ class ExpenseSummaryListTile extends StatelessWidget {
     final menu = showRecurringOverflowMenu && onRecurringMenuAction != null
         ? PopupMenuButton<RecurringExpenseTileAction>(
             tooltip: l10n.recurringMenuTooltip,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints.tightFor(width: 36, height: 36),
             onSelected: onRecurringMenuAction,
             itemBuilder: (ctx) => [
               PopupMenuItem(
@@ -109,7 +111,7 @@ class ExpenseSummaryListTile extends StatelessWidget {
     final inner = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (categoryId != null) ...[
             Container(
@@ -144,7 +146,7 @@ class ExpenseSummaryListTile extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (expectationChip != null)
+                if (expectationChip != null && !showSettlementControl)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Semantics(
@@ -175,32 +177,38 @@ class ExpenseSummaryListTile extends StatelessWidget {
               ],
             ),
           ),
-          if (showSettlementControl)
-            Padding(
-              padding: const EdgeInsets.only(left: 8, right: 2),
-              child: ListRowSettlementSegmented(
-                settled: settlementSelected,
-                settledLabel: l10n.paymentExpectationConfirmedShort,
-                unsettledLabel: l10n.paymentExpectationExpectedShort,
-                onChanged: (v) => onSettlementToggle!(v),
-              ),
-            ),
           Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                originalLabel,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+              if (showSettlementControl)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, right: 12),
+                  child: ListRowSettlementSegmented(
+                    settled: settlementSelected,
+                    settledLabel: l10n.paymentExpectationConfirmedShort,
+                    unsettledLabel: l10n.paymentExpectationExpectedShort,
+                    onChanged: (v) => onSettlementToggle!(v),
+                  ),
                 ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    originalLabel,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(usdLabel, style: theme.textTheme.titleSmall),
+                  if (menu != null) ...[
+                    const SizedBox(width: 2),
+                    menu,
+                  ],
+                ],
               ),
-              const SizedBox(width: 10),
-              Text(usdLabel, style: theme.textTheme.titleSmall),
-              if (menu != null) ...[
-                const SizedBox(width: 2),
-                menu,
-              ],
             ],
           ),
         ],

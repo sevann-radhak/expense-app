@@ -12,7 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Expense Tracker';
 
   @override
-  String get navHome => 'Home';
+  String get navHome => 'Expenses';
 
   @override
   String get navSettings => 'Settings';
@@ -290,7 +290,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryEditDescriptionTooltip => 'Edit note';
 
   @override
-  String get homeTitle => 'Home';
+  String get homeTitle => 'Expenses';
 
   @override
   String get homeEmptyState =>
@@ -496,7 +496,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseListCardBadge => 'Card';
 
   @override
-  String get expensesThisMonthHeading => 'Transactions';
+  String get expensesThisMonthHeading => 'Expense items';
 
   @override
   String get monthSummaryTitle => 'Month totals';

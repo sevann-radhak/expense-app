@@ -103,7 +103,7 @@ abstract class AppLocalizations {
   /// Bottom navigation / rail label for home.
   ///
   /// In en, this message translates to:
-  /// **'Home'**
+  /// **'Expenses'**
   String get navHome;
 
   /// Bottom navigation / rail label for settings.
@@ -602,10 +602,10 @@ abstract class AppLocalizations {
   /// **'Edit note'**
   String get categoryEditDescriptionTooltip;
 
-  /// App bar title on the home route.
+  /// App bar title on the monthly expenses route.
   ///
   /// In en, this message translates to:
-  /// **'Home'**
+  /// **'Expenses'**
   String get homeTitle;
 
   /// Empty state on the home screen before expense data exists.
@@ -977,7 +977,7 @@ abstract class AppLocalizations {
   /// No description provided for @expensesThisMonthHeading.
   ///
   /// In en, this message translates to:
-  /// **'Transactions'**
+  /// **'Expense items'**
   String get expensesThisMonthHeading;
 
   /// Heading for per-currency spend summary on the home screen.

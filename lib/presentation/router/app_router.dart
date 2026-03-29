@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import 'package:expense_app/presentation/categories/categories_screen.dart';
-import 'package:expense_app/presentation/home/home_screen.dart';
+import 'package:expense_app/presentation/expenses/expenses_screen.dart';
 import 'package:expense_app/presentation/income/income_screen.dart';
 import 'package:expense_app/presentation/reports/reports_screen.dart';
 import 'package:expense_app/presentation/settings/settings_screen.dart';
@@ -11,8 +11,12 @@ import 'package:expense_app/presentation/shell/app_shell.dart';
 const double kNavigationRailBreakpointWidth = 720;
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/expenses',
   routes: [
+    GoRoute(
+      path: '/home',
+      redirect: (context, state) => '/expenses',
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return AppShell(navigationShell: navigationShell);
@@ -21,9 +25,9 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/home',
+              path: '/expenses',
               pageBuilder: (context, state) =>
-                  const NoTransitionPage<void>(child: HomeScreen()),
+                  const NoTransitionPage<void>(child: ExpensesScreen()),
             ),
           ],
         ),

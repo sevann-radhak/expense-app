@@ -45,9 +45,7 @@ void main() {
     await resetLocalDatabaseToInitialState(db);
 
     expect(await db.select(db.expenses).get(), isEmpty);
-    final instruments = await db.select(db.paymentInstruments).get();
-    expect(instruments.length, 2);
-    expect(instruments.map((r) => r.label).toSet(), {'Naranja', 'Galicia'});
+    expect(await db.select(db.paymentInstruments).get(), isEmpty);
     final cats = await db.select(db.categories).get();
     expect(cats.length, 8);
   });

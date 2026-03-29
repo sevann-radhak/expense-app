@@ -3,7 +3,6 @@ import 'package:drift_flutter/drift_flutter.dart';
 
 import 'package:expense_app/data/local/category_seed.dart';
 import 'package:expense_app/data/local/income_category_seed.dart';
-import 'package:expense_app/data/local/payment_instrument_seed.dart';
 import 'package:expense_app/domain/expense.dart';
 import 'package:expense_app/domain/expense_inclusion.dart';
 import 'package:expense_app/domain/payment_expectation_status.dart';
@@ -834,7 +833,6 @@ Future<AppDatabase> initializeAppDatabase() async {
   await db.ensureExpensePaymentExpectationColumns();
   await db.ensurePaymentInstrumentV2Columns();
   await db.ensureExpenseInstallmentColumns();
-  await PaymentInstrumentSeeder.ensureSeedData(db);
   await db.backfillPaymentInstrumentDefaultsIfNeeded();
   await db.ensureIncomeTaxonomyDescriptionColumns();
   await db.ensureIncomeRecurringSeriesColumns();

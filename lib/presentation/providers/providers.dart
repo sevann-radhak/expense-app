@@ -4,6 +4,7 @@ import 'package:expense_app/data/local/app_database.dart';
 import 'package:expense_app/data/local/app_database_reset.dart';
 import 'package:expense_app/data/local/example_expenses_seed.dart';
 import 'package:expense_app/data/local/example_incomes_seed.dart';
+import 'package:expense_app/data/local/payment_instrument_seed.dart';
 import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/data/local/drift_category_repository.dart';
 import 'package:expense_app/data/local/drift_expense_repository.dart';
@@ -159,6 +160,7 @@ Future<void> populateExampleDemoData(WidgetRef ref) async {
   final db = ref.read(appDatabaseProvider);
   await populateExampleExpenses(db);
   await populateExampleIncomes(db);
+  await PaymentInstrumentSeeder.populateExamplePaymentInstruments(db);
 }
 
 /// First day of the currently selected calendar month (local).

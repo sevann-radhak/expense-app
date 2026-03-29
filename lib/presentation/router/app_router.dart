@@ -11,7 +11,6 @@ import 'package:expense_app/presentation/shell/app_shell.dart';
 /// Narrow layouts use a bottom [NavigationBar]; wider layouts use [NavigationRail].
 const double kNavigationRailBreakpointWidth = 720;
 
-/// One key per [StatefulShellBranch] (same order as [appRouter] branches).
 final List<GlobalKey<NavigatorState>> kShellBranchNavigatorKeys = [
   GlobalKey<NavigatorState>(debugLabel: 'shellBranchExpenses'),
   GlobalKey<NavigatorState>(debugLabel: 'shellBranchIncome'),
@@ -20,7 +19,6 @@ final List<GlobalKey<NavigatorState>> kShellBranchNavigatorKeys = [
   GlobalKey<NavigatorState>(debugLabel: 'shellBranchSettings'),
 ];
 
-/// Pops popup menus and other branch-local overlay routes so they do not survive tab switches.
 void popShellBranchOverlayRoutes() {
   for (final key in kShellBranchNavigatorKeys) {
     final nav = key.currentState;

@@ -5,10 +5,9 @@ import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/formatting/payment_expectation_display.dart';
 import 'package:expense_app/presentation/expenses/recurring_expense_ui.dart';
-import 'package:expense_app/presentation/theme/category_accent_colors.dart';
+import 'package:expense_app/presentation/widgets/cashflow_summary_list_row.dart';
 import 'package:expense_app/presentation/widgets/list_row_settlement_segmented.dart';
 
-/// Compact expense row (category, subcategory, date, amounts) for lists.
 class ExpenseSummaryListTile extends StatelessWidget {
   const ExpenseSummaryListTile({
     required this.expense,
@@ -27,22 +26,12 @@ class ExpenseSummaryListTile extends StatelessWidget {
   final Expense expense;
   final String categoryName;
   final String subcategoryName;
-
-  /// When set, shows a left accent bar using the shared category palette.
   final String? categoryId;
   final VoidCallback? onTap;
-
-  /// When true and [onRecurringMenuAction] is set, shows a menu for scheduled recurring rows.
   final bool showRecurringOverflowMenu;
   final void Function(RecurringExpenseTileAction action)? onRecurringMenuAction;
-
-  /// Resolved card profile label when [Expense.paidWithCreditCard].
   final String? paymentInstrumentLabel;
-
-  /// Slightly dims the row (e.g. future scheduled expenses).
   final bool emphasizeAsScheduled;
-
-  /// Paid vs expected; shown on the row when non-null and line is not skipped/waived.
   final Future<void> Function(bool settled)? onSettlementToggle;
 
   @override
@@ -94,14 +83,7 @@ class ExpenseSummaryListTile extends StatelessWidget {
                 child: Text(l10n.recurringTileActionDelete),
               ),
             ],
-            // Compact icon; do not use [constraints] — it limits the *menu* panel.
-            child: const SizedBox(
-              width: 36,
-              height: 36,
-              child: Center(
-                child: Icon(Icons.more_vert, size: 22),
-              ),
-            ),
+            child: kListRowOverflowMenuIconChild,
           )
         : null;
 
@@ -111,7 +93,8 @@ class ExpenseSummaryListTile extends StatelessWidget {
         expense.effectivePaymentExpectationStatus ==
             PaymentExpectationStatus.confirmedPaid;
 
-    final cardSuffix = paymentInstrumentLabel != null && paymentInstrumentLabel!.isNotEmpty
+    final cardSuffix = paymentInstrumentLabel != null &&
+            paymentInstrumentLabel!.isNotEmpty
         ? ' · ${l10n.expenseListCardLabel(paymentInstrumentLabel!)}'
         : (expense.paidWithCreditCard ? ' · ${l10n.expenseListCardBadge}' : '');
 
@@ -120,17 +103,8 @@ class ExpenseSummaryListTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (categoryId != null) ...[
-            Container(
-              width: 4,
-              constraints: const BoxConstraints(minHeight: 40),
-              decoration: BoxDecoration(
-                color: categoryAccentColor(categoryId!),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
+          if (categoryId != null)
+            ListRowCategoryLeadingAccent(categoryId: categoryId!),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,39 +158,18 @@ class ExpenseSummaryListTile extends StatelessWidget {
               ],
             ),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (showSettlementControl)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8, right: 12),
-                  child: ListRowSettlementSegmented(
+          CashflowSummaryTrailing(
+            settlement: showSettlementControl
+                ? ListRowSettlementSegmented(
                     settled: settlementSelected,
                     settledLabel: l10n.paymentExpectationConfirmedShort,
                     unsettledLabel: l10n.paymentExpectationExpectedShort,
                     onChanged: (v) => onSettlementToggle!(v),
-                  ),
-                ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    originalLabel,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(usdLabel, style: theme.textTheme.titleSmall),
-                  if (menu != null) ...[
-                    const SizedBox(width: 2),
-                    menu,
-                  ],
-                ],
-              ),
-            ],
+                  )
+                : null,
+            originalLabel: originalLabel,
+            usdLabel: usdLabel,
+            menu: menu,
           ),
         ],
       ),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Compact two-segment control for list rows (Paid/Expected or Received/Expected).
-///
-/// The settled side (true) uses high-contrast [ColorScheme.primary] when selected.
+/// Paid/Expected (or Received/Expected) control; settled side uses [ColorScheme.primary].
 class ListRowSettlementSegmented extends StatelessWidget {
   const ListRowSettlementSegmented({
     super.key,

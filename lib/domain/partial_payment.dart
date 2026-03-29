@@ -1,7 +1,4 @@
-// Partial settlement of an expense across multiple payments.
-// Product spec: docs/04-phase-4-analysis.md §8. Phase 4.8: interfaces only (no persistence).
-
-/// One recorded partial settlement toward an expense (USD snapshot).
+/// One partial settlement toward an expense (USD). See `docs/04-phase-4-analysis.md` §8; no Drift in Phase 4.
 class PartialPayment {
   const PartialPayment({
     required this.id,
@@ -15,12 +12,10 @@ class PartialPayment {
   final String expenseId;
   final double amountUsd;
 
-  /// Calendar date only (local).
   final DateTime paidOn;
   final String note;
 }
 
-/// Future repository for partial payments; not wired to Drift in Phase 4.
 abstract class PartialPaymentRepository {
   Stream<List<PartialPayment>> watchForExpense(String expenseId);
 

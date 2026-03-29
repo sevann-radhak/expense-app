@@ -5,7 +5,7 @@ import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/formatting/payment_expectation_display.dart';
 import 'package:expense_app/presentation/incomes/recurring_income_ui.dart';
-import 'package:expense_app/presentation/theme/category_accent_colors.dart';
+import 'package:expense_app/presentation/widgets/cashflow_summary_list_row.dart';
 import 'package:expense_app/presentation/widgets/list_row_settlement_segmented.dart';
 
 class IncomeSummaryListTile extends StatelessWidget {
@@ -24,13 +24,8 @@ class IncomeSummaryListTile extends StatelessWidget {
   final String categoryName;
   final String subcategoryName;
   final String? categoryId;
-
-  /// Edit (always); skip/delete when the row is part of a recurring series.
   final void Function(IncomeSummaryTileMenuAction action)? onMenuAction;
-
   final bool emphasizeAsScheduled;
-
-  /// Paid/received vs expected; shown on the row when non-null and line is not skipped/waived.
   final Future<void> Function(bool settled)? onSettlementToggle;
 
   @override
@@ -85,13 +80,7 @@ class IncomeSummaryListTile extends StatelessWidget {
                 ),
               ],
             ],
-            child: const SizedBox(
-              width: 36,
-              height: 36,
-              child: Center(
-                child: Icon(Icons.more_vert, size: 22),
-              ),
-            ),
+            child: kListRowOverflowMenuIconChild,
           )
         : null;
 
@@ -106,17 +95,8 @@ class IncomeSummaryListTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (categoryId != null) ...[
-            Container(
-              width: 4,
-              constraints: const BoxConstraints(minHeight: 40),
-              decoration: BoxDecoration(
-                color: categoryAccentColor(categoryId!),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
+          if (categoryId != null)
+            ListRowCategoryLeadingAccent(categoryId: categoryId!),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,14 +111,17 @@ class IncomeSummaryListTile extends StatelessWidget {
                 if (expectationChip != null && !showSettlementControl)
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Chip(
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      label: Text(
-                        expectationChip,
-                        style: theme.textTheme.labelSmall,
+                    child: Semantics(
+                      label: expectationChip,
+                      child: Chip(
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        label: Text(
+                          expectationChip,
+                          style: theme.textTheme.labelSmall,
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                   ),
                 if (note.isNotEmpty)
@@ -156,39 +139,18 @@ class IncomeSummaryListTile extends StatelessWidget {
               ],
             ),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (showSettlementControl)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8, right: 12),
-                  child: ListRowSettlementSegmented(
+          CashflowSummaryTrailing(
+            settlement: showSettlementControl
+                ? ListRowSettlementSegmented(
                     settled: settlementSelected,
                     settledLabel: l10n.incomeFormSettlementReceived,
                     unsettledLabel: l10n.paymentExpectationExpectedShort,
                     onChanged: (v) => onSettlementToggle!(v),
-                  ),
-                ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    originalLabel,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(usdLabel, style: theme.textTheme.titleSmall),
-                  if (menu != null) ...[
-                    const SizedBox(width: 2),
-                    menu,
-                  ],
-                ],
-              ),
-            ],
+                  )
+                : null,
+            originalLabel: originalLabel,
+            usdLabel: usdLabel,
+            menu: menu,
           ),
         ],
       ),

@@ -1,29 +1,126 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
+import 'package:expense_app/presentation/settings/settings_card_profiles_section.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
+  static const _languageSystemValue = '';
+  static const _languageEnglishValue = 'en';
+  static const _currencyCatalogDefaultValue = '';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final settings = ref.watch(appUserSettingsProvider);
+    final settingsNotifier = ref.read(appUserSettingsProvider.notifier);
+    final asyncCatalog = ref.watch(defaultFxCatalogProvider);
+
+    final languageValue = settings.localeLanguageCode == null
+        ? _languageSystemValue
+        : _languageEnglishValue;
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560),
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  l10n.settingsPlaceholder,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                  l10n.settingsPreferencesSectionTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  key: ValueKey<String>('settings_lang_${settings.localeLanguageCode}'),
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: l10n.settingsLanguageLabel,
+                    border: const OutlineInputBorder(),
+                  ),
+                  initialValue: languageValue,
+                  items: [
+                    DropdownMenuItem(
+                      value: _languageSystemValue,
+                      child: Text(l10n.settingsLanguageSystem),
+                    ),
+                    DropdownMenuItem(
+                      value: _languageEnglishValue,
+                      child: Text(l10n.settingsLanguageEnglish),
+                    ),
+                  ],
+                  onChanged: (v) {
+                    if (v == null) {
+                      return;
+                    }
+                    final code = v.isEmpty ? null : v;
+                    settingsNotifier.setLocaleLanguageCode(code);
+                  },
+                ),
+                const SizedBox(height: 16),
+                asyncCatalog.when(
+                  loading: () => const SizedBox(height: 56),
+                  error: (e, _) => Text('$e'),
+                  data: (DefaultFxCatalog catalog) {
+                    final currencyValue = _currencyDropdownValue(
+                      settings.defaultCurrencyCode,
+                      catalog,
+                    );
+                    return DropdownButtonFormField<String>(
+                      key: ValueKey<String>('settings_ccy_$currencyValue'),
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        labelText: l10n.settingsDefaultCurrencyLabel,
+                        border: const OutlineInputBorder(),
+                      ),
+                      initialValue: currencyValue,
+                      items: [
+                        DropdownMenuItem(
+                          value: _currencyCatalogDefaultValue,
+                          child: Text(
+                            l10n.settingsDefaultCurrencyCatalogDefault(
+                              catalog.defaultCurrencyCode.toUpperCase(),
+                            ),
+                          ),
+                        ),
+                        ...catalog.currencies.map(
+                          (c) => DropdownMenuItem(
+                            value: c.code,
+                            child: Text(c.menuLabel),
+                          ),
+                        ),
+                      ],
+                      onChanged: (v) {
+                        if (v == null) {
+                          return;
+                        }
+                        final code = v.isEmpty ? null : v;
+                        settingsNotifier.setDefaultCurrencyCode(code);
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: 32),
+                const SettingsCardProfilesSection(),
+                const SizedBox(height: 32),
+                Text(
+                  l10n.settingsAccountSectionTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.settingsAccountPlaceholder,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 32),
                 Text(
@@ -123,4 +220,17 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _currencyDropdownValue(
+  String? stored,
+  DefaultFxCatalog catalog,
+) {
+  if (stored == null || stored.isEmpty) {
+    return SettingsScreen._currencyCatalogDefaultValue;
+  }
+  if (catalog.optionForCode(stored) == null) {
+    return SettingsScreen._currencyCatalogDefaultValue;
+  }
+  return stored.toUpperCase();
 }

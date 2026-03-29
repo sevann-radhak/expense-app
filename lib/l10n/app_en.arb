@@ -162,9 +162,119 @@
   "@settingsTitle": {
     "description": "App bar title on the settings route."
   },
-  "settingsPlaceholder": "Language, currency, and card profiles will be configured here.",
-  "@settingsPlaceholder": {
-    "description": "Placeholder body on the settings screen."
+  "settingsPreferencesSectionTitle": "Preferences",
+  "@settingsPreferencesSectionTitle": {
+    "description": "Heading for locale and default currency controls."
+  },
+  "settingsLanguageLabel": "Language",
+  "@settingsLanguageLabel": {
+    "description": "Label for the app language dropdown."
+  },
+  "settingsLanguageSystem": "System default",
+  "@settingsLanguageSystem": {
+    "description": "Use the device locale for formatting and UI language when supported."
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "Force English UI and formatting locale."
+  },
+  "settingsDefaultCurrencyLabel": "Default currency for new expenses",
+  "@settingsDefaultCurrencyLabel": {
+    "description": "Label for default ISO currency when opening the add-expense form."
+  },
+  "settingsDefaultCurrencyCatalogDefault": "Use table default ({code})",
+  "@settingsDefaultCurrencyCatalogDefault": {
+    "description": "Dropdown entry meaning the JSON FX table default applies.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAccountSectionTitle": "Account",
+  "@settingsAccountSectionTitle": {
+    "description": "Heading for future sign-in / sync (placeholder)."
+  },
+  "settingsAccountPlaceholder": "Sign-in and multi-device sync are planned for a later phase.",
+  "@settingsAccountPlaceholder": {
+    "description": "Short note under Account while auth is out of scope."
+  },
+  "settingsPaymentInstrumentsSectionTitle": "Card profiles",
+  "@settingsPaymentInstrumentsSectionTitle": {
+    "description": "Heading for credit card metadata list (no card numbers)."
+  },
+  "settingsPaymentInstrumentsDescription": "Store labels, bank, billing cycle, and fee notes for your cards. Card numbers are never stored.",
+  "@settingsPaymentInstrumentsDescription": {
+    "description": "Explains card profile scope and privacy."
+  },
+  "settingsPaymentInstrumentAdd": "Add card profile",
+  "@settingsPaymentInstrumentAdd": {
+    "description": "Button to create a payment instrument row."
+  },
+  "settingsPaymentInstrumentEditTitle": "Edit card profile",
+  "@settingsPaymentInstrumentEditTitle": {
+    "description": "Dialog title when editing metadata."
+  },
+  "settingsPaymentInstrumentCreateTitle": "New card profile",
+  "@settingsPaymentInstrumentCreateTitle": {
+    "description": "Dialog title for a new profile."
+  },
+  "settingsPaymentInstrumentLabel": "Label",
+  "@settingsPaymentInstrumentLabel": {
+    "description": "Display name for the card profile."
+  },
+  "settingsPaymentInstrumentBank": "Bank / issuer (optional)",
+  "@settingsPaymentInstrumentBank": {
+    "description": "Optional institution name."
+  },
+  "settingsPaymentInstrumentBillingDay": "Billing cycle day (1–31, optional)",
+  "@settingsPaymentInstrumentBillingDay": {
+    "description": "Day of month for statement or cycle close."
+  },
+  "settingsPaymentInstrumentAnnualFee": "Annual fee (optional)",
+  "@settingsPaymentInstrumentAnnualFee": {
+    "description": "Numeric annual fee in your default currency."
+  },
+  "settingsPaymentInstrumentMonthlyFee": "Monthly fee (optional)",
+  "@settingsPaymentInstrumentMonthlyFee": {
+    "description": "Numeric monthly fee."
+  },
+  "settingsPaymentInstrumentFeeDescription": "Fee notes (optional)",
+  "@settingsPaymentInstrumentFeeDescription": {
+    "description": "Free text for percentage fees or surcharges."
+  },
+  "settingsPaymentInstrumentSave": "Save profile",
+  "@settingsPaymentInstrumentSave": {
+    "description": "Confirm save in card profile dialog."
+  },
+  "settingsPaymentInstrumentDeleteTitle": "Delete this card profile?",
+  "@settingsPaymentInstrumentDeleteTitle": {
+    "description": "Confirm delete dialog title."
+  },
+  "settingsPaymentInstrumentDeleteMessage": "Expenses are not deleted; any link to this profile will need to be cleared separately later.",
+  "@settingsPaymentInstrumentDeleteMessage": {
+    "description": "Explains delete scope before paymentInstrumentId on expenses exists."
+  },
+  "settingsPaymentInstrumentLabelRequired": "Enter a label.",
+  "@settingsPaymentInstrumentLabelRequired": {
+    "description": "Validation when label empty."
+  },
+  "settingsPaymentInstrumentBillingDayInvalid": "Use a day from 1 to 31, or leave empty.",
+  "@settingsPaymentInstrumentBillingDayInvalid": {
+    "description": "Validation for billing cycle day field."
+  },
+  "settingsPaymentInstrumentNoneYet": "No card profiles yet.",
+  "@settingsPaymentInstrumentNoneYet": {
+    "description": "Empty list hint under card profiles."
+  },
+  "settingsPaymentInstrumentCycleDaySummary": "Cycle day {day}",
+  "@settingsPaymentInstrumentCycleDaySummary": {
+    "description": "Subtitle fragment for billing day.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
   },
   "cannotDeleteReservedSubcategory": "This subcategory cannot be deleted.",
   "@cannotDeleteReservedSubcategory": {
@@ -214,6 +324,14 @@
     }
   },
   "expensePaidWithCardLabel": "Paid with credit card",
+  "expenseCardProfileLabel": "Card profile (optional)",
+  "@expenseCardProfileLabel": {
+    "description": "Dropdown to link expense to a stored card metadata profile."
+  },
+  "expenseCardProfileNone": "None",
+  "@expenseCardProfileNone": {
+    "description": "No card profile selected for a card-paid expense."
+  },
   "expenseCategoryRequired": "Choose a category.",
   "expenseSubcategoryRequired": "Choose a subcategory.",
   "expenseNoSubcategories": "No subcategories for this category.",

@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:expense_app/data/local/app_database.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
@@ -21,11 +22,15 @@ void main() {
   Future<void> pumpExpenseApp(
     WidgetTester tester, {
     required AppDatabase db,
+    SharedPreferences? prefs,
   }) async {
+    SharedPreferences.setMockInitialValues({});
+    final p = prefs ?? await SharedPreferences.getInstance();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
+          sharedPreferencesProvider.overrideWithValue(p),
         ],
         child: const ExpenseApp(),
       ),
@@ -118,7 +123,7 @@ void main() {
       await tester.tap(find.text(l10n.navSettings));
       await tester.pumpAndSettle();
 
-      expect(find.text(l10n.settingsPlaceholder), findsOneWidget);
+      expect(find.text(l10n.settingsPreferencesSectionTitle), findsOneWidget);
     } finally {
       await disposeUiAndDb(tester, db);
     }
@@ -143,7 +148,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text(l10n.settingsPlaceholder), findsOneWidget);
+      expect(find.text(l10n.settingsPreferencesSectionTitle), findsOneWidget);
     } finally {
       await disposeUiAndDb(tester, db);
     }

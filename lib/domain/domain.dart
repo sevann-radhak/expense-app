@@ -7,4 +7,6 @@ export 'category_repository.dart';
 export 'expense.dart';
 export 'expense_inclusion.dart';
 export 'expense_repository.dart';
+export 'payment_instrument.dart';
+export 'payment_instrument_repository.dart';
 export 'report_aggregates.dart';

@@ -74,11 +74,35 @@ class Expenses extends Table {
 
   TextColumn get description => text().withDefault(const Constant(''))();
 
+  /// Optional card profile id; validated in [DriftExpenseRepository].
+  TextColumn get paymentInstrumentId => text().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Categories, Subcategories, Expenses])
+/// Card / wallet profile for attribution only (no PAN, CVV, PIN).
+@DataClassName('PaymentInstrumentRow')
+class PaymentInstruments extends Table {
+  TextColumn get id => text()();
+
+  TextColumn get label => text()();
+
+  TextColumn get bankName => text().nullable()();
+
+  IntColumn get billingCycleDay => integer().nullable()();
+
+  RealColumn get annualFeeAmount => real().nullable()();
+
+  RealColumn get monthlyFeeAmount => real().nullable()();
+
+  TextColumn get feeDescription => text().withDefault(const Constant(''))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [Categories, Subcategories, Expenses, PaymentInstruments])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
@@ -95,7 +119,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -119,10 +143,17 @@ class AppDatabase extends _$AppDatabase {
           if (from < 6) {
             await ensureCategoryAndSubcategoryDescriptionColumns();
           }
+          if (from < 7) {
+            await m.createTable(paymentInstruments);
+          }
+          if (from < 8) {
+            await m.addColumn(expenses, expenses.paymentInstrumentId);
+          }
         },
         beforeOpen: (OpeningDetails details) async {
           await ensureExpenseDescriptionColumn();
           await ensureCategoryAndSubcategoryDescriptionColumns();
+          await ensureExpensePaymentInstrumentIdColumn();
         },
       );
 
@@ -147,6 +178,23 @@ class AppDatabase extends _$AppDatabase {
   }
 
   /// Ensures nullable taxonomy description columns (upgrades + WASM quirks).
+  Future<void> ensureExpensePaymentInstrumentIdColumn() async {
+    try {
+      await customStatement(
+        'ALTER TABLE expenses ADD COLUMN payment_instrument_id TEXT',
+      );
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('duplicate column') || msg.contains('already exists')) {
+        return;
+      }
+      if (msg.contains('no such table')) {
+        return;
+      }
+      rethrow;
+    }
+  }
+
   Future<void> ensureCategoryAndSubcategoryDescriptionColumns() async {
     const stmts = <String>[
       'ALTER TABLE categories ADD COLUMN description TEXT',
@@ -180,6 +228,7 @@ Future<AppDatabase> initializeAppDatabase() async {
   await db.customSelect('SELECT 1').getSingle();
   await db.ensureExpenseDescriptionColumn();
   await db.ensureCategoryAndSubcategoryDescriptionColumns();
+  await db.ensureExpensePaymentInstrumentIdColumn();
   _appDatabase = db;
   return db;
 }

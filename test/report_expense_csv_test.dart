@@ -33,7 +33,34 @@ void main() {
     expect(csv.contains('10.5'), isTrue);
     expect(csv.contains('ARS'), isTrue);
     expect(csv.contains('true'), isTrue);
-    expect(csv.contains('Note'), isTrue);
+    expect(csv.contains(',,Note'), isTrue);
+  });
+
+  test('buildReportExpensesCsv includes payment_instrument_id when set', () {
+    final expenses = [
+      Expense(
+        id: 'e1',
+        occurredOn: DateTime(2026, 2, 1),
+        categoryId: 'c1',
+        subcategoryId: 's1',
+        amountOriginal: 1,
+        currencyCode: 'USD',
+        manualFxRateToUsd: 1,
+        amountUsd: 1,
+        paidWithCreditCard: true,
+        paymentInstrumentId: 'pi_visa',
+        description: '',
+      ),
+    ];
+    final csv = buildReportExpensesCsv(
+      expenses: expenses,
+      categoryNames: {'c1': 'C'},
+      subcategoryNames: {'s1': 'S'},
+      unknownCategoryLabel: '?',
+      unknownSubcategoryLabel: '?',
+    );
+    final line = csv.trim().split('\n')[1];
+    expect(line, contains('true,pi_visa,'));
   });
 
   test('buildReportExpensesCsv escapes commas and quotes in description', () {

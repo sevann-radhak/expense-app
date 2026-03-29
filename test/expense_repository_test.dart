@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:expense_app/data/local/app_database.dart';
 import 'package:expense_app/data/local/drift_expense_repository.dart';
+import 'package:expense_app/data/local/drift_payment_instrument_repository.dart';
 import 'package:expense_app/domain/domain.dart';
 
 void main() {
@@ -53,6 +54,34 @@ void main() {
       paidWithCreditCard: false,
     );
   }
+
+  test('create rejects unknown paymentInstrumentId', () async {
+    expect(
+      () => repo.create(
+        sample(
+          id: 'e_pi',
+          occurredOn: DateTime(2025, 6, 10),
+        ).copyWith(
+          paidWithCreditCard: true,
+          paymentInstrumentId: 'missing_pi',
+        ),
+      ),
+      throwsA(isA<ArgumentError>()),
+    );
+  });
+
+  test('create and read paymentInstrumentId', () async {
+    final piRepo = DriftPaymentInstrumentRepository(db);
+    await piRepo.create(const PaymentInstrument(id: 'pi_x', label: 'Test card'));
+    await repo.create(
+      sample(id: 'e_pi', occurredOn: DateTime(2025, 6, 10)).copyWith(
+        paidWithCreditCard: true,
+        paymentInstrumentId: 'pi_x',
+      ),
+    );
+    final list = await repo.watchForMonth(2025, 6).first;
+    expect(list.single.paymentInstrumentId, 'pi_x');
+  });
 
   test('create rejects subcategory that does not match category', () async {
     expect(

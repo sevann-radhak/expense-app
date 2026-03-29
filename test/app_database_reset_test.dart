@@ -34,9 +34,18 @@ void main() {
     );
     expect(await db.select(db.expenses).get(), isNotEmpty);
 
+    await db.into(db.paymentInstruments).insert(
+          PaymentInstrumentsCompanion.insert(
+            id: 'pi_reset_test',
+            label: 'Test card',
+          ),
+        );
+    expect(await db.select(db.paymentInstruments).get(), isNotEmpty);
+
     await resetLocalDatabaseToInitialState(db);
 
     expect(await db.select(db.expenses).get(), isEmpty);
+    expect(await db.select(db.paymentInstruments).get(), isEmpty);
     final cats = await db.select(db.categories).get();
     expect(cats.length, 8);
   });

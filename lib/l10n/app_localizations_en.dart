@@ -163,8 +163,93 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
-  String get settingsPlaceholder =>
-      'Language, currency, and card profiles will be configured here.';
+  String get settingsPreferencesSectionTitle => 'Preferences';
+
+  @override
+  String get settingsLanguageLabel => 'Language';
+
+  @override
+  String get settingsLanguageSystem => 'System default';
+
+  @override
+  String get settingsLanguageEnglish => 'English';
+
+  @override
+  String get settingsDefaultCurrencyLabel =>
+      'Default currency for new expenses';
+
+  @override
+  String settingsDefaultCurrencyCatalogDefault(String code) {
+    return 'Use table default ($code)';
+  }
+
+  @override
+  String get settingsAccountSectionTitle => 'Account';
+
+  @override
+  String get settingsAccountPlaceholder =>
+      'Sign-in and multi-device sync are planned for a later phase.';
+
+  @override
+  String get settingsPaymentInstrumentsSectionTitle => 'Card profiles';
+
+  @override
+  String get settingsPaymentInstrumentsDescription =>
+      'Store labels, bank, billing cycle, and fee notes for your cards. Card numbers are never stored.';
+
+  @override
+  String get settingsPaymentInstrumentAdd => 'Add card profile';
+
+  @override
+  String get settingsPaymentInstrumentEditTitle => 'Edit card profile';
+
+  @override
+  String get settingsPaymentInstrumentCreateTitle => 'New card profile';
+
+  @override
+  String get settingsPaymentInstrumentLabel => 'Label';
+
+  @override
+  String get settingsPaymentInstrumentBank => 'Bank / issuer (optional)';
+
+  @override
+  String get settingsPaymentInstrumentBillingDay =>
+      'Billing cycle day (1–31, optional)';
+
+  @override
+  String get settingsPaymentInstrumentAnnualFee => 'Annual fee (optional)';
+
+  @override
+  String get settingsPaymentInstrumentMonthlyFee => 'Monthly fee (optional)';
+
+  @override
+  String get settingsPaymentInstrumentFeeDescription => 'Fee notes (optional)';
+
+  @override
+  String get settingsPaymentInstrumentSave => 'Save profile';
+
+  @override
+  String get settingsPaymentInstrumentDeleteTitle =>
+      'Delete this card profile?';
+
+  @override
+  String get settingsPaymentInstrumentDeleteMessage =>
+      'Expenses are not deleted; any link to this profile will need to be cleared separately later.';
+
+  @override
+  String get settingsPaymentInstrumentLabelRequired => 'Enter a label.';
+
+  @override
+  String get settingsPaymentInstrumentBillingDayInvalid =>
+      'Use a day from 1 to 31, or leave empty.';
+
+  @override
+  String get settingsPaymentInstrumentNoneYet => 'No card profiles yet.';
+
+  @override
+  String settingsPaymentInstrumentCycleDaySummary(int day) {
+    return 'Cycle day $day';
+  }
 
   @override
   String get cannotDeleteReservedSubcategory =>
@@ -232,6 +317,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expensePaidWithCardLabel => 'Paid with credit card';
+
+  @override
+  String get expenseCardProfileLabel => 'Card profile (optional)';
+
+  @override
+  String get expenseCardProfileNone => 'None';
 
   @override
   String get expenseCategoryRequired => 'Choose a category.';

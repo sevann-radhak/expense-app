@@ -382,11 +382,161 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settingsTitle;
 
-  /// Placeholder body on the settings screen.
+  /// Heading for locale and default currency controls.
   ///
   /// In en, this message translates to:
-  /// **'Language, currency, and card profiles will be configured here.'**
-  String get settingsPlaceholder;
+  /// **'Preferences'**
+  String get settingsPreferencesSectionTitle;
+
+  /// Label for the app language dropdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguageLabel;
+
+  /// Use the device locale for formatting and UI language when supported.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get settingsLanguageSystem;
+
+  /// Force English UI and formatting locale.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get settingsLanguageEnglish;
+
+  /// Label for default ISO currency when opening the add-expense form.
+  ///
+  /// In en, this message translates to:
+  /// **'Default currency for new expenses'**
+  String get settingsDefaultCurrencyLabel;
+
+  /// Dropdown entry meaning the JSON FX table default applies.
+  ///
+  /// In en, this message translates to:
+  /// **'Use table default ({code})'**
+  String settingsDefaultCurrencyCatalogDefault(String code);
+
+  /// Heading for future sign-in / sync (placeholder).
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get settingsAccountSectionTitle;
+
+  /// Short note under Account while auth is out of scope.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in and multi-device sync are planned for a later phase.'**
+  String get settingsAccountPlaceholder;
+
+  /// Heading for credit card metadata list (no card numbers).
+  ///
+  /// In en, this message translates to:
+  /// **'Card profiles'**
+  String get settingsPaymentInstrumentsSectionTitle;
+
+  /// Explains card profile scope and privacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Store labels, bank, billing cycle, and fee notes for your cards. Card numbers are never stored.'**
+  String get settingsPaymentInstrumentsDescription;
+
+  /// Button to create a payment instrument row.
+  ///
+  /// In en, this message translates to:
+  /// **'Add card profile'**
+  String get settingsPaymentInstrumentAdd;
+
+  /// Dialog title when editing metadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit card profile'**
+  String get settingsPaymentInstrumentEditTitle;
+
+  /// Dialog title for a new profile.
+  ///
+  /// In en, this message translates to:
+  /// **'New card profile'**
+  String get settingsPaymentInstrumentCreateTitle;
+
+  /// Display name for the card profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get settingsPaymentInstrumentLabel;
+
+  /// Optional institution name.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank / issuer (optional)'**
+  String get settingsPaymentInstrumentBank;
+
+  /// Day of month for statement or cycle close.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing cycle day (1–31, optional)'**
+  String get settingsPaymentInstrumentBillingDay;
+
+  /// Numeric annual fee in your default currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual fee (optional)'**
+  String get settingsPaymentInstrumentAnnualFee;
+
+  /// Numeric monthly fee.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly fee (optional)'**
+  String get settingsPaymentInstrumentMonthlyFee;
+
+  /// Free text for percentage fees or surcharges.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee notes (optional)'**
+  String get settingsPaymentInstrumentFeeDescription;
+
+  /// Confirm save in card profile dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Save profile'**
+  String get settingsPaymentInstrumentSave;
+
+  /// Confirm delete dialog title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this card profile?'**
+  String get settingsPaymentInstrumentDeleteTitle;
+
+  /// Explains delete scope before paymentInstrumentId on expenses exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses are not deleted; any link to this profile will need to be cleared separately later.'**
+  String get settingsPaymentInstrumentDeleteMessage;
+
+  /// Validation when label empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a label.'**
+  String get settingsPaymentInstrumentLabelRequired;
+
+  /// Validation for billing cycle day field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a day from 1 to 31, or leave empty.'**
+  String get settingsPaymentInstrumentBillingDayInvalid;
+
+  /// Empty list hint under card profiles.
+  ///
+  /// In en, this message translates to:
+  /// **'No card profiles yet.'**
+  String get settingsPaymentInstrumentNoneYet;
+
+  /// Subtitle fragment for billing day.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle day {day}'**
+  String settingsPaymentInstrumentCycleDaySummary(int day);
 
   /// Shown when the user tries to delete the system Other row.
   ///
@@ -507,6 +657,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Paid with credit card'**
   String get expensePaidWithCardLabel;
+
+  /// Dropdown to link expense to a stored card metadata profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Card profile (optional)'**
+  String get expenseCardProfileLabel;
+
+  /// No card profile selected for a card-paid expense.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get expenseCardProfileNone;
 
   /// No description provided for @expenseCategoryRequired.
   ///

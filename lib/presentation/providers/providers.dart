@@ -6,7 +6,10 @@ import 'package:expense_app/data/local/example_expenses_seed.dart';
 import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/data/local/drift_category_repository.dart';
 import 'package:expense_app/data/local/drift_expense_repository.dart';
+import 'package:expense_app/data/local/drift_payment_instrument_repository.dart';
 import 'package:expense_app/domain/domain.dart';
+
+export 'app_user_settings_provider.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   throw StateError('Override appDatabaseProvider in main() or tests.');
@@ -18,6 +21,18 @@ final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
 
 final expenseRepositoryProvider = Provider<ExpenseRepository>((ref) {
   return DriftExpenseRepository(ref.watch(appDatabaseProvider));
+});
+
+final paymentInstrumentRepositoryProvider =
+    Provider<PaymentInstrumentRepository>((ref) {
+  return DriftPaymentInstrumentRepository(ref.watch(appDatabaseProvider));
+});
+
+final paymentInstrumentsStreamProvider =
+    StreamProvider<List<PaymentInstrument>>((ref) {
+  return ref
+      .watch(paymentInstrumentRepositoryProvider)
+      .watchPaymentInstruments();
 });
 
 /// Static FX table from assets (replace with API later).

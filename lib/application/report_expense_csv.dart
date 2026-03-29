@@ -30,7 +30,7 @@ String buildReportExpensesCsv({
   const header =
       'occurred_on,category_id,category_name,subcategory_id,subcategory_name,'
       'amount_original,currency_code,fx_rate_to_usd,amount_usd,'
-      'paid_with_credit_card,description';
+      'paid_with_credit_card,payment_instrument_id,description';
 
   final sorted = List<Expense>.from(expenses)
     ..sort((a, b) {
@@ -57,6 +57,9 @@ String buildReportExpensesCsv({
       _csvDouble(e.manualFxRateToUsd),
       _csvDouble(e.amountUsd),
       e.paidWithCreditCard ? 'true' : 'false',
+      e.paymentInstrumentId == null
+          ? ''
+          : csvEscapeField(e.paymentInstrumentId!),
       csvEscapeField(e.description),
     ].join(',');
     buf.writeln(row);

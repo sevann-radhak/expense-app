@@ -74,7 +74,24 @@ class DriftExpenseRepository implements ExpenseRepository {
       amountUsd: r.amountUsd,
       paidWithCreditCard: r.paidWithCreditCard,
       description: r.description,
+      paymentInstrumentId: r.paymentInstrumentId,
     );
+  }
+
+  Future<void> _assertPaymentInstrumentIfSet(String? id) async {
+    if (id == null || id.isEmpty) {
+      return;
+    }
+    final row = await (_db.select(_db.paymentInstruments)
+          ..where((p) => p.id.equals(id)))
+        .getSingleOrNull();
+    if (row == null) {
+      throw ArgumentError.value(
+        id,
+        'paymentInstrumentId',
+        'Unknown payment instrument',
+      );
+    }
   }
 
   Future<void> _assertSubcategoryBelongsToCategory({
@@ -112,6 +129,7 @@ class DriftExpenseRepository implements ExpenseRepository {
       categoryId: expense.categoryId,
       subcategoryId: expense.subcategoryId,
     );
+    await _assertPaymentInstrumentIfSet(expense.paymentInstrumentId);
     final e = _withRecomputedUsd(expense);
     await _db.into(_db.expenses).insert(
           ExpensesCompanion.insert(
@@ -125,6 +143,7 @@ class DriftExpenseRepository implements ExpenseRepository {
             amountUsd: e.amountUsd,
             paidWithCreditCard: Value(e.paidWithCreditCard),
             description: Value(e.description),
+            paymentInstrumentId: Value(e.paymentInstrumentId),
           ),
         );
   }
@@ -142,6 +161,7 @@ class DriftExpenseRepository implements ExpenseRepository {
       categoryId: expense.categoryId,
       subcategoryId: expense.subcategoryId,
     );
+    await _assertPaymentInstrumentIfSet(expense.paymentInstrumentId);
     final e = _withRecomputedUsd(expense);
     final updated = await (_db.update(_db.expenses)..where((x) => x.id.equals(e.id)))
         .write(
@@ -155,6 +175,7 @@ class DriftExpenseRepository implements ExpenseRepository {
         amountUsd: Value(e.amountUsd),
         paidWithCreditCard: Value(e.paidWithCreditCard),
         description: Value(e.description),
+        paymentInstrumentId: Value(e.paymentInstrumentId),
       ),
     );
     if (updated == 0) {

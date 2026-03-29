@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:expense_app/data/local/app_user_settings_storage.dart';
 import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
@@ -17,8 +18,13 @@ class ExpenseFormDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(defaultFxCatalogProvider);
+    final userSettings = ref.watch(appUserSettingsProvider);
     return async.when(
-      data: (catalog) => _ExpenseFormLoaded(catalog: catalog, initial: initial),
+      data: (catalog) => _ExpenseFormLoaded(
+        catalog: catalog,
+        initial: initial,
+        userDefaultCurrencyCode: userSettings.defaultCurrencyCode,
+      ),
       loading: () => const AlertDialog(
         content: SizedBox(
           width: 200,
@@ -32,10 +38,17 @@ class ExpenseFormDialog extends ConsumerWidget {
 }
 
 class _ExpenseFormLoaded extends ConsumerStatefulWidget {
-  const _ExpenseFormLoaded({required this.catalog, this.initial});
+  const _ExpenseFormLoaded({
+    required this.catalog,
+    this.initial,
+    this.userDefaultCurrencyCode,
+  });
 
   final DefaultFxCatalog catalog;
   final Expense? initial;
+
+  /// Persisted preference; validated against [catalog] in [initState].
+  final String? userDefaultCurrencyCode;
 
   @override
   ConsumerState<_ExpenseFormLoaded> createState() => _ExpenseFormLoadedState();
@@ -53,6 +66,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
   String? _categoryId;
   String? _subcategoryId;
   bool _paidWithCreditCard = false;
+  String? _paymentInstrumentId;
   bool _appliedInitialAmountMask = false;
 
   @override
@@ -71,14 +85,36 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
           ? formatLocalUnitsPerUsdForField(1.0 / m)
           : formatLocalUnitsPerUsdForField(catalog.localUnitsPerUsdFor(_currencyCode));
       _paidWithCreditCard = i.paidWithCreditCard;
+      _paymentInstrumentId = i.paymentInstrumentId;
       _descriptionController.text = i.description;
     } else {
       final n = DateTime.now();
       _occurredOn = DateTime(n.year, n.month, n.day);
-      _currencyCode = catalog.defaultCurrencyCode;
+      _currencyCode = effectiveDefaultCurrencyForForm(
+        widget.userDefaultCurrencyCode,
+        catalog,
+      );
       _fxController.text = formatLocalUnitsPerUsdForField(
         catalog.localUnitsPerUsdFor(_currencyCode),
       );
+    }
+  }
+
+  void _applyCardPaymentSuggestion(List<PaymentInstrument> instruments) {
+    if (_paymentInstrumentId != null) {
+      return;
+    }
+    if (instruments.isEmpty) {
+      return;
+    }
+    final prefs = ref.read(sharedPreferencesProvider);
+    final last = AppUserSettingsStorage.readLastPaymentInstrumentId(prefs);
+    if (last != null && instruments.any((p) => p.id == last)) {
+      _paymentInstrumentId = last;
+      return;
+    }
+    if (instruments.length == 1) {
+      _paymentInstrumentId = instruments.single.id;
     }
   }
 
@@ -233,6 +269,8 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
       amountUsd: Expense.computeUsd(amount, manualFx),
       paidWithCreditCard: _paidWithCreditCard,
       description: _descriptionController.text.trim(),
+      paymentInstrumentId:
+          _paidWithCreditCard ? _paymentInstrumentId : null,
     );
 
     try {
@@ -240,6 +278,12 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
         await repo.create(expense);
       } else {
         await repo.update(expense);
+      }
+      if (expense.paidWithCreditCard && expense.paymentInstrumentId != null) {
+        await AppUserSettingsStorage.writeLastPaymentInstrumentId(
+          ref.read(sharedPreferencesProvider),
+          expense.paymentInstrumentId,
+        );
       }
       if (mounted) {
         Navigator.of(context).pop();
@@ -288,7 +332,23 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final localeName = Localizations.localeOf(context).toString();
+    ref.listen<AsyncValue<List<PaymentInstrument>>>(
+      paymentInstrumentsStreamProvider,
+      (prev, next) {
+        next.whenData((instruments) {
+          if (!mounted) {
+            return;
+          }
+          if (_paidWithCreditCard && _paymentInstrumentId == null) {
+            setState(() => _applyCardPaymentSuggestion(instruments));
+          }
+        });
+      },
+    );
+
     final categories = ref.watch(categoriesStreamProvider).valueOrNull ?? [];
+    final instruments =
+        ref.watch(paymentInstrumentsStreamProvider).valueOrNull ?? [];
     final subsAsync = _categoryId == null
         ? const AsyncValue<List<Subcategory>>.data([])
         : ref.watch(subcategoriesForCategoryProvider(_categoryId!));
@@ -504,8 +564,47 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                   contentPadding: EdgeInsets.zero,
                   title: Text(l10n.expensePaidWithCardLabel),
                   value: _paidWithCreditCard,
-                  onChanged: (v) => setState(() => _paidWithCreditCard = v),
+                  onChanged: (v) {
+                    setState(() {
+                      _paidWithCreditCard = v;
+                      if (!v) {
+                        _paymentInstrumentId = null;
+                      } else {
+                        _applyCardPaymentSuggestion(instruments);
+                      }
+                    });
+                  },
                 ),
+                if (_paidWithCreditCard && instruments.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  DropdownButtonFormField<String?>(
+                    key: ValueKey<String>(
+                      'exp_card_${_paymentInstrumentId ?? 'none'}',
+                    ),
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: l10n.expenseCardProfileLabel,
+                    ),
+                    // ignore: deprecated_member_use
+                    value: _paymentInstrumentId != null &&
+                            instruments.any((p) => p.id == _paymentInstrumentId)
+                        ? _paymentInstrumentId
+                        : null,
+                    items: [
+                      DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text(l10n.expenseCardProfileNone),
+                      ),
+                      ...instruments.map(
+                        (p) => DropdownMenuItem<String?>(
+                          value: p.id,
+                          child: Text(p.label),
+                        ),
+                      ),
+                    ],
+                    onChanged: (v) => setState(() => _paymentInstrumentId = v),
+                  ),
+                ],
               ],
             ),
           ),

@@ -917,6 +917,17 @@ class $ExpensesTable extends Expenses
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _paymentInstrumentIdMeta =
+      const VerificationMeta('paymentInstrumentId');
+  @override
+  late final GeneratedColumn<String> paymentInstrumentId =
+      GeneratedColumn<String>(
+        'payment_instrument_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -929,6 +940,7 @@ class $ExpensesTable extends Expenses
     amountUsd,
     paidWithCreditCard,
     description,
+    paymentInstrumentId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1029,6 +1041,15 @@ class $ExpensesTable extends Expenses
         ),
       );
     }
+    if (data.containsKey('payment_instrument_id')) {
+      context.handle(
+        _paymentInstrumentIdMeta,
+        paymentInstrumentId.isAcceptableOrUnknown(
+          data['payment_instrument_id']!,
+          _paymentInstrumentIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1078,6 +1099,10 @@ class $ExpensesTable extends Expenses
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       )!,
+      paymentInstrumentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_instrument_id'],
+      ),
     );
   }
 
@@ -1100,6 +1125,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
   final double amountUsd;
   final bool paidWithCreditCard;
   final String description;
+
+  /// Optional profile id; validated in [DriftExpenseRepository] (no DB FK on web).
+  final String? paymentInstrumentId;
   const ExpenseRow({
     required this.id,
     required this.occurredOn,
@@ -1111,6 +1139,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     required this.amountUsd,
     required this.paidWithCreditCard,
     required this.description,
+    this.paymentInstrumentId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1125,6 +1154,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     map['amount_usd'] = Variable<double>(amountUsd);
     map['paid_with_credit_card'] = Variable<bool>(paidWithCreditCard);
     map['description'] = Variable<String>(description);
+    if (!nullToAbsent || paymentInstrumentId != null) {
+      map['payment_instrument_id'] = Variable<String>(paymentInstrumentId);
+    }
     return map;
   }
 
@@ -1140,6 +1172,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       amountUsd: Value(amountUsd),
       paidWithCreditCard: Value(paidWithCreditCard),
       description: Value(description),
+      paymentInstrumentId: paymentInstrumentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentInstrumentId),
     );
   }
 
@@ -1159,6 +1194,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       amountUsd: serializer.fromJson<double>(json['amountUsd']),
       paidWithCreditCard: serializer.fromJson<bool>(json['paidWithCreditCard']),
       description: serializer.fromJson<String>(json['description']),
+      paymentInstrumentId: serializer.fromJson<String?>(
+        json['paymentInstrumentId'],
+      ),
     );
   }
   @override
@@ -1175,6 +1213,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       'amountUsd': serializer.toJson<double>(amountUsd),
       'paidWithCreditCard': serializer.toJson<bool>(paidWithCreditCard),
       'description': serializer.toJson<String>(description),
+      'paymentInstrumentId': serializer.toJson<String?>(paymentInstrumentId),
     };
   }
 
@@ -1189,6 +1228,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     double? amountUsd,
     bool? paidWithCreditCard,
     String? description,
+    Value<String?> paymentInstrumentId = const Value.absent(),
   }) => ExpenseRow(
     id: id ?? this.id,
     occurredOn: occurredOn ?? this.occurredOn,
@@ -1200,6 +1240,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     amountUsd: amountUsd ?? this.amountUsd,
     paidWithCreditCard: paidWithCreditCard ?? this.paidWithCreditCard,
     description: description ?? this.description,
+    paymentInstrumentId: paymentInstrumentId.present
+        ? paymentInstrumentId.value
+        : this.paymentInstrumentId,
   );
   ExpenseRow copyWithCompanion(ExpensesCompanion data) {
     return ExpenseRow(
@@ -1229,6 +1272,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       description: data.description.present
           ? data.description.value
           : this.description,
+      paymentInstrumentId: data.paymentInstrumentId.present
+          ? data.paymentInstrumentId.value
+          : this.paymentInstrumentId,
     );
   }
 
@@ -1244,7 +1290,8 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
           ..write('manualFxRateToUsd: $manualFxRateToUsd, ')
           ..write('amountUsd: $amountUsd, ')
           ..write('paidWithCreditCard: $paidWithCreditCard, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('paymentInstrumentId: $paymentInstrumentId')
           ..write(')'))
         .toString();
   }
@@ -1261,6 +1308,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     amountUsd,
     paidWithCreditCard,
     description,
+    paymentInstrumentId,
   );
   @override
   bool operator ==(Object other) =>
@@ -1275,7 +1323,8 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
           other.manualFxRateToUsd == this.manualFxRateToUsd &&
           other.amountUsd == this.amountUsd &&
           other.paidWithCreditCard == this.paidWithCreditCard &&
-          other.description == this.description);
+          other.description == this.description &&
+          other.paymentInstrumentId == this.paymentInstrumentId);
 }
 
 class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
@@ -1289,6 +1338,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
   final Value<double> amountUsd;
   final Value<bool> paidWithCreditCard;
   final Value<String> description;
+  final Value<String?> paymentInstrumentId;
   final Value<int> rowid;
   const ExpensesCompanion({
     this.id = const Value.absent(),
@@ -1301,6 +1351,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     this.amountUsd = const Value.absent(),
     this.paidWithCreditCard = const Value.absent(),
     this.description = const Value.absent(),
+    this.paymentInstrumentId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ExpensesCompanion.insert({
@@ -1314,6 +1365,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     required double amountUsd,
     this.paidWithCreditCard = const Value.absent(),
     this.description = const Value.absent(),
+    this.paymentInstrumentId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        occurredOn = Value(occurredOn),
@@ -1332,6 +1384,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     Expression<double>? amountUsd,
     Expression<bool>? paidWithCreditCard,
     Expression<String>? description,
+    Expression<String>? paymentInstrumentId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1346,6 +1399,8 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
       if (paidWithCreditCard != null)
         'paid_with_credit_card': paidWithCreditCard,
       if (description != null) 'description': description,
+      if (paymentInstrumentId != null)
+        'payment_instrument_id': paymentInstrumentId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1361,6 +1416,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     Value<double>? amountUsd,
     Value<bool>? paidWithCreditCard,
     Value<String>? description,
+    Value<String?>? paymentInstrumentId,
     Value<int>? rowid,
   }) {
     return ExpensesCompanion(
@@ -1374,6 +1430,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
       amountUsd: amountUsd ?? this.amountUsd,
       paidWithCreditCard: paidWithCreditCard ?? this.paidWithCreditCard,
       description: description ?? this.description,
+      paymentInstrumentId: paymentInstrumentId ?? this.paymentInstrumentId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1411,6 +1468,11 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
+    if (paymentInstrumentId.present) {
+      map['payment_instrument_id'] = Variable<String>(
+        paymentInstrumentId.value,
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1430,6 +1492,499 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
           ..write('amountUsd: $amountUsd, ')
           ..write('paidWithCreditCard: $paidWithCreditCard, ')
           ..write('description: $description, ')
+          ..write('paymentInstrumentId: $paymentInstrumentId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PaymentInstrumentsTable extends PaymentInstruments
+    with TableInfo<$PaymentInstrumentsTable, PaymentInstrumentRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PaymentInstrumentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bankNameMeta = const VerificationMeta(
+    'bankName',
+  );
+  @override
+  late final GeneratedColumn<String> bankName = GeneratedColumn<String>(
+    'bank_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _billingCycleDayMeta = const VerificationMeta(
+    'billingCycleDay',
+  );
+  @override
+  late final GeneratedColumn<int> billingCycleDay = GeneratedColumn<int>(
+    'billing_cycle_day',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _annualFeeAmountMeta = const VerificationMeta(
+    'annualFeeAmount',
+  );
+  @override
+  late final GeneratedColumn<double> annualFeeAmount = GeneratedColumn<double>(
+    'annual_fee_amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _monthlyFeeAmountMeta = const VerificationMeta(
+    'monthlyFeeAmount',
+  );
+  @override
+  late final GeneratedColumn<double> monthlyFeeAmount = GeneratedColumn<double>(
+    'monthly_fee_amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _feeDescriptionMeta = const VerificationMeta(
+    'feeDescription',
+  );
+  @override
+  late final GeneratedColumn<String> feeDescription = GeneratedColumn<String>(
+    'fee_description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    label,
+    bankName,
+    billingCycleDay,
+    annualFeeAmount,
+    monthlyFeeAmount,
+    feeDescription,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'payment_instruments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PaymentInstrumentRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (data.containsKey('bank_name')) {
+      context.handle(
+        _bankNameMeta,
+        bankName.isAcceptableOrUnknown(data['bank_name']!, _bankNameMeta),
+      );
+    }
+    if (data.containsKey('billing_cycle_day')) {
+      context.handle(
+        _billingCycleDayMeta,
+        billingCycleDay.isAcceptableOrUnknown(
+          data['billing_cycle_day']!,
+          _billingCycleDayMeta,
+        ),
+      );
+    }
+    if (data.containsKey('annual_fee_amount')) {
+      context.handle(
+        _annualFeeAmountMeta,
+        annualFeeAmount.isAcceptableOrUnknown(
+          data['annual_fee_amount']!,
+          _annualFeeAmountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('monthly_fee_amount')) {
+      context.handle(
+        _monthlyFeeAmountMeta,
+        monthlyFeeAmount.isAcceptableOrUnknown(
+          data['monthly_fee_amount']!,
+          _monthlyFeeAmountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fee_description')) {
+      context.handle(
+        _feeDescriptionMeta,
+        feeDescription.isAcceptableOrUnknown(
+          data['fee_description']!,
+          _feeDescriptionMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PaymentInstrumentRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PaymentInstrumentRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      bankName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bank_name'],
+      ),
+      billingCycleDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}billing_cycle_day'],
+      ),
+      annualFeeAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}annual_fee_amount'],
+      ),
+      monthlyFeeAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}monthly_fee_amount'],
+      ),
+      feeDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fee_description'],
+      )!,
+    );
+  }
+
+  @override
+  $PaymentInstrumentsTable createAlias(String alias) {
+    return $PaymentInstrumentsTable(attachedDatabase, alias);
+  }
+}
+
+class PaymentInstrumentRow extends DataClass
+    implements Insertable<PaymentInstrumentRow> {
+  final String id;
+  final String label;
+  final String? bankName;
+  final int? billingCycleDay;
+  final double? annualFeeAmount;
+  final double? monthlyFeeAmount;
+  final String feeDescription;
+  const PaymentInstrumentRow({
+    required this.id,
+    required this.label,
+    this.bankName,
+    this.billingCycleDay,
+    this.annualFeeAmount,
+    this.monthlyFeeAmount,
+    required this.feeDescription,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['label'] = Variable<String>(label);
+    if (!nullToAbsent || bankName != null) {
+      map['bank_name'] = Variable<String>(bankName);
+    }
+    if (!nullToAbsent || billingCycleDay != null) {
+      map['billing_cycle_day'] = Variable<int>(billingCycleDay);
+    }
+    if (!nullToAbsent || annualFeeAmount != null) {
+      map['annual_fee_amount'] = Variable<double>(annualFeeAmount);
+    }
+    if (!nullToAbsent || monthlyFeeAmount != null) {
+      map['monthly_fee_amount'] = Variable<double>(monthlyFeeAmount);
+    }
+    map['fee_description'] = Variable<String>(feeDescription);
+    return map;
+  }
+
+  PaymentInstrumentsCompanion toCompanion(bool nullToAbsent) {
+    return PaymentInstrumentsCompanion(
+      id: Value(id),
+      label: Value(label),
+      bankName: bankName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bankName),
+      billingCycleDay: billingCycleDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(billingCycleDay),
+      annualFeeAmount: annualFeeAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(annualFeeAmount),
+      monthlyFeeAmount: monthlyFeeAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(monthlyFeeAmount),
+      feeDescription: Value(feeDescription),
+    );
+  }
+
+  factory PaymentInstrumentRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PaymentInstrumentRow(
+      id: serializer.fromJson<String>(json['id']),
+      label: serializer.fromJson<String>(json['label']),
+      bankName: serializer.fromJson<String?>(json['bankName']),
+      billingCycleDay: serializer.fromJson<int?>(json['billingCycleDay']),
+      annualFeeAmount: serializer.fromJson<double?>(json['annualFeeAmount']),
+      monthlyFeeAmount: serializer.fromJson<double?>(json['monthlyFeeAmount']),
+      feeDescription: serializer.fromJson<String>(json['feeDescription']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'label': serializer.toJson<String>(label),
+      'bankName': serializer.toJson<String?>(bankName),
+      'billingCycleDay': serializer.toJson<int?>(billingCycleDay),
+      'annualFeeAmount': serializer.toJson<double?>(annualFeeAmount),
+      'monthlyFeeAmount': serializer.toJson<double?>(monthlyFeeAmount),
+      'feeDescription': serializer.toJson<String>(feeDescription),
+    };
+  }
+
+  PaymentInstrumentRow copyWith({
+    String? id,
+    String? label,
+    Value<String?> bankName = const Value.absent(),
+    Value<int?> billingCycleDay = const Value.absent(),
+    Value<double?> annualFeeAmount = const Value.absent(),
+    Value<double?> monthlyFeeAmount = const Value.absent(),
+    String? feeDescription,
+  }) => PaymentInstrumentRow(
+    id: id ?? this.id,
+    label: label ?? this.label,
+    bankName: bankName.present ? bankName.value : this.bankName,
+    billingCycleDay: billingCycleDay.present
+        ? billingCycleDay.value
+        : this.billingCycleDay,
+    annualFeeAmount: annualFeeAmount.present
+        ? annualFeeAmount.value
+        : this.annualFeeAmount,
+    monthlyFeeAmount: monthlyFeeAmount.present
+        ? monthlyFeeAmount.value
+        : this.monthlyFeeAmount,
+    feeDescription: feeDescription ?? this.feeDescription,
+  );
+  PaymentInstrumentRow copyWithCompanion(PaymentInstrumentsCompanion data) {
+    return PaymentInstrumentRow(
+      id: data.id.present ? data.id.value : this.id,
+      label: data.label.present ? data.label.value : this.label,
+      bankName: data.bankName.present ? data.bankName.value : this.bankName,
+      billingCycleDay: data.billingCycleDay.present
+          ? data.billingCycleDay.value
+          : this.billingCycleDay,
+      annualFeeAmount: data.annualFeeAmount.present
+          ? data.annualFeeAmount.value
+          : this.annualFeeAmount,
+      monthlyFeeAmount: data.monthlyFeeAmount.present
+          ? data.monthlyFeeAmount.value
+          : this.monthlyFeeAmount,
+      feeDescription: data.feeDescription.present
+          ? data.feeDescription.value
+          : this.feeDescription,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PaymentInstrumentRow(')
+          ..write('id: $id, ')
+          ..write('label: $label, ')
+          ..write('bankName: $bankName, ')
+          ..write('billingCycleDay: $billingCycleDay, ')
+          ..write('annualFeeAmount: $annualFeeAmount, ')
+          ..write('monthlyFeeAmount: $monthlyFeeAmount, ')
+          ..write('feeDescription: $feeDescription')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    label,
+    bankName,
+    billingCycleDay,
+    annualFeeAmount,
+    monthlyFeeAmount,
+    feeDescription,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PaymentInstrumentRow &&
+          other.id == this.id &&
+          other.label == this.label &&
+          other.bankName == this.bankName &&
+          other.billingCycleDay == this.billingCycleDay &&
+          other.annualFeeAmount == this.annualFeeAmount &&
+          other.monthlyFeeAmount == this.monthlyFeeAmount &&
+          other.feeDescription == this.feeDescription);
+}
+
+class PaymentInstrumentsCompanion
+    extends UpdateCompanion<PaymentInstrumentRow> {
+  final Value<String> id;
+  final Value<String> label;
+  final Value<String?> bankName;
+  final Value<int?> billingCycleDay;
+  final Value<double?> annualFeeAmount;
+  final Value<double?> monthlyFeeAmount;
+  final Value<String> feeDescription;
+  final Value<int> rowid;
+  const PaymentInstrumentsCompanion({
+    this.id = const Value.absent(),
+    this.label = const Value.absent(),
+    this.bankName = const Value.absent(),
+    this.billingCycleDay = const Value.absent(),
+    this.annualFeeAmount = const Value.absent(),
+    this.monthlyFeeAmount = const Value.absent(),
+    this.feeDescription = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PaymentInstrumentsCompanion.insert({
+    required String id,
+    required String label,
+    this.bankName = const Value.absent(),
+    this.billingCycleDay = const Value.absent(),
+    this.annualFeeAmount = const Value.absent(),
+    this.monthlyFeeAmount = const Value.absent(),
+    this.feeDescription = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       label = Value(label);
+  static Insertable<PaymentInstrumentRow> custom({
+    Expression<String>? id,
+    Expression<String>? label,
+    Expression<String>? bankName,
+    Expression<int>? billingCycleDay,
+    Expression<double>? annualFeeAmount,
+    Expression<double>? monthlyFeeAmount,
+    Expression<String>? feeDescription,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (label != null) 'label': label,
+      if (bankName != null) 'bank_name': bankName,
+      if (billingCycleDay != null) 'billing_cycle_day': billingCycleDay,
+      if (annualFeeAmount != null) 'annual_fee_amount': annualFeeAmount,
+      if (monthlyFeeAmount != null) 'monthly_fee_amount': monthlyFeeAmount,
+      if (feeDescription != null) 'fee_description': feeDescription,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PaymentInstrumentsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? label,
+    Value<String?>? bankName,
+    Value<int?>? billingCycleDay,
+    Value<double?>? annualFeeAmount,
+    Value<double?>? monthlyFeeAmount,
+    Value<String>? feeDescription,
+    Value<int>? rowid,
+  }) {
+    return PaymentInstrumentsCompanion(
+      id: id ?? this.id,
+      label: label ?? this.label,
+      bankName: bankName ?? this.bankName,
+      billingCycleDay: billingCycleDay ?? this.billingCycleDay,
+      annualFeeAmount: annualFeeAmount ?? this.annualFeeAmount,
+      monthlyFeeAmount: monthlyFeeAmount ?? this.monthlyFeeAmount,
+      feeDescription: feeDescription ?? this.feeDescription,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (bankName.present) {
+      map['bank_name'] = Variable<String>(bankName.value);
+    }
+    if (billingCycleDay.present) {
+      map['billing_cycle_day'] = Variable<int>(billingCycleDay.value);
+    }
+    if (annualFeeAmount.present) {
+      map['annual_fee_amount'] = Variable<double>(annualFeeAmount.value);
+    }
+    if (monthlyFeeAmount.present) {
+      map['monthly_fee_amount'] = Variable<double>(monthlyFeeAmount.value);
+    }
+    if (feeDescription.present) {
+      map['fee_description'] = Variable<String>(feeDescription.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PaymentInstrumentsCompanion(')
+          ..write('id: $id, ')
+          ..write('label: $label, ')
+          ..write('bankName: $bankName, ')
+          ..write('billingCycleDay: $billingCycleDay, ')
+          ..write('annualFeeAmount: $annualFeeAmount, ')
+          ..write('monthlyFeeAmount: $monthlyFeeAmount, ')
+          ..write('feeDescription: $feeDescription, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1442,6 +1997,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $SubcategoriesTable subcategories = $SubcategoriesTable(this);
   late final $ExpensesTable expenses = $ExpensesTable(this);
+  late final $PaymentInstrumentsTable paymentInstruments =
+      $PaymentInstrumentsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1450,6 +2007,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     categories,
     subcategories,
     expenses,
+    paymentInstruments,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2315,6 +2873,7 @@ typedef $$ExpensesTableCreateCompanionBuilder =
       required double amountUsd,
       Value<bool> paidWithCreditCard,
       Value<String> description,
+      Value<String?> paymentInstrumentId,
       Value<int> rowid,
     });
 typedef $$ExpensesTableUpdateCompanionBuilder =
@@ -2329,6 +2888,7 @@ typedef $$ExpensesTableUpdateCompanionBuilder =
       Value<double> amountUsd,
       Value<bool> paidWithCreditCard,
       Value<String> description,
+      Value<String?> paymentInstrumentId,
       Value<int> rowid,
     });
 
@@ -2421,6 +2981,11 @@ class $$ExpensesTableFilterComposer
 
   ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentInstrumentId => $composableBuilder(
+    column: $table.paymentInstrumentId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2520,6 +3085,11 @@ class $$ExpensesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get paymentInstrumentId => $composableBuilder(
+    column: $table.paymentInstrumentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CategoriesTableOrderingComposer get categoryId {
     final $$CategoriesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2612,6 +3182,11 @@ class $$ExpensesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get paymentInstrumentId => $composableBuilder(
+    column: $table.paymentInstrumentId,
+    builder: (column) => column,
+  );
+
   $$CategoriesTableAnnotationComposer get categoryId {
     final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -2697,6 +3272,7 @@ class $$ExpensesTableTableManager
                 Value<double> amountUsd = const Value.absent(),
                 Value<bool> paidWithCreditCard = const Value.absent(),
                 Value<String> description = const Value.absent(),
+                Value<String?> paymentInstrumentId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpensesCompanion(
                 id: id,
@@ -2709,6 +3285,7 @@ class $$ExpensesTableTableManager
                 amountUsd: amountUsd,
                 paidWithCreditCard: paidWithCreditCard,
                 description: description,
+                paymentInstrumentId: paymentInstrumentId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2723,6 +3300,7 @@ class $$ExpensesTableTableManager
                 required double amountUsd,
                 Value<bool> paidWithCreditCard = const Value.absent(),
                 Value<String> description = const Value.absent(),
+                Value<String?> paymentInstrumentId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpensesCompanion.insert(
                 id: id,
@@ -2735,6 +3313,7 @@ class $$ExpensesTableTableManager
                 amountUsd: amountUsd,
                 paidWithCreditCard: paidWithCreditCard,
                 description: description,
+                paymentInstrumentId: paymentInstrumentId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2817,6 +3396,265 @@ typedef $$ExpensesTableProcessedTableManager =
       ExpenseRow,
       PrefetchHooks Function({bool categoryId, bool subcategoryId})
     >;
+typedef $$PaymentInstrumentsTableCreateCompanionBuilder =
+    PaymentInstrumentsCompanion Function({
+      required String id,
+      required String label,
+      Value<String?> bankName,
+      Value<int?> billingCycleDay,
+      Value<double?> annualFeeAmount,
+      Value<double?> monthlyFeeAmount,
+      Value<String> feeDescription,
+      Value<int> rowid,
+    });
+typedef $$PaymentInstrumentsTableUpdateCompanionBuilder =
+    PaymentInstrumentsCompanion Function({
+      Value<String> id,
+      Value<String> label,
+      Value<String?> bankName,
+      Value<int?> billingCycleDay,
+      Value<double?> annualFeeAmount,
+      Value<double?> monthlyFeeAmount,
+      Value<String> feeDescription,
+      Value<int> rowid,
+    });
+
+class $$PaymentInstrumentsTableFilterComposer
+    extends Composer<_$AppDatabase, $PaymentInstrumentsTable> {
+  $$PaymentInstrumentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bankName => $composableBuilder(
+    column: $table.bankName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get billingCycleDay => $composableBuilder(
+    column: $table.billingCycleDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get annualFeeAmount => $composableBuilder(
+    column: $table.annualFeeAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get monthlyFeeAmount => $composableBuilder(
+    column: $table.monthlyFeeAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get feeDescription => $composableBuilder(
+    column: $table.feeDescription,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PaymentInstrumentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PaymentInstrumentsTable> {
+  $$PaymentInstrumentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bankName => $composableBuilder(
+    column: $table.bankName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get billingCycleDay => $composableBuilder(
+    column: $table.billingCycleDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get annualFeeAmount => $composableBuilder(
+    column: $table.annualFeeAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get monthlyFeeAmount => $composableBuilder(
+    column: $table.monthlyFeeAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get feeDescription => $composableBuilder(
+    column: $table.feeDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PaymentInstrumentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PaymentInstrumentsTable> {
+  $$PaymentInstrumentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<String> get bankName =>
+      $composableBuilder(column: $table.bankName, builder: (column) => column);
+
+  GeneratedColumn<int> get billingCycleDay => $composableBuilder(
+    column: $table.billingCycleDay,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get annualFeeAmount => $composableBuilder(
+    column: $table.annualFeeAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get monthlyFeeAmount => $composableBuilder(
+    column: $table.monthlyFeeAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get feeDescription => $composableBuilder(
+    column: $table.feeDescription,
+    builder: (column) => column,
+  );
+}
+
+class $$PaymentInstrumentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PaymentInstrumentsTable,
+          PaymentInstrumentRow,
+          $$PaymentInstrumentsTableFilterComposer,
+          $$PaymentInstrumentsTableOrderingComposer,
+          $$PaymentInstrumentsTableAnnotationComposer,
+          $$PaymentInstrumentsTableCreateCompanionBuilder,
+          $$PaymentInstrumentsTableUpdateCompanionBuilder,
+          (
+            PaymentInstrumentRow,
+            BaseReferences<
+              _$AppDatabase,
+              $PaymentInstrumentsTable,
+              PaymentInstrumentRow
+            >,
+          ),
+          PaymentInstrumentRow,
+          PrefetchHooks Function()
+        > {
+  $$PaymentInstrumentsTableTableManager(
+    _$AppDatabase db,
+    $PaymentInstrumentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PaymentInstrumentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PaymentInstrumentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PaymentInstrumentsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<String?> bankName = const Value.absent(),
+                Value<int?> billingCycleDay = const Value.absent(),
+                Value<double?> annualFeeAmount = const Value.absent(),
+                Value<double?> monthlyFeeAmount = const Value.absent(),
+                Value<String> feeDescription = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PaymentInstrumentsCompanion(
+                id: id,
+                label: label,
+                bankName: bankName,
+                billingCycleDay: billingCycleDay,
+                annualFeeAmount: annualFeeAmount,
+                monthlyFeeAmount: monthlyFeeAmount,
+                feeDescription: feeDescription,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String label,
+                Value<String?> bankName = const Value.absent(),
+                Value<int?> billingCycleDay = const Value.absent(),
+                Value<double?> annualFeeAmount = const Value.absent(),
+                Value<double?> monthlyFeeAmount = const Value.absent(),
+                Value<String> feeDescription = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PaymentInstrumentsCompanion.insert(
+                id: id,
+                label: label,
+                bankName: bankName,
+                billingCycleDay: billingCycleDay,
+                annualFeeAmount: annualFeeAmount,
+                monthlyFeeAmount: monthlyFeeAmount,
+                feeDescription: feeDescription,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PaymentInstrumentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PaymentInstrumentsTable,
+      PaymentInstrumentRow,
+      $$PaymentInstrumentsTableFilterComposer,
+      $$PaymentInstrumentsTableOrderingComposer,
+      $$PaymentInstrumentsTableAnnotationComposer,
+      $$PaymentInstrumentsTableCreateCompanionBuilder,
+      $$PaymentInstrumentsTableUpdateCompanionBuilder,
+      (
+        PaymentInstrumentRow,
+        BaseReferences<
+          _$AppDatabase,
+          $PaymentInstrumentsTable,
+          PaymentInstrumentRow
+        >,
+      ),
+      PaymentInstrumentRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2827,4 +3665,6 @@ class $AppDatabaseManager {
       $$SubcategoriesTableTableManager(_db, _db.subcategories);
   $$ExpensesTableTableManager get expenses =>
       $$ExpensesTableTableManager(_db, _db.expenses);
+  $$PaymentInstrumentsTableTableManager get paymentInstruments =>
+      $$PaymentInstrumentsTableTableManager(_db, _db.paymentInstruments);
 }

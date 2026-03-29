@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:expense_app/data/local/app_user_settings_storage.dart';
 import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
@@ -11,19 +10,17 @@ import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 import 'package:expense_app/presentation/theme/category_accent_colors.dart';
 
-enum _RecurrenceFormKind { monthly, weekly }
+class IncomeFormDialog extends ConsumerWidget {
+  const IncomeFormDialog({super.key, this.initial});
 
-class ExpenseFormDialog extends ConsumerWidget {
-  const ExpenseFormDialog({super.key, this.initial});
-
-  final Expense? initial;
+  final IncomeEntry? initial;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(defaultFxCatalogProvider);
     final userSettings = ref.watch(appUserSettingsProvider);
     return async.when(
-      data: (catalog) => _ExpenseFormLoaded(
+      data: (catalog) => _IncomeFormLoaded(
         catalog: catalog,
         initial: initial,
         userDefaultCurrencyCode: userSettings.defaultCurrencyCode,
@@ -40,44 +37,35 @@ class ExpenseFormDialog extends ConsumerWidget {
   }
 }
 
-class _ExpenseFormLoaded extends ConsumerStatefulWidget {
-  const _ExpenseFormLoaded({
+class _IncomeFormLoaded extends ConsumerStatefulWidget {
+  const _IncomeFormLoaded({
     required this.catalog,
     this.initial,
     this.userDefaultCurrencyCode,
   });
 
   final DefaultFxCatalog catalog;
-  final Expense? initial;
-
-  /// Persisted preference; validated against [catalog] in [initState].
+  final IncomeEntry? initial;
   final String? userDefaultCurrencyCode;
 
   @override
-  ConsumerState<_ExpenseFormLoaded> createState() => _ExpenseFormLoadedState();
+  ConsumerState<_IncomeFormLoaded> createState() => _IncomeFormLoadedState();
 }
 
-class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
+class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
   final _fxController = TextEditingController();
   final _amountFocus = FocusNode();
-
-  late DateTime _occurredOn;
-  late String _currencyCode;
-  String? _categoryId;
-  String? _subcategoryId;
-  bool _paidWithCreditCard = false;
-  String? _paymentInstrumentId;
-  bool _appliedInitialAmountMask = false;
-  bool _makeRecurring = false;
-  _RecurrenceFormKind _recurrenceKind = _RecurrenceFormKind.monthly;
-  final _horizonMonthsController = TextEditingController(text: '12');
-  bool _splitInstallments = false;
-  final _installmentCountController = TextEditingController(text: '12');
   final _categorySearch = SearchController();
   final _subcategorySearch = SearchController();
+
+  late DateTime _receivedOn;
+  late String _currencyCode;
+  String? _incomeCategoryId;
+  String? _incomeSubcategoryId;
+  bool _appliedInitialAmountMask = false;
 
   @override
   void initState() {
@@ -86,20 +74,18 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
     final i = widget.initial;
     final catalog = widget.catalog;
     if (i != null) {
-      _occurredOn = DateTime(i.occurredOn.year, i.occurredOn.month, i.occurredOn.day);
-      _categoryId = i.categoryId;
-      _subcategoryId = i.subcategoryId;
+      _receivedOn = DateTime(i.receivedOn.year, i.receivedOn.month, i.receivedOn.day);
+      _incomeCategoryId = i.incomeCategoryId;
+      _incomeSubcategoryId = i.incomeSubcategoryId;
       _currencyCode = i.currencyCode.toUpperCase();
       final m = i.manualFxRateToUsd;
       _fxController.text = m > 0
           ? formatLocalUnitsPerUsdForField(1.0 / m)
           : formatLocalUnitsPerUsdForField(catalog.localUnitsPerUsdFor(_currencyCode));
-      _paidWithCreditCard = i.paidWithCreditCard;
-      _paymentInstrumentId = i.paymentInstrumentId;
       _descriptionController.text = i.description;
     } else {
       final n = DateTime.now();
-      _occurredOn = DateTime(n.year, n.month, n.day);
+      _receivedOn = DateTime(n.year, n.month, n.day);
       _currencyCode = effectiveDefaultCurrencyForForm(
         widget.userDefaultCurrencyCode,
         catalog,
@@ -109,36 +95,6 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
       );
     }
   }
-
-  void _applyCardPaymentSuggestion(List<PaymentInstrument> instruments) {
-    if (_paymentInstrumentId != null) {
-      return;
-    }
-    if (instruments.isEmpty) {
-      return;
-    }
-    PaymentInstrument? defaultActive;
-    for (final p in instruments) {
-      if (p.isDefault) {
-        defaultActive = p;
-        break;
-      }
-    }
-    if (defaultActive != null) {
-      _paymentInstrumentId = defaultActive.id;
-      return;
-    }
-    final prefs = ref.read(sharedPreferencesProvider);
-    final last = AppUserSettingsStorage.readLastPaymentInstrumentId(prefs);
-    if (last != null && instruments.any((p) => p.id == last)) {
-      _paymentInstrumentId = last;
-      return;
-    }
-    if (instruments.length == 1) {
-      _paymentInstrumentId = instruments.single.id;
-    }
-  }
-
 
   @override
   void didChangeDependencies() {
@@ -191,8 +147,6 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
     _descriptionController.dispose();
     _amountController.dispose();
     _fxController.dispose();
-    _horizonMonthsController.dispose();
-    _installmentCountController.dispose();
     _categorySearch.dispose();
     _subcategorySearch.dispose();
     super.dispose();
@@ -201,13 +155,13 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _occurredOn,
+      initialDate: _receivedOn,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
     if (picked != null) {
       setState(() {
-        _occurredOn = DateTime(picked.year, picked.month, picked.day);
+        _receivedOn = DateTime(picked.year, picked.month, picked.day);
       });
     }
   }
@@ -275,177 +229,32 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
     if (amount == null || localPerUsd == null || localPerUsd <= 0) {
       return;
     }
-    if (_categoryId == null || _subcategoryId == null) {
+    if (_incomeCategoryId == null || _incomeSubcategoryId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.expenseCategoryRequired)),
       );
       return;
     }
 
-    if (widget.initial == null && _splitInstallments) {
-      if (_makeRecurring) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.expenseFormInstallmentConflictRecurring)),
-        );
-        return;
-      }
-      if (!_paidWithCreditCard || _paymentInstrumentId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.expenseFormInstallmentNeedsCard)),
-        );
-        return;
-      }
-      final n = int.tryParse(_installmentCountController.text.trim());
-      if (n == null || n < 2 || n > 60) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.expenseFormInstallmentCountInvalid)),
-        );
-        return;
-      }
-      final manualFx = 1.0 / localPerUsd;
-      final planId = const Uuid().v4();
-      final baseDesc = _descriptionController.text.trim();
-      final perUsd = Expense.computeUsd(amount, manualFx);
-      const intervalMonths = 1;
-      final legs = <Expense>[];
-      for (var i = 0; i < n; i++) {
-        final d = ExpenseDates.addCalendarMonths(_occurredOn, i * intervalMonths);
-        final suffix = ' (${i + 1}/$n)';
-        final desc = baseDesc.isEmpty ? suffix.trim() : '$baseDesc$suffix';
-        legs.add(
-          Expense(
-            id: const Uuid().v4(),
-            occurredOn: d,
-            categoryId: _categoryId!,
-            subcategoryId: _subcategoryId!,
-            amountOriginal: amount,
-            currencyCode: _currencyCode,
-            manualFxRateToUsd: manualFx,
-            amountUsd: perUsd,
-            paidWithCreditCard: true,
-            description: desc,
-            paymentInstrumentId: _paymentInstrumentId,
-            installmentPlanId: planId,
-            installmentIndex: i + 1,
-          ),
-        );
-      }
-      final plan = InstallmentPlan(
-        id: planId,
-        paymentCount: n,
-        intervalMonths: intervalMonths,
-        anchorOccurredOn: _occurredOn,
-        categoryId: _categoryId!,
-        subcategoryId: _subcategoryId!,
-        paymentInstrumentId: _paymentInstrumentId,
-        perPaymentAmountOriginal: amount,
-        currencyCode: _currencyCode,
-        manualFxRateToUsd: manualFx,
-        perPaymentAmountUsd: perUsd,
-        description: baseDesc,
-      );
-      try {
-        await ref.read(installmentPlanRepositoryProvider).createPlanWithExpenses(
-              plan: plan,
-              expenseLegs: legs,
-            );
-        await AppUserSettingsStorage.writeLastPaymentInstrumentId(
-          ref.read(sharedPreferencesProvider),
-          _paymentInstrumentId,
-        );
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
-      } on Object catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
-        }
-      }
-      return;
-    }
-
-    if (widget.initial == null && _makeRecurring) {
-      final h = int.tryParse(_horizonMonthsController.text.trim());
-      if (h == null || h < 1 || h > 120) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.expenseFormHorizonMonthsInvalid)),
-        );
-        return;
-      }
-    }
-
     final manualFx = 1.0 / localPerUsd;
-    final repo = ref.read(expenseRepositoryProvider);
-    final seriesId = const Uuid().v4();
-    final makeRecurring = widget.initial == null && _makeRecurring;
-    final expenseId = makeRecurring
-        ? materializedExpenseIdForSeriesDate(
-            seriesId: seriesId,
-            occurredOn: _occurredOn,
-          )
-        : (widget.initial?.id ?? Uuid().v4());
-
-    final expense = Expense(
-      id: expenseId,
-      occurredOn: _occurredOn,
-      categoryId: _categoryId!,
-      subcategoryId: _subcategoryId!,
+    final repo = ref.read(incomeRepositoryProvider);
+    final entry = IncomeEntry(
+      id: widget.initial?.id ?? const Uuid().v4(),
+      receivedOn: _receivedOn,
+      incomeCategoryId: _incomeCategoryId!,
+      incomeSubcategoryId: _incomeSubcategoryId!,
       amountOriginal: amount,
       currencyCode: _currencyCode,
       manualFxRateToUsd: manualFx,
-      amountUsd: Expense.computeUsd(amount, manualFx),
-      paidWithCreditCard: _paidWithCreditCard,
+      amountUsd: IncomeEntry.computeUsd(amount, manualFx),
       description: _descriptionController.text.trim(),
-      paymentInstrumentId:
-          _paidWithCreditCard ? _paymentInstrumentId : null,
-      recurringSeriesId: widget.initial?.recurringSeriesId ??
-          (makeRecurring ? seriesId : null),
-      paymentExpectationStatus: widget.initial?.paymentExpectationStatus ??
-          (makeRecurring ? PaymentExpectationStatus.expected : null),
-      paymentExpectationConfirmedOn:
-          widget.initial?.paymentExpectationConfirmedOn,
     );
 
     try {
       if (widget.initial == null) {
-        await repo.create(expense);
-        if (makeRecurring) {
-          final h = int.parse(_horizonMonthsController.text.trim());
-          final rule = _recurrenceKind == _RecurrenceFormKind.monthly
-              ? RecurrenceMonthlyByCalendarDay(calendarDay: _occurredOn.day)
-              : RecurrenceWeekly(
-                  intervalWeeks: 1,
-                  weekdays: {_occurredOn.weekday},
-                );
-          final series = ExpenseRecurringSeries(
-            id: seriesId,
-            anchorOccurredOn: _occurredOn,
-            rule: rule,
-            endCondition: const RecurrenceEndNever(),
-            horizonMonths: h,
-            active: true,
-            categoryId: expense.categoryId,
-            subcategoryId: expense.subcategoryId,
-            amountOriginal: expense.amountOriginal,
-            currencyCode: expense.currencyCode,
-            manualFxRateToUsd: expense.manualFxRateToUsd,
-            amountUsd: expense.amountUsd,
-            paidWithCreditCard: expense.paidWithCreditCard,
-            description: expense.description,
-            paymentInstrumentId: expense.paymentInstrumentId,
-          );
-          await ref
-              .read(recurringExpenseSeriesRepositoryProvider)
-              .upsertAndRematerialize(series, calendarTodayLocal());
-        }
+        await repo.create(entry);
       } else {
-        await repo.update(expense);
-      }
-      if (expense.paidWithCreditCard && expense.paymentInstrumentId != null) {
-        await AppUserSettingsStorage.writeLastPaymentInstrumentId(
-          ref.read(sharedPreferencesProvider),
-          expense.paymentInstrumentId,
-        );
+        await repo.update(entry);
       }
       if (mounted) {
         Navigator.of(context).pop();
@@ -483,7 +292,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
       ),
     );
     if (ok == true && mounted) {
-      await ref.read(expenseRepositoryProvider).delete(id);
+      await ref.read(incomeRepositoryProvider).delete(id);
       if (mounted) {
         Navigator.of(context).pop();
       }
@@ -494,69 +303,42 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final localeName = Localizations.localeOf(context).toString();
-    ref.listen<AsyncValue<List<PaymentInstrument>>>(
-      activePaymentInstrumentsStreamProvider,
-      (prev, next) {
-        next.whenData((instruments) {
-          if (!mounted) {
-            return;
-          }
-          if (instruments.isEmpty && _paidWithCreditCard) {
-            setState(() {
-              _paidWithCreditCard = false;
-              _paymentInstrumentId = null;
-            });
-            return;
-          }
-          if (_paidWithCreditCard && _paymentInstrumentId == null) {
-            setState(() => _applyCardPaymentSuggestion(instruments));
-          }
-        });
-      },
-    );
-
-    final categories = ref.watch(categoriesStreamProvider).valueOrNull ?? [];
-    final activeInstruments =
-        ref.watch(activePaymentInstrumentsStreamProvider).valueOrNull ?? [];
-    final subsAsync = _categoryId == null
-        ? const AsyncValue<List<Subcategory>>.data([])
-        : ref.watch(subcategoriesForCategoryProvider(_categoryId!));
+    final categories = ref.watch(incomeCategoriesStreamProvider).valueOrNull ?? [];
+    final subsAsync = _incomeCategoryId == null
+        ? const AsyncValue<List<IncomeSubcategory>>.data([])
+        : ref.watch(incomeSubcategoriesForCategoryProvider(_incomeCategoryId!));
+    final subs = subsAsync.valueOrNull ?? [];
 
     if (widget.initial == null &&
-        _categoryId == null &&
+        _incomeCategoryId == null &&
         categories.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          setState(() {
-            _categoryId = categories.first.id;
-          });
+          setState(() => _incomeCategoryId = categories.first.id);
         }
       });
     }
-
-    final subs = subsAsync.valueOrNull ?? [];
-    if (_categoryId != null &&
+    if (_incomeCategoryId != null &&
         subs.isNotEmpty &&
-        (_subcategoryId == null || !subs.any((s) => s.id == _subcategoryId))) {
+        (_incomeSubcategoryId == null ||
+            !subs.any((s) => s.id == _incomeSubcategoryId))) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          setState(() {
-            _subcategoryId = subs.first.id;
-          });
+          setState(() => _incomeSubcategoryId = subs.first.id);
         }
       });
     }
 
-    Category? selectedCat;
+    IncomeCategory? selectedCat;
     for (final c in categories) {
-      if (c.id == _categoryId) {
+      if (c.id == _incomeCategoryId) {
         selectedCat = c;
         break;
       }
     }
-    Subcategory? selectedSub;
+    IncomeSubcategory? selectedSub;
     for (final s in subs) {
-      if (s.id == _subcategoryId) {
+      if (s.id == _incomeSubcategoryId) {
         selectedSub = s;
         break;
       }
@@ -564,7 +346,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
 
     return AlertDialog(
       title: Text(
-        widget.initial == null ? l10n.addExpenseTitle : l10n.editExpenseTitle,
+        widget.initial == null ? l10n.incomeFormAddTitle : l10n.incomeFormEditTitle,
       ),
       content: SizedBox(
         width: 400,
@@ -575,30 +357,6 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (widget.initial?.recurringSeriesId != null &&
-                    widget.initial!.recurringSeriesId!.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Text(
-                          l10n.expenseFromRecurringBanner,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                        ),
-                      ),
-                    ),
-                  ),
                 if (widget.initial != null)
                   Align(
                     alignment: Alignment.centerRight,
@@ -611,7 +369,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(l10n.expenseDateLabel),
-                  subtitle: Text(ExpenseDates.toStorageDate(_occurredOn)),
+                  subtitle: Text(ExpenseDates.toStorageDate(_receivedOn)),
                   trailing: IconButton(
                     icon: const Icon(Icons.calendar_today),
                     onPressed: _pickDate,
@@ -628,12 +386,13 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                     return SearchBar(
                       controller: controller,
                       hintText: selectedCat?.name ?? l10n.expenseCategoryLabel,
-                      leading: _categoryId != null
+                      leading: _incomeCategoryId != null
                           ? Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: CircleAvatar(
                                 radius: 14,
-                                backgroundColor: categoryAccentColor(_categoryId!),
+                                backgroundColor:
+                                    categoryAccentColor(_incomeCategoryId!),
                               ),
                             )
                           : const Icon(Icons.search),
@@ -658,8 +417,8 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                             title: Text(c.name),
                             onTap: () {
                               setState(() {
-                                _categoryId = c.id;
-                                _subcategoryId = null;
+                                _incomeCategoryId = c.id;
+                                _incomeSubcategoryId = null;
                               });
                               controller.closeView(c.name);
                             },
@@ -669,7 +428,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                   },
                 ),
                 const SizedBox(height: 12),
-                if (_categoryId != null) ...[
+                if (_incomeCategoryId != null) ...[
                   Text(
                     l10n.taxonomySearchSubcategoryHint,
                     style: Theme.of(context).textTheme.labelMedium,
@@ -678,12 +437,9 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                   subsAsync.when(
                     data: (list) {
                       if (list.isEmpty) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            l10n.expenseNoSubcategories,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
+                        return Text(
+                          l10n.expenseNoSubcategories,
+                          style: Theme.of(context).textTheme.bodySmall,
                         );
                       }
                       return SearchAnchor(
@@ -693,13 +449,17 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                             controller: controller,
                             hintText:
                                 selectedSub?.name ?? l10n.expenseSubcategoryLabel,
-                            leading: Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: CircleAvatar(
-                                radius: 14,
-                                backgroundColor: categoryAccentColor(_categoryId!),
-                              ),
-                            ),
+                            leading: _incomeCategoryId != null
+                                ? Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: CircleAvatar(
+                                      radius: 14,
+                                      backgroundColor: categoryAccentColor(
+                                        _incomeCategoryId!,
+                                      ),
+                                    ),
+                                  )
+                                : const Icon(Icons.search),
                             onTap: () => controller.openView(),
                             onChanged: (_) => controller.openView(),
                           );
@@ -715,7 +475,8 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                               .map(
                                 (s) {
                                   final i = list.indexOf(s);
-                                  final parent = categoryAccentColor(_categoryId!);
+                                  final parent =
+                                      categoryAccentColor(_incomeCategoryId!);
                                   final tone = subcategoryTonalColor(
                                     parent,
                                     i,
@@ -728,7 +489,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                                     ),
                                     title: Text(s.name),
                                     onTap: () {
-                                      setState(() => _subcategoryId = s.id);
+                                      setState(() => _incomeSubcategoryId = s.id);
                                       controller.closeView(s.name);
                                     },
                                   );
@@ -813,9 +574,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                   decoration: InputDecoration(
                     labelText: l10n.expenseFxFieldLabel,
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                   ],
@@ -838,125 +597,6 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                   ),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                if (widget.initial == null) ...[
-                  const SizedBox(height: 8),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.expenseFormMakeRecurringLabel),
-                    value: _makeRecurring,
-                    onChanged: (v) => setState(() {
-                      _makeRecurring = v;
-                      if (v) {
-                        _splitInstallments = false;
-                      }
-                    }),
-                  ),
-                  if (_makeRecurring) ...[
-                    DropdownButtonFormField<_RecurrenceFormKind>(
-                      // ignore: deprecated_member_use
-                      value: _recurrenceKind,
-                      decoration: InputDecoration(
-                        labelText: l10n.expenseFormRecurrenceLabel,
-                      ),
-                      items: [
-                        DropdownMenuItem(
-                          value: _RecurrenceFormKind.monthly,
-                          child: Text(l10n.expenseFormRecurrenceMonthly),
-                        ),
-                        DropdownMenuItem(
-                          value: _RecurrenceFormKind.weekly,
-                          child: Text(l10n.expenseFormRecurrenceWeekly),
-                        ),
-                      ],
-                      onChanged: (v) => setState(
-                        () => _recurrenceKind =
-                            v ?? _RecurrenceFormKind.monthly,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _horizonMonthsController,
-                      decoration: InputDecoration(
-                        labelText: l10n.expenseFormHorizonMonthsLabel,
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                    ),
-                  ],
-                  const SizedBox(height: 8),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.expenseFormSplitInstallmentsLabel),
-                    value: _splitInstallments,
-                    onChanged: (v) => setState(() {
-                      _splitInstallments = v;
-                      if (v) {
-                        _makeRecurring = false;
-                      }
-                    }),
-                  ),
-                  if (_splitInstallments) ...[
-                    TextFormField(
-                      controller: _installmentCountController,
-                      decoration: InputDecoration(
-                        labelText: l10n.expenseFormInstallmentCountLabel,
-                      ),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                    ),
-                  ],
-                ],
-                if (activeInstruments.isNotEmpty) ...[
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.expensePaidWithCardLabel),
-                    value: _paidWithCreditCard,
-                    onChanged: (v) {
-                      setState(() {
-                        _paidWithCreditCard = v;
-                        if (!v) {
-                          _paymentInstrumentId = null;
-                        } else {
-                          _applyCardPaymentSuggestion(activeInstruments);
-                        }
-                      });
-                    },
-                  ),
-                  if (_paidWithCreditCard) ...[
-                    const SizedBox(height: 4),
-                    DropdownButtonFormField<String?>(
-                      key: ValueKey<String>(
-                        'exp_card_${_paymentInstrumentId ?? 'none'}',
-                      ),
-                      isExpanded: true,
-                      decoration: InputDecoration(
-                        labelText: l10n.expenseCardProfileLabel,
-                      ),
-                      // ignore: deprecated_member_use
-                      value: _paymentInstrumentId != null &&
-                              activeInstruments.any((p) => p.id == _paymentInstrumentId)
-                          ? _paymentInstrumentId
-                          : null,
-                      items: [
-                        DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text(l10n.expenseCardProfileNone),
-                        ),
-                        ...activeInstruments.map(
-                          (p) => DropdownMenuItem<String?>(
-                            value: p.id,
-                            child: Text(p.label),
-                          ),
-                        ),
-                      ],
-                      onChanged: (v) => setState(() => _paymentInstrumentId = v),
-                    ),
-                  ],
-                ],
               ],
             ),
           ),

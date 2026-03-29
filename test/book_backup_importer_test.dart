@@ -57,6 +57,9 @@ void main() {
       paymentInstruments: base.paymentInstruments,
       expenseRecurringSeries: base.expenseRecurringSeries,
       expenses: [...base.expenses, badExpense],
+      incomeEntries: base.incomeEntries,
+      installmentPlans: base.installmentPlans,
+      partialPayments: base.partialPayments,
     );
     final report = await importBookBackupReplacingAll(db, tainted);
     expect(report.expensesSkipped, 1);
@@ -72,6 +75,9 @@ void main() {
       subcategories: const [],
       paymentInstruments: const [],
       expenseRecurringSeries: const [],
+      incomeEntries: const [],
+      installmentPlans: const [],
+      partialPayments: const [],
       expenses: [
         Expense(
           id: 'e1',

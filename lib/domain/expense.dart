@@ -20,6 +20,17 @@ abstract final class ExpenseDates {
       int.parse(parts[2], radix: 10),
     );
   }
+
+  /// Moves [dateOnly] forward by whole calendar months (day clamped to month length).
+  static DateTime addCalendarMonths(DateTime dateOnly, int deltaMonths) {
+    final y = dateOnly.year;
+    final m = dateOnly.month + deltaMonths;
+    final year = y + (m - 1) ~/ 12;
+    final month = (m - 1) % 12 + 1;
+    final lastDay = DateTime(year, month + 1, 0).day;
+    final day = dateOnly.day > lastDay ? lastDay : dateOnly.day;
+    return DateTime(year, month, day);
+  }
 }
 
 /// Single expense line (local-first book).
@@ -39,6 +50,8 @@ class Expense {
     this.recurringSeriesId,
     this.paymentExpectationStatus,
     this.paymentExpectationConfirmedOn,
+    this.installmentPlanId,
+    this.installmentIndex,
   });
 
   final String id;
@@ -75,6 +88,12 @@ class Expense {
   /// Date-only: when the user marked [PaymentExpectationStatus.confirmedPaid].
   final DateTime? paymentExpectationConfirmedOn;
 
+  /// When set with [installmentIndex], this row is a leg of an installment plan.
+  final String? installmentPlanId;
+
+  /// 1-based index within [installmentPlanId], when applicable.
+  final int? installmentIndex;
+
   static double computeUsd(double amountOriginal, double manualFxRateToUsd) {
     return amountOriginal * manualFxRateToUsd;
   }
@@ -94,10 +113,14 @@ class Expense {
     String? recurringSeriesId,
     PaymentExpectationStatus? paymentExpectationStatus,
     DateTime? paymentExpectationConfirmedOn,
+    String? installmentPlanId,
+    int? installmentIndex,
     bool clearPaymentInstrumentId = false,
     bool clearRecurringSeriesId = false,
     bool clearPaymentExpectation = false,
     bool clearPaymentExpectationConfirmedOn = false,
+    bool clearInstallmentPlan = false,
+    bool clearInstallmentIndex = false,
   }) {
     final nextStatus = clearPaymentExpectation
         ? null
@@ -125,6 +148,12 @@ class Expense {
           : (recurringSeriesId ?? this.recurringSeriesId),
       paymentExpectationStatus: nextStatus,
       paymentExpectationConfirmedOn: nextConfirmed,
+      installmentPlanId: clearInstallmentPlan
+          ? null
+          : (installmentPlanId ?? this.installmentPlanId),
+      installmentIndex: clearInstallmentIndex
+          ? null
+          : (installmentIndex ?? this.installmentIndex),
     );
   }
 }

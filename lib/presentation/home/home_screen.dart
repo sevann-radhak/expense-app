@@ -25,6 +25,9 @@ class HomeScreen extends ConsumerWidget {
     final allSubs = ref.watch(allSubcategoriesStreamProvider).valueOrNull ?? [];
     final categoryName = {for (final c in categories) c.id: c.name};
     final subcategoryName = {for (final s in allSubs) s.id: s.name};
+    final instruments =
+        ref.watch(paymentInstrumentsStreamProvider).valueOrNull ?? [];
+    final instrumentLabel = {for (final p in instruments) p.id: p.label};
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.homeTitle)),
@@ -104,6 +107,13 @@ class HomeScreen extends ConsumerWidget {
                             l10n.taxonomyUnknownLabel,
                         subcategoryName: subcategoryName[e.subcategoryId] ??
                             l10n.taxonomyUnknownLabel,
+                        paymentInstrumentLabel: e.paymentInstrumentId != null
+                            ? instrumentLabel[e.paymentInstrumentId!]
+                            : null,
+                        emphasizeAsScheduled: !isRealizedOnLocalCalendar(
+                          e.occurredOn,
+                          today,
+                        ),
                         showRecurringOverflowMenu:
                             e.recurringSeriesId != null &&
                                 !isRealizedOnLocalCalendar(

@@ -82,10 +82,15 @@ class DriftExpenseRepository implements ExpenseRepository {
       paymentExpectationConfirmedOn: confRaw != null && confRaw.isNotEmpty
           ? ExpenseDates.fromStorageDate(confRaw)
           : null,
+      installmentPlanId: r.installmentPlanId,
+      installmentIndex: r.installmentIndex,
     );
   }
 
-  Future<void> _assertPaymentInstrumentIfSet(String? id) async {
+  Future<void> _assertPaymentInstrumentIfSet(
+    String? id, {
+    required bool requireActive,
+  }) async {
     if (id == null || id.isEmpty) {
       return;
     }
@@ -97,6 +102,29 @@ class DriftExpenseRepository implements ExpenseRepository {
         id,
         'paymentInstrumentId',
         'Unknown payment instrument',
+      );
+    }
+    if (requireActive && !row.isActive) {
+      throw ArgumentError.value(
+        id,
+        'paymentInstrumentId',
+        'Payment instrument is inactive',
+      );
+    }
+  }
+
+  Future<void> _assertInstallmentPlanIfSet(String? planId) async {
+    if (planId == null || planId.isEmpty) {
+      return;
+    }
+    final row = await (_db.select(_db.installmentPlans)
+          ..where((p) => p.id.equals(planId)))
+        .getSingleOrNull();
+    if (row == null) {
+      throw ArgumentError.value(
+        planId,
+        'installmentPlanId',
+        'Unknown installment plan',
       );
     }
   }
@@ -136,7 +164,11 @@ class DriftExpenseRepository implements ExpenseRepository {
       categoryId: expense.categoryId,
       subcategoryId: expense.subcategoryId,
     );
-    await _assertPaymentInstrumentIfSet(expense.paymentInstrumentId);
+    await _assertPaymentInstrumentIfSet(
+      expense.paymentInstrumentId,
+      requireActive: expense.paidWithCreditCard,
+    );
+    await _assertInstallmentPlanIfSet(expense.installmentPlanId);
     final e = _withRecomputedUsd(expense);
     await _db.into(_db.expenses).insert(
           ExpensesCompanion.insert(
@@ -158,6 +190,8 @@ class DriftExpenseRepository implements ExpenseRepository {
                   ? ExpenseDates.toStorageDate(e.paymentExpectationConfirmedOn!)
                   : null,
             ),
+            installmentPlanId: Value(e.installmentPlanId),
+            installmentIndex: Value(e.installmentIndex),
           ),
         );
   }
@@ -175,7 +209,11 @@ class DriftExpenseRepository implements ExpenseRepository {
       categoryId: expense.categoryId,
       subcategoryId: expense.subcategoryId,
     );
-    await _assertPaymentInstrumentIfSet(expense.paymentInstrumentId);
+    await _assertPaymentInstrumentIfSet(
+      expense.paymentInstrumentId,
+      requireActive: expense.paidWithCreditCard,
+    );
+    await _assertInstallmentPlanIfSet(expense.installmentPlanId);
     final e = _withRecomputedUsd(expense);
     final updated = await (_db.update(_db.expenses)..where((x) => x.id.equals(e.id)))
         .write(
@@ -197,6 +235,8 @@ class DriftExpenseRepository implements ExpenseRepository {
               ? ExpenseDates.toStorageDate(e.paymentExpectationConfirmedOn!)
               : null,
         ),
+        installmentPlanId: Value(e.installmentPlanId),
+        installmentIndex: Value(e.installmentIndex),
       ),
     );
     if (updated == 0) {

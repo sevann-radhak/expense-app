@@ -25,6 +25,9 @@ void main() {
         PaymentInstrument(id: 'pi1', label: 'Card'),
       ],
       expenseRecurringSeries: const [],
+      incomeEntries: const [],
+      installmentPlans: const [],
+      partialPayments: const [],
       expenses: [
         Expense(
           id: 'e1',

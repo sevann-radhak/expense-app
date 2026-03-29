@@ -19,12 +19,21 @@ class SettingsCardProfilesSection extends ConsumerWidget {
     if (d != null) {
       parts.add(l10n.settingsPaymentInstrumentCycleDaySummary(d));
     }
+    final sc = p.statementClosingDay;
+    if (sc != null) {
+      parts.add('Close $sc');
+    }
+    final pd = p.paymentDueDay;
+    if (pd != null) {
+      parts.add('Due $pd');
+    }
     return parts.join(' · ');
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
     final async = ref.watch(paymentInstrumentsStreamProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -37,7 +46,7 @@ class SettingsCardProfilesSection extends ConsumerWidget {
         Text(
           l10n.settingsPaymentInstrumentsDescription,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: scheme.onSurfaceVariant,
               ),
         ),
         const SizedBox(height: 12),
@@ -58,7 +67,7 @@ class SettingsCardProfilesSection extends ConsumerWidget {
               return Text(
                 l10n.settingsPaymentInstrumentNoneYet,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: scheme.onSurfaceVariant,
                     ),
               );
             }
@@ -66,63 +75,134 @@ class SettingsCardProfilesSection extends ConsumerWidget {
               children: list.map((p) {
                 final sub = _subtitle(l10n, p);
                 return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    title: Text(p.label),
-                    subtitle: sub.isEmpty ? null : Text(sub),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 4, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        IconButton(
-                          tooltip: l10n.settingsPaymentInstrumentEditTitle,
-                          icon: const Icon(Icons.edit_outlined),
-                          onPressed: () async {
-                            await showDialog<bool>(
-                              context: context,
-                              builder: (ctx) =>
-                                  PaymentInstrumentFormDialog(initial: p),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          tooltip: l10n.deleteExpenseAction,
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () async {
-                            final ok = await showDialog<bool>(
-                              context: context,
-                              builder: (ctx) => AlertDialog(
-                                title: Text(
-                                  l10n.settingsPaymentInstrumentDeleteTitle,
-                                ),
-                                content: Text(
-                                  l10n.settingsPaymentInstrumentDeleteMessage,
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(ctx, false),
-                                    child: Text(l10n.cancel),
-                                  ),
-                                  FilledButton(
-                                    onPressed: () => Navigator.pop(ctx, true),
-                                    child: Text(l10n.confirmDelete),
-                                  ),
-                                ],
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                p.label,
+                                style: Theme.of(context).textTheme.titleSmall,
                               ),
-                            );
-                            if (ok == true && context.mounted) {
-                              try {
-                                await ref
-                                    .read(paymentInstrumentRepositoryProvider)
-                                    .deleteById(p.id);
-                              } on Object catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('$e')),
+                            ),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: [
+                                if (!p.isActive)
+                                  Chip(
+                                    label: Text(
+                                      l10n.settingsPaymentInstrumentInactive,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                    visualDensity: VisualDensity.compact,
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                if (p.isDefault)
+                                  Chip(
+                                    label: Text(
+                                      l10n.settingsPaymentInstrumentDefaultBadge,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                    visualDensity: VisualDensity.compact,
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        if (sub.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              sub,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Wrap(
+                            spacing: 0,
+                            children: [
+                              if (p.isActive && !p.isDefault)
+                                TextButton(
+                                  onPressed: () async {
+                                    try {
+                                      await ref
+                                          .read(paymentInstrumentRepositoryProvider)
+                                          .update(p.copyWith(isDefault: true));
+                                    } on Object catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('$e')),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  child: Text(l10n.settingsPaymentInstrumentSetDefault),
+                                ),
+                              IconButton(
+                                tooltip: l10n.settingsPaymentInstrumentEditTitle,
+                                icon: const Icon(Icons.edit_outlined),
+                                onPressed: () async {
+                                  await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) =>
+                                        PaymentInstrumentFormDialog(initial: p),
                                   );
-                                }
-                              }
-                            }
-                          },
+                                },
+                              ),
+                              IconButton(
+                                tooltip: l10n.deleteExpenseAction,
+                                icon: const Icon(Icons.delete_outline),
+                                onPressed: () async {
+                                  final ok = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: Text(
+                                        l10n.settingsPaymentInstrumentDeleteTitle,
+                                      ),
+                                      content: Text(
+                                        l10n.settingsPaymentInstrumentDeleteMessage,
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx, false),
+                                          child: Text(l10n.cancel),
+                                        ),
+                                        FilledButton(
+                                          onPressed: () => Navigator.pop(ctx, true),
+                                          child: Text(l10n.confirmDelete),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (ok == true && context.mounted) {
+                                    try {
+                                      await ref
+                                          .read(paymentInstrumentRepositoryProvider)
+                                          .deleteById(p.id);
+                                    } on Object catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('$e')),
+                                        );
+                                      }
+                                    }
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

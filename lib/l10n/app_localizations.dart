@@ -1231,6 +1231,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save'**
   String get recurringPaidEarlySave;
+
+  /// No description provided for @navIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get navIncome;
+
+  /// No description provided for @incomeScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get incomeScreenTitle;
+
+  /// No description provided for @incomeThisMonthHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Income this month'**
+  String get incomeThisMonthHeading;
+
+  /// No description provided for @incomeEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No income this month'**
+  String get incomeEmptyTitle;
+
+  /// No description provided for @incomeEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to record a deposit or inflow.'**
+  String get incomeEmptyBody;
+
+  /// No description provided for @incomeAddTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add income'**
+  String get incomeAddTooltip;
+
+  /// No description provided for @incomeFormAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add income'**
+  String get incomeFormAddTitle;
+
+  /// No description provided for @incomeFormEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit income'**
+  String get incomeFormEditTitle;
+
+  /// No description provided for @settingsPaymentInstrumentInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get settingsPaymentInstrumentInactive;
+
+  /// No description provided for @settingsPaymentInstrumentDefaultBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get settingsPaymentInstrumentDefaultBadge;
+
+  /// No description provided for @settingsPaymentInstrumentSetDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as default'**
+  String get settingsPaymentInstrumentSetDefault;
+
+  /// No description provided for @settingsPaymentInstrumentActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get settingsPaymentInstrumentActiveLabel;
+
+  /// No description provided for @settingsPaymentInstrumentStatementClosingDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Statement closing day (1–31)'**
+  String get settingsPaymentInstrumentStatementClosingDay;
+
+  /// No description provided for @settingsPaymentInstrumentPaymentDueDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment due day (1–31)'**
+  String get settingsPaymentInstrumentPaymentDueDay;
+
+  /// No description provided for @settingsPaymentInstrumentNominalApr.
+  ///
+  /// In en, this message translates to:
+  /// **'Nominal APR %'**
+  String get settingsPaymentInstrumentNominalApr;
+
+  /// No description provided for @settingsPaymentInstrumentCreditLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit limit'**
+  String get settingsPaymentInstrumentCreditLimit;
+
+  /// No description provided for @settingsPaymentInstrumentDisplaySuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'Display suffix (e.g. last four)'**
+  String get settingsPaymentInstrumentDisplaySuffix;
+
+  /// No description provided for @expenseFormSplitInstallmentsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Split into installment plan'**
+  String get expenseFormSplitInstallmentsLabel;
+
+  /// No description provided for @expenseFormInstallmentCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of payments'**
+  String get expenseFormInstallmentCountLabel;
+
+  /// No description provided for @expenseFormInstallmentCountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number between 2 and 60.'**
+  String get expenseFormInstallmentCountInvalid;
+
+  /// No description provided for @expenseFormInstallmentNeedsCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a card profile to use installments.'**
+  String get expenseFormInstallmentNeedsCard;
+
+  /// No description provided for @expenseFormInstallmentConflictRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off repeating expense to use installments.'**
+  String get expenseFormInstallmentConflictRecurring;
+
+  /// No description provided for @reportsIncomeThisMonthLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Income this month (USD): {amount}'**
+  String reportsIncomeThisMonthLine(String amount);
+
+  /// No description provided for @expenseListCardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Card: {label}'**
+  String expenseListCardLabel(String label);
+
+  /// No description provided for @taxonomySearchCategoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search categories'**
+  String get taxonomySearchCategoryHint;
+
+  /// No description provided for @taxonomySearchSubcategoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search subcategories'**
+  String get taxonomySearchSubcategoryHint;
 }
 
 class _AppLocalizationsDelegate

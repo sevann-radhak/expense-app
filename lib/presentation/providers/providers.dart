@@ -6,6 +6,9 @@ import 'package:expense_app/data/local/example_expenses_seed.dart';
 import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/data/local/drift_category_repository.dart';
 import 'package:expense_app/data/local/drift_expense_repository.dart';
+import 'package:expense_app/data/local/drift_income_repository.dart';
+import 'package:expense_app/data/local/drift_income_taxonomy_repository.dart';
+import 'package:expense_app/data/local/drift_installment_plan_repository.dart';
 import 'package:expense_app/data/local/drift_payment_instrument_repository.dart';
 import 'package:expense_app/data/local/drift_recurring_expense_series_repository.dart';
 import 'package:expense_app/domain/domain.dart';
@@ -44,6 +47,72 @@ final paymentInstrumentsStreamProvider =
   return ref
       .watch(paymentInstrumentRepositoryProvider)
       .watchPaymentInstruments();
+});
+
+/// Profiles with [PaymentInstrument.isActive] — used in expense picker (Phase 4.4).
+final activePaymentInstrumentsStreamProvider =
+    StreamProvider<List<PaymentInstrument>>((ref) {
+  return ref
+      .watch(paymentInstrumentRepositoryProvider)
+      .watchPaymentInstruments()
+      .map((list) => list.where((p) => p.isActive).toList());
+});
+
+final incomeRepositoryProvider = Provider<IncomeRepository>((ref) {
+  return DriftIncomeRepository(ref.watch(appDatabaseProvider));
+});
+
+final incomeTaxonomyRepositoryProvider =
+    Provider<IncomeTaxonomyRepository>((ref) {
+  return DriftIncomeTaxonomyRepository(ref.watch(appDatabaseProvider));
+});
+
+final incomeCategoriesStreamProvider =
+    StreamProvider<List<IncomeCategory>>((ref) {
+  return ref.watch(incomeTaxonomyRepositoryProvider).watchIncomeCategories();
+});
+
+final allIncomeSubcategoriesStreamProvider =
+    StreamProvider<List<IncomeSubcategory>>((ref) {
+  return ref
+      .watch(incomeTaxonomyRepositoryProvider)
+      .watchAllIncomeSubcategories();
+});
+
+final incomeSubcategoriesForCategoryProvider =
+    StreamProvider.family<List<IncomeSubcategory>, String>((ref, categoryId) {
+      return ref
+          .watch(incomeTaxonomyRepositoryProvider)
+          .watchIncomeSubcategories(categoryId);
+    });
+
+final installmentPlanRepositoryProvider =
+    Provider<InstallmentPlanRepository>((ref) {
+  return DriftInstallmentPlanRepository(ref.watch(appDatabaseProvider));
+});
+
+final incomeForSelectedMonthProvider = StreamProvider<List<IncomeEntry>>((ref) {
+  final m = ref.watch(selectedMonthProvider);
+  return ref.watch(incomeRepositoryProvider).watchForMonth(m.year, m.month);
+});
+
+final incomeForReportDetailMonthProvider = StreamProvider<List<IncomeEntry>>((
+  ref,
+) {
+  final year = ref.watch(selectedReportYearProvider);
+  final month = ref.watch(selectedReportDetailMonthProvider);
+  return ref.watch(incomeRepositoryProvider).watchForMonth(year, month);
+});
+
+final incomeUsdTotalSelectedMonthProvider = Provider<AsyncValue<double>>((ref) {
+  final async = ref.watch(incomeForSelectedMonthProvider);
+  return async.when(
+    data: (list) => AsyncValue.data(
+      list.fold<double>(0, (sum, e) => sum + e.amountUsd),
+    ),
+    loading: () => const AsyncValue.loading(),
+    error: (e, st) => AsyncValue.error(e, st),
+  );
 });
 
 /// Static FX table from assets (replace with API later).

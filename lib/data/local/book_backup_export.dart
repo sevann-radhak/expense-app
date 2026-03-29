@@ -28,6 +28,24 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
           (t) => OrderingTerm.asc(t.id),
         ]))
       .get();
+  final planRows = await (db.select(db.installmentPlans)
+        ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+      .get();
+  final incomeRows = await (db.select(db.incomeEntries)
+        ..orderBy([
+          (t) => OrderingTerm.asc(t.receivedOn),
+          (t) => OrderingTerm.asc(t.id),
+        ]))
+      .get();
+  final incCatRows = await (db.select(db.incomeCategories)
+        ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+      .get();
+  final incSubRows = await (db.select(db.incomeSubcategories)
+        ..orderBy([
+          (t) => OrderingTerm.asc(t.categoryId),
+          (t) => OrderingTerm.asc(t.sortOrder),
+        ]))
+      .get();
 
   final categories = catRows
       .map(
@@ -64,6 +82,13 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
           annualFeeAmount: r.annualFeeAmount,
           monthlyFeeAmount: r.monthlyFeeAmount,
           feeDescription: r.feeDescription.isEmpty ? null : r.feeDescription,
+          isActive: r.isActive,
+          isDefault: r.isDefault,
+          statementClosingDay: r.statementClosingDay,
+          paymentDueDay: r.paymentDueDay,
+          nominalAprPercent: r.nominalAprPercent,
+          creditLimit: r.creditLimit,
+          displaySuffix: r.displaySuffix,
         ),
       )
       .toList();
@@ -94,13 +119,117 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
                       r.paymentExpectationConfirmedOn!.isNotEmpty
                   ? ExpenseDates.fromStorageDate(r.paymentExpectationConfirmedOn!)
                   : null,
+          installmentPlanId: r.installmentPlanId,
+          installmentIndex: r.installmentIndex,
+        ),
+      )
+      .toList();
+
+  final incomeCategories = incCatRows
+      .map(
+        (r) => IncomeCategory(
+          id: r.id,
+          name: r.name,
+          description: r.description,
+          sortOrder: r.sortOrder,
+        ),
+      )
+      .toList();
+  final incomeSubcategories = incSubRows
+      .map(
+        (r) => IncomeSubcategory(
+          id: r.id,
+          categoryId: r.categoryId,
+          name: r.name,
+          description: r.description,
+          slug: r.slug,
+          isSystemReserved: r.isSystemReserved,
+          sortOrder: r.sortOrder,
         ),
       )
       .toList();
 
   final catIds = categories.map((c) => c.id).toSet();
   final subIds = subcategories.map((s) => s.id).toSet();
+  final incCatIds = incomeCategories.map((c) => c.id).toSet();
+  final incSubIds = incomeSubcategories.map((s) => s.id).toSet();
   final piIds = paymentInstruments.map((p) => p.id).toSet();
+
+  final installmentPlansRaw = planRows
+      .map(
+        (r) => InstallmentPlan(
+          id: r.id,
+          paymentCount: r.paymentCount,
+          intervalMonths: r.intervalMonths,
+          anchorOccurredOn: ExpenseDates.fromStorageDate(r.anchorOccurredOn),
+          categoryId: r.categoryId,
+          subcategoryId: r.subcategoryId,
+          paymentInstrumentId: r.paymentInstrumentId,
+          perPaymentAmountOriginal: r.perPaymentAmountOriginal,
+          currencyCode: r.currencyCode,
+          manualFxRateToUsd: r.manualFxRateToUsd,
+          perPaymentAmountUsd: r.perPaymentAmountUsd,
+          description: r.description,
+        ),
+      )
+      .toList();
+
+  final installmentPlans = <InstallmentPlan>[];
+  for (final p in installmentPlansRaw) {
+    if (!catIds.contains(p.categoryId) || !subIds.contains(p.subcategoryId)) {
+      continue;
+    }
+    final pip = p.paymentInstrumentId;
+    if (pip != null && pip.isNotEmpty && !piIds.contains(pip)) {
+      installmentPlans.add(
+        InstallmentPlan(
+          id: p.id,
+          paymentCount: p.paymentCount,
+          intervalMonths: p.intervalMonths,
+          anchorOccurredOn: p.anchorOccurredOn,
+          categoryId: p.categoryId,
+          subcategoryId: p.subcategoryId,
+          paymentInstrumentId: null,
+          perPaymentAmountOriginal: p.perPaymentAmountOriginal,
+          currencyCode: p.currencyCode,
+          manualFxRateToUsd: p.manualFxRateToUsd,
+          perPaymentAmountUsd: p.perPaymentAmountUsd,
+          description: p.description,
+        ),
+      );
+    } else {
+      installmentPlans.add(p);
+    }
+  }
+  final planIds = installmentPlans.map((p) => p.id).toSet();
+
+  final incomeEntriesRaw = incomeRows
+      .map(
+        (r) => IncomeEntry(
+          id: r.id,
+          receivedOn: ExpenseDates.fromStorageDate(r.receivedOn),
+          incomeCategoryId: r.incomeCategoryId,
+          incomeSubcategoryId: r.incomeSubcategoryId,
+          amountOriginal: r.amountOriginal,
+          currencyCode: r.currencyCode,
+          manualFxRateToUsd: r.manualFxRateToUsd,
+          amountUsd: r.amountUsd,
+          description: r.description,
+        ),
+      )
+      .toList();
+
+  final incomeEntries = <IncomeEntry>[];
+  for (final inc in incomeEntriesRaw) {
+    if (!incCatIds.contains(inc.incomeCategoryId) ||
+        !incSubIds.contains(inc.incomeSubcategoryId)) {
+      continue;
+    }
+    if (inc.manualFxRateToUsd <= 0) {
+      continue;
+    }
+    incomeEntries.add(inc);
+  }
 
   final expenseRecurringSeries = <ExpenseRecurringSeries>[];
   for (final s in expenseRecurringSeriesRaw) {
@@ -140,6 +269,10 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
     if (rs != null && rs.isNotEmpty && !seriesIds.contains(rs)) {
       next = next.copyWith(clearRecurringSeriesId: true);
     }
+    final ipl = next.installmentPlanId;
+    if (ipl != null && ipl.isNotEmpty && !planIds.contains(ipl)) {
+      next = next.copyWith(clearInstallmentPlan: true, clearInstallmentIndex: true);
+    }
     expenses.add(next);
   }
 
@@ -148,8 +281,13 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
     exportedAt: DateTime.now().toUtc(),
     categories: categories,
     subcategories: subcategories,
+    incomeCategories: incomeCategories,
+    incomeSubcategories: incomeSubcategories,
     paymentInstruments: paymentInstruments,
     expenseRecurringSeries: expenseRecurringSeries,
     expenses: expenses,
+    incomeEntries: incomeEntries,
+    installmentPlans: installmentPlans,
+    partialPayments: const [],
   );
 }

@@ -644,4 +644,91 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recurringPaidEarlySave => 'Save';
+
+  @override
+  String get navIncome => 'Income';
+
+  @override
+  String get incomeScreenTitle => 'Income';
+
+  @override
+  String get incomeThisMonthHeading => 'Income this month';
+
+  @override
+  String get incomeEmptyTitle => 'No income this month';
+
+  @override
+  String get incomeEmptyBody => 'Tap + to record a deposit or inflow.';
+
+  @override
+  String get incomeAddTooltip => 'Add income';
+
+  @override
+  String get incomeFormAddTitle => 'Add income';
+
+  @override
+  String get incomeFormEditTitle => 'Edit income';
+
+  @override
+  String get settingsPaymentInstrumentInactive => 'Inactive';
+
+  @override
+  String get settingsPaymentInstrumentDefaultBadge => 'Default';
+
+  @override
+  String get settingsPaymentInstrumentSetDefault => 'Set as default';
+
+  @override
+  String get settingsPaymentInstrumentActiveLabel => 'Active';
+
+  @override
+  String get settingsPaymentInstrumentStatementClosingDay =>
+      'Statement closing day (1–31)';
+
+  @override
+  String get settingsPaymentInstrumentPaymentDueDay => 'Payment due day (1–31)';
+
+  @override
+  String get settingsPaymentInstrumentNominalApr => 'Nominal APR %';
+
+  @override
+  String get settingsPaymentInstrumentCreditLimit => 'Credit limit';
+
+  @override
+  String get settingsPaymentInstrumentDisplaySuffix =>
+      'Display suffix (e.g. last four)';
+
+  @override
+  String get expenseFormSplitInstallmentsLabel => 'Split into installment plan';
+
+  @override
+  String get expenseFormInstallmentCountLabel => 'Number of payments';
+
+  @override
+  String get expenseFormInstallmentCountInvalid =>
+      'Enter a number between 2 and 60.';
+
+  @override
+  String get expenseFormInstallmentNeedsCard =>
+      'Choose a card profile to use installments.';
+
+  @override
+  String get expenseFormInstallmentConflictRecurring =>
+      'Turn off repeating expense to use installments.';
+
+  @override
+  String reportsIncomeThisMonthLine(String amount) {
+    return 'Income this month (USD): $amount';
+  }
+
+  @override
+  String expenseListCardLabel(String label) {
+    return 'Card: $label';
+  }
+
+  @override
+  String get taxonomySearchCategoryHint => 'Search categories';
+
+  @override
+  String get taxonomySearchSubcategoryHint => 'Search subcategories';
 }

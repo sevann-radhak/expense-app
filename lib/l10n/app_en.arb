@@ -575,5 +575,45 @@
   "recurrenceOrdinalFourth": "Fourth",
   "recurrenceOrdinalLast": "Last",
   "recurringPaidEarlyTitle": "Date paid",
-  "recurringPaidEarlySave": "Save"
+  "recurringPaidEarlySave": "Save",
+  "navIncome": "Income",
+  "incomeScreenTitle": "Income",
+  "incomeThisMonthHeading": "Income this month",
+  "incomeEmptyTitle": "No income this month",
+  "incomeEmptyBody": "Tap + to record a deposit or inflow.",
+  "incomeAddTooltip": "Add income",
+  "incomeFormAddTitle": "Add income",
+  "incomeFormEditTitle": "Edit income",
+  "settingsPaymentInstrumentInactive": "Inactive",
+  "settingsPaymentInstrumentDefaultBadge": "Default",
+  "settingsPaymentInstrumentSetDefault": "Set as default",
+  "settingsPaymentInstrumentActiveLabel": "Active",
+  "settingsPaymentInstrumentStatementClosingDay": "Statement closing day (1–31)",
+  "settingsPaymentInstrumentPaymentDueDay": "Payment due day (1–31)",
+  "settingsPaymentInstrumentNominalApr": "Nominal APR %",
+  "settingsPaymentInstrumentCreditLimit": "Credit limit",
+  "settingsPaymentInstrumentDisplaySuffix": "Display suffix (e.g. last four)",
+  "expenseFormSplitInstallmentsLabel": "Split into installment plan",
+  "expenseFormInstallmentCountLabel": "Number of payments",
+  "expenseFormInstallmentCountInvalid": "Enter a number between 2 and 60.",
+  "expenseFormInstallmentNeedsCard": "Choose a card profile to use installments.",
+  "expenseFormInstallmentConflictRecurring": "Turn off repeating expense to use installments.",
+  "reportsIncomeThisMonthLine": "Income this month (USD): {amount}",
+  "@reportsIncomeThisMonthLine": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "expenseListCardLabel": "Card: {label}",
+  "@expenseListCardLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "taxonomySearchCategoryHint": "Search categories",
+  "taxonomySearchSubcategoryHint": "Search subcategories"
 }

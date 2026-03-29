@@ -83,6 +83,27 @@ void main() {
     expect(list.single.paymentInstrumentId, 'pi_x');
   });
 
+  test('create rejects inactive payment instrument when paid with card', () async {
+    final piRepo = DriftPaymentInstrumentRepository(db);
+    await piRepo.create(const PaymentInstrument(id: 'pi_active', label: 'Active card'));
+    await piRepo.create(
+      const PaymentInstrument(
+        id: 'pi_inactive',
+        label: 'Old card',
+        isActive: false,
+      ),
+    );
+    await expectLater(
+      repo.create(
+        sample(id: 'e_inactive', occurredOn: DateTime(2025, 6, 10)).copyWith(
+          paidWithCreditCard: true,
+          paymentInstrumentId: 'pi_inactive',
+        ),
+      ),
+      throwsA(isA<ArgumentError>()),
+    );
+  });
+
   test('create rejects subcategory that does not match category', () async {
     expect(
       () => repo.create(

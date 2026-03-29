@@ -393,10 +393,15 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
       localeName,
     ).format(DateTime(year, month));
     final expensesAsync = ref.watch(expensesForReportDetailMonthProvider);
+    final incomeAsync = ref.watch(incomeForReportDetailMonthProvider);
     final categories = ref.watch(categoriesStreamProvider).valueOrNull ?? [];
     final allSubs = ref.watch(allSubcategoriesStreamProvider).valueOrNull ?? [];
     final categoryName = {for (final c in categories) c.id: c.name};
     final subcategoryName = {for (final s in allSubs) s.id: s.name};
+    final instruments =
+        ref.watch(paymentInstrumentsStreamProvider).valueOrNull ?? [];
+    final instrumentLabel = {for (final p in instruments) p.id: p.label};
+    final today = calendarTodayLocal();
 
     return ListView(
       padding: const EdgeInsets.all(24),
@@ -433,7 +438,10 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
         const SizedBox(height: 16),
         expensesAsync.when(
           data: (expenses) {
-            if (expenses.isEmpty) {
+            final incomeList = incomeAsync.valueOrNull ?? [];
+            final incomeUsd =
+                incomeList.fold<double>(0, (sum, e) => sum + e.amountUsd);
+            if (expenses.isEmpty && incomeUsd <= 0) {
               return Text(
                 l10n.reportsByMonthEmpty,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -445,27 +453,52 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  l10n.expensesThisMonthHeading,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                ...expenses.map(
-                  (e) => ExpenseSummaryListTile(
-                    expense: e,
-                    categoryId: e.categoryId,
-                    categoryName: categoryName[e.categoryId] ??
-                        l10n.taxonomyUnknownLabel,
-                    subcategoryName: subcategoryName[e.subcategoryId] ??
-                        l10n.taxonomyUnknownLabel,
-                    onTap: () {
-                      showDialog<void>(
-                        context: context,
-                        builder: (ctx) => ExpenseFormDialog(initial: e),
-                      );
-                    },
+                if (incomeUsd > 0) ...[
+                  Text(
+                    l10n.reportsIncomeThisMonthLine(
+                      formatUsdAmountOnly(incomeUsd, localeName),
+                    ),
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
-                ),
+                  const SizedBox(height: 16),
+                ],
+                if (expenses.isEmpty)
+                  Text(
+                    l10n.reportsByMonthEmpty,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  )
+                else ...[
+                  Text(
+                    l10n.expensesThisMonthHeading,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  ...expenses.map(
+                    (e) => ExpenseSummaryListTile(
+                      expense: e,
+                      categoryId: e.categoryId,
+                      categoryName: categoryName[e.categoryId] ??
+                          l10n.taxonomyUnknownLabel,
+                      subcategoryName: subcategoryName[e.subcategoryId] ??
+                          l10n.taxonomyUnknownLabel,
+                      paymentInstrumentLabel: e.paymentInstrumentId != null
+                          ? instrumentLabel[e.paymentInstrumentId!]
+                          : null,
+                      emphasizeAsScheduled: !isRealizedOnLocalCalendar(
+                        e.occurredOn,
+                        today,
+                      ),
+                      onTap: () {
+                        showDialog<void>(
+                          context: context,
+                          builder: (ctx) => ExpenseFormDialog(initial: e),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ],
             );
           },

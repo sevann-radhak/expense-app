@@ -17,6 +17,8 @@ class ExpenseSummaryListTile extends StatelessWidget {
     this.onTap,
     this.showRecurringOverflowMenu = false,
     this.onRecurringMenuAction,
+    this.paymentInstrumentLabel,
+    this.emphasizeAsScheduled = false,
   });
 
   final Expense expense;
@@ -30,6 +32,12 @@ class ExpenseSummaryListTile extends StatelessWidget {
   /// When true and [onRecurringMenuAction] is set, shows a menu for scheduled recurring rows.
   final bool showRecurringOverflowMenu;
   final void Function(RecurringExpenseTileAction action)? onRecurringMenuAction;
+
+  /// Resolved card profile label when [Expense.paidWithCreditCard].
+  final String? paymentInstrumentLabel;
+
+  /// Slightly dims the row (e.g. future scheduled expenses).
+  final bool emphasizeAsScheduled;
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +86,11 @@ class ExpenseSummaryListTile extends StatelessWidget {
           )
         : null;
 
-    final child = Padding(
+    final cardSuffix = paymentInstrumentLabel != null && paymentInstrumentLabel!.isNotEmpty
+        ? ' · ${l10n.expenseListCardLabel(paymentInstrumentLabel!)}'
+        : (expense.paidWithCreditCard ? ' · ${l10n.expenseListCardBadge}' : '');
+
+    final inner = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,14 +118,14 @@ class ExpenseSummaryListTile extends StatelessWidget {
                       TextSpan(
                         text: '$categoryName — $subcategoryName · $dateStr',
                       ),
-                      if (expense.paidWithCreditCard)
+                      if (cardSuffix.isNotEmpty)
                         TextSpan(
-                          text: ' · ${l10n.expenseListCardBadge}',
+                          text: cardSuffix,
                           style: theme.textTheme.bodySmall,
                         ),
                     ],
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (expectationChip != null)
@@ -165,6 +177,11 @@ class ExpenseSummaryListTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    final child = Opacity(
+      opacity: emphasizeAsScheduled ? 0.82 : 1,
+      child: inner,
     );
 
     return Card(

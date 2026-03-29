@@ -34,6 +34,11 @@ class AppShell extends StatelessWidget {
                   label: Text(l10n.navHome),
                 ),
                 NavigationRailDestination(
+                  icon: const Icon(Icons.payments_outlined),
+                  selectedIcon: const Icon(Icons.payments),
+                  label: Text(l10n.navIncome),
+                ),
+                NavigationRailDestination(
                   icon: const Icon(Icons.bar_chart_outlined),
                   selectedIcon: const Icon(Icons.bar_chart),
                   label: Text(l10n.navReports),
@@ -67,6 +72,11 @@ class AppShell extends StatelessWidget {
             icon: const Icon(Icons.home_outlined),
             selectedIcon: const Icon(Icons.home),
             label: l10n.navHome,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.payments_outlined),
+            selectedIcon: const Icon(Icons.payments),
+            label: l10n.navIncome,
           ),
           NavigationDestination(
             icon: const Icon(Icons.bar_chart_outlined),

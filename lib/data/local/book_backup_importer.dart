@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:expense_app/application/book_backup_snapshot.dart';
 import 'package:expense_app/application/recurrence_json_codec.dart';
 import 'package:expense_app/data/local/app_database.dart';
+import 'package:expense_app/data/local/income_category_seed.dart';
 import 'package:expense_app/domain/domain.dart';
 
 /// Result of [sanitizeBookBackupForImport] when the file had inconsistent rows
@@ -17,6 +18,8 @@ final class BookBackupSanitizeReport {
     required this.subcategoriesDropped,
     required this.recurringSeriesSkipped,
     required this.recurringSeriesLinksCleared,
+    required this.installmentLinksCleared,
+    required this.incomeSkipped,
   });
 
   final BookBackupSnapshot snapshot;
@@ -25,13 +28,17 @@ final class BookBackupSanitizeReport {
   final int subcategoriesDropped;
   final int recurringSeriesSkipped;
   final int recurringSeriesLinksCleared;
+  final int installmentLinksCleared;
+  final int incomeSkipped;
 
   bool get hadRepairs =>
       expensesSkipped > 0 ||
       paymentInstrumentLinksCleared > 0 ||
       subcategoriesDropped > 0 ||
       recurringSeriesSkipped > 0 ||
-      recurringSeriesLinksCleared > 0;
+      recurringSeriesLinksCleared > 0 ||
+      installmentLinksCleared > 0 ||
+      incomeSkipped > 0;
 }
 
 /// Drops orphan subcategories and expenses with broken links; clears invalid
@@ -49,6 +56,35 @@ BookBackupSanitizeReport sanitizeBookBackupForImport(BookBackupSnapshot raw) {
 
   final piIds = raw.paymentInstruments.map((p) => p.id).toSet();
 
+  final keptPlans = <InstallmentPlan>[];
+  for (final p in raw.installmentPlans) {
+    if (!catIds.contains(p.categoryId) || !subIds.contains(p.subcategoryId)) {
+      continue;
+    }
+    final pip = p.paymentInstrumentId;
+    if (pip != null && pip.isNotEmpty && !piIds.contains(pip)) {
+      keptPlans.add(
+        InstallmentPlan(
+          id: p.id,
+          paymentCount: p.paymentCount,
+          intervalMonths: p.intervalMonths,
+          anchorOccurredOn: p.anchorOccurredOn,
+          categoryId: p.categoryId,
+          subcategoryId: p.subcategoryId,
+          paymentInstrumentId: null,
+          perPaymentAmountOriginal: p.perPaymentAmountOriginal,
+          currencyCode: p.currencyCode,
+          manualFxRateToUsd: p.manualFxRateToUsd,
+          perPaymentAmountUsd: p.perPaymentAmountUsd,
+          description: p.description,
+        ),
+      );
+    } else {
+      keptPlans.add(p);
+    }
+  }
+  final planIds = keptPlans.map((p) => p.id).toSet();
+
   final keptSeries = raw.expenseRecurringSeries.where((s) {
     return catIds.contains(s.categoryId) && subIds.contains(s.subcategoryId);
   }).toList();
@@ -59,6 +95,7 @@ BookBackupSanitizeReport sanitizeBookBackupForImport(BookBackupSnapshot raw) {
   var expensesSkipped = 0;
   var paymentCleared = 0;
   var seriesLinksCleared = 0;
+  var installmentLinksCleared = 0;
 
   for (final e in raw.expenses) {
     if (!catIds.contains(e.categoryId)) {
@@ -84,13 +121,18 @@ BookBackupSanitizeReport sanitizeBookBackupForImport(BookBackupSnapshot raw) {
       next = next.copyWith(clearRecurringSeriesId: true);
       seriesLinksCleared++;
     }
+    final ipl = next.installmentPlanId;
+    if (ipl != null && ipl.isNotEmpty && !planIds.contains(ipl)) {
+      next = next.copyWith(clearInstallmentPlan: true, clearInstallmentIndex: true);
+      installmentLinksCleared++;
+    }
     keptExpenses.add(next);
   }
 
   final cleanedSeries = <ExpenseRecurringSeries>[];
   for (final s in keptSeries) {
-    final pi = s.paymentInstrumentId;
-    if (pi != null && pi.isNotEmpty && !piIds.contains(pi)) {
+    final pii = s.paymentInstrumentId;
+    if (pii != null && pii.isNotEmpty && !piIds.contains(pii)) {
       cleanedSeries.add(s.copyWith(clearPaymentInstrumentId: true));
       paymentCleared++;
     } else {
@@ -98,14 +140,51 @@ BookBackupSanitizeReport sanitizeBookBackupForImport(BookBackupSnapshot raw) {
     }
   }
 
+  var incomeCats = raw.incomeCategories;
+  var incomeSubs = raw.incomeSubcategories;
+  if (incomeCats.isEmpty) {
+    incomeCats = IncomeCategorySeeder.builtInIncomeCategories();
+    incomeSubs = IncomeCategorySeeder.builtInIncomeSubcategories();
+  }
+  final incCatIds = incomeCats.map((c) => c.id).toSet();
+  final keptIncSubs =
+      incomeSubs.where((s) => incCatIds.contains(s.categoryId)).toList();
+  final incSubIds = keptIncSubs.map((s) => s.id).toSet();
+
+  final defIncCat = IncomeCategorySeeder.kMigrationDefaultCategoryId;
+  final defIncSub = IncomeCategorySeeder.kMigrationDefaultSubcategoryId;
+
+  final keptIncome = <IncomeEntry>[];
+  var incomeSkipped = 0;
+  for (final inc in raw.incomeEntries) {
+    if (inc.manualFxRateToUsd <= 0) {
+      incomeSkipped++;
+      continue;
+    }
+    var catId = inc.incomeCategoryId;
+    var subId = inc.incomeSubcategoryId;
+    if (!incCatIds.contains(catId) || !incSubIds.contains(subId)) {
+      catId = defIncCat;
+      subId = defIncSub;
+    }
+    keptIncome.add(
+      inc.copyWith(incomeCategoryId: catId, incomeSubcategoryId: subId),
+    );
+  }
+
   final cleaned = BookBackupSnapshot(
-    schemaVersion: raw.schemaVersion,
+    schemaVersion: BookBackupSnapshot.currentSchemaVersion,
     exportedAt: raw.exportedAt,
     categories: raw.categories,
     subcategories: keptSubs,
+    incomeCategories: incomeCats,
+    incomeSubcategories: keptIncSubs,
     paymentInstruments: raw.paymentInstruments,
     expenseRecurringSeries: cleanedSeries,
     expenses: keptExpenses,
+    incomeEntries: keptIncome,
+    installmentPlans: keptPlans,
+    partialPayments: const [],
   );
 
   return BookBackupSanitizeReport(
@@ -115,6 +194,8 @@ BookBackupSanitizeReport sanitizeBookBackupForImport(BookBackupSnapshot raw) {
     subcategoriesDropped: subDropped,
     recurringSeriesSkipped: seriesSkipped,
     recurringSeriesLinksCleared: seriesLinksCleared,
+    installmentLinksCleared: installmentLinksCleared,
+    incomeSkipped: incomeSkipped,
   );
 }
 
@@ -134,6 +215,47 @@ void validateBookBackupSnapshot(BookBackupSnapshot snapshot) {
     subIds.add(s.id);
   }
   final piIds = snapshot.paymentInstruments.map((p) => p.id).toSet();
+  final planIds = <String>{};
+  for (final p in snapshot.installmentPlans) {
+    if (!catIds.contains(p.categoryId)) {
+      throw ArgumentError('Installment plan ${p.id} references missing category');
+    }
+    if (!subIds.contains(p.subcategoryId)) {
+      throw ArgumentError('Installment plan ${p.id} references missing subcategory');
+    }
+    final pip = p.paymentInstrumentId;
+    if (pip != null && pip.isNotEmpty && !piIds.contains(pip)) {
+      throw ArgumentError('Installment plan ${p.id} references missing payment instrument');
+    }
+    if (p.manualFxRateToUsd <= 0) {
+      throw ArgumentError('Installment plan ${p.id} has invalid FX');
+    }
+    if (p.paymentCount < 2) {
+      throw ArgumentError('Installment plan ${p.id} has invalid paymentCount');
+    }
+    planIds.add(p.id);
+  }
+  final incCatIds = snapshot.incomeCategories.map((c) => c.id).toSet();
+  final incSubIds = <String>{};
+  for (final s in snapshot.incomeSubcategories) {
+    if (!incCatIds.contains(s.categoryId)) {
+      throw ArgumentError(
+        'Income subcategory ${s.id} references missing income category ${s.categoryId}',
+      );
+    }
+    incSubIds.add(s.id);
+  }
+  for (final inc in snapshot.incomeEntries) {
+    if (!incCatIds.contains(inc.incomeCategoryId)) {
+      throw ArgumentError('Income ${inc.id} references missing income category');
+    }
+    if (!incSubIds.contains(inc.incomeSubcategoryId)) {
+      throw ArgumentError('Income ${inc.id} references missing income subcategory');
+    }
+    if (inc.manualFxRateToUsd <= 0) {
+      throw ArgumentError('Income ${inc.id} has invalid FX');
+    }
+  }
   final seriesIds = <String>{};
   for (final s in snapshot.expenseRecurringSeries) {
     if (!catIds.contains(s.categoryId)) {
@@ -170,6 +292,10 @@ void validateBookBackupSnapshot(BookBackupSnapshot snapshot) {
     if (rs != null && rs.isNotEmpty && !seriesIds.contains(rs)) {
       throw ArgumentError('Expense ${e.id} references missing recurring series');
     }
+    final ipl = e.installmentPlanId;
+    if (ipl != null && ipl.isNotEmpty && !planIds.contains(ipl)) {
+      throw ArgumentError('Expense ${e.id} references missing installment plan');
+    }
   }
 }
 
@@ -186,10 +312,14 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
   final toImport = report.snapshot;
   await db.transaction(() async {
     await db.delete(db.expenses).go();
+    await db.delete(db.incomeEntries).go();
     await db.delete(db.recExpenseSeries).go();
+    await db.delete(db.installmentPlans).go();
     await db.delete(db.paymentInstruments).go();
     await db.delete(db.subcategories).go();
     await db.delete(db.categories).go();
+    await db.delete(db.incomeSubcategories).go();
+    await db.delete(db.incomeCategories).go();
 
     await db.batch((b) {
       for (final c in toImport.categories) {
@@ -217,6 +347,31 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
           ),
         );
       }
+      for (final c in toImport.incomeCategories) {
+        b.insert(
+          db.incomeCategories,
+          IncomeCategoriesCompanion.insert(
+            id: c.id,
+            name: c.name,
+            description: Value(c.description),
+            sortOrder: Value(c.sortOrder),
+          ),
+        );
+      }
+      for (final s in toImport.incomeSubcategories) {
+        b.insert(
+          db.incomeSubcategories,
+          IncomeSubcategoriesCompanion.insert(
+            id: s.id,
+            categoryId: s.categoryId,
+            name: s.name,
+            description: Value(s.description),
+            slug: s.slug,
+            isSystemReserved: Value(s.isSystemReserved),
+            sortOrder: Value(s.sortOrder),
+          ),
+        );
+      }
       for (final p in toImport.paymentInstruments) {
         b.insert(
           db.paymentInstruments,
@@ -228,6 +383,32 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
             annualFeeAmount: Value(p.annualFeeAmount),
             monthlyFeeAmount: Value(p.monthlyFeeAmount),
             feeDescription: Value(p.feeDescription ?? ''),
+            isActive: Value(p.isActive),
+            isDefault: Value(p.isDefault),
+            statementClosingDay: Value(p.statementClosingDay),
+            paymentDueDay: Value(p.paymentDueDay),
+            nominalAprPercent: Value(p.nominalAprPercent),
+            creditLimit: Value(p.creditLimit),
+            displaySuffix: Value(p.displaySuffix),
+          ),
+        );
+      }
+      for (final pl in toImport.installmentPlans) {
+        b.insert(
+          db.installmentPlans,
+          InstallmentPlansCompanion.insert(
+            id: pl.id,
+            paymentCount: pl.paymentCount,
+            intervalMonths: Value(pl.intervalMonths),
+            anchorOccurredOn: ExpenseDates.toStorageDate(pl.anchorOccurredOn),
+            categoryId: pl.categoryId,
+            subcategoryId: pl.subcategoryId,
+            paymentInstrumentId: Value(pl.paymentInstrumentId),
+            perPaymentAmountOriginal: pl.perPaymentAmountOriginal,
+            currencyCode: Value(pl.currencyCode),
+            manualFxRateToUsd: Value(pl.manualFxRateToUsd),
+            perPaymentAmountUsd: pl.perPaymentAmountUsd,
+            description: Value(pl.description),
           ),
         );
       }
@@ -256,6 +437,22 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
           ),
         );
       }
+      for (final inc in toImport.incomeEntries) {
+        b.insert(
+          db.incomeEntries,
+          IncomeEntriesCompanion.insert(
+            id: inc.id,
+            receivedOn: ExpenseDates.toStorageDate(inc.receivedOn),
+            incomeCategoryId: inc.incomeCategoryId,
+            incomeSubcategoryId: inc.incomeSubcategoryId,
+            amountOriginal: inc.amountOriginal,
+            currencyCode: Value(inc.currencyCode),
+            manualFxRateToUsd: Value(inc.manualFxRateToUsd),
+            amountUsd: inc.amountUsd,
+            description: Value(inc.description),
+          ),
+        );
+      }
       for (final e in toImport.expenses) {
         b.insert(
           db.expenses,
@@ -278,6 +475,8 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
                   ? ExpenseDates.toStorageDate(e.paymentExpectationConfirmedOn!)
                   : null,
             ),
+            installmentPlanId: Value(e.installmentPlanId),
+            installmentIndex: Value(e.installmentIndex),
           ),
         );
       }

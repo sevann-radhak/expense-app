@@ -26,6 +26,14 @@ class _PaymentInstrumentFormDialogState
   late final TextEditingController _annualFeeController;
   late final TextEditingController _monthlyFeeController;
   late final TextEditingController _feeDescriptionController;
+  late final TextEditingController _statementClosingController;
+  late final TextEditingController _paymentDueController;
+  late final TextEditingController _aprController;
+  late final TextEditingController _creditLimitController;
+  late final TextEditingController _displaySuffixController;
+
+  bool _isActive = true;
+  bool _isDefault = false;
 
   @override
   void initState() {
@@ -49,6 +57,29 @@ class _PaymentInstrumentFormDialogState
     _feeDescriptionController = TextEditingController(
       text: i?.feeDescription ?? '',
     );
+    _statementClosingController = TextEditingController(
+      text: i?.statementClosingDay?.toString() ?? '',
+    );
+    _paymentDueController = TextEditingController(
+      text: i?.paymentDueDay?.toString() ?? '',
+    );
+    _aprController = TextEditingController(
+      text: i?.nominalAprPercent != null
+          ? formatAmountPlainForEdit(i!.nominalAprPercent!)
+          : '',
+    );
+    _creditLimitController = TextEditingController(
+      text: i?.creditLimit != null
+          ? formatAmountPlainForEdit(i!.creditLimit!)
+          : '',
+    );
+    _displaySuffixController = TextEditingController(
+      text: i?.displaySuffix ?? '',
+    );
+    if (i != null) {
+      _isActive = i.isActive;
+      _isDefault = i.isDefault;
+    }
   }
 
   @override
@@ -59,6 +90,11 @@ class _PaymentInstrumentFormDialogState
     _annualFeeController.dispose();
     _monthlyFeeController.dispose();
     _feeDescriptionController.dispose();
+    _statementClosingController.dispose();
+    _paymentDueController.dispose();
+    _aprController.dispose();
+    _creditLimitController.dispose();
+    _displaySuffixController.dispose();
     super.dispose();
   }
 
@@ -98,6 +134,45 @@ class _PaymentInstrumentFormDialogState
         return;
       }
     }
+    int? statementDay;
+    final st = _statementClosingController.text.trim();
+    if (st.isNotEmpty) {
+      statementDay = int.tryParse(st);
+      if (statementDay == null || statementDay < 1 || statementDay > 31) {
+        return;
+      }
+    }
+    int? dueDay;
+    final du = _paymentDueController.text.trim();
+    if (du.isNotEmpty) {
+      dueDay = int.tryParse(du);
+      if (dueDay == null || dueDay < 1 || dueDay > 31) {
+        return;
+      }
+    }
+    double? apr;
+    final ap = _aprController.text.trim();
+    if (ap.isNotEmpty) {
+      apr = tryParseDecimalInput(ap, localeName);
+      if (apr == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.expenseAmountInvalid)),
+        );
+        return;
+      }
+    }
+    double? creditLimit;
+    final cl = _creditLimitController.text.trim();
+    if (cl.isNotEmpty) {
+      creditLimit = tryParseDecimalInput(cl, localeName);
+      if (creditLimit == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.expenseAmountInvalid)),
+        );
+        return;
+      }
+    }
+    final suffix = _displaySuffixController.text.trim();
     final bank = _bankController.text.trim();
     final instrument = PaymentInstrument(
       id: widget.initial?.id ?? const Uuid().v4(),
@@ -109,6 +184,13 @@ class _PaymentInstrumentFormDialogState
       feeDescription: _feeDescriptionController.text.trim().isEmpty
           ? null
           : _feeDescriptionController.text.trim(),
+      isActive: _isActive,
+      isDefault: _isDefault,
+      statementClosingDay: statementDay,
+      paymentDueDay: dueDay,
+      nominalAprPercent: apr,
+      creditLimit: creditLimit,
+      displaySuffix: suffix.isEmpty ? null : suffix,
     );
     final repo = ref.read(paymentInstrumentRepositoryProvider);
     try {
@@ -217,6 +299,62 @@ class _PaymentInstrumentFormDialogState
                     border: const OutlineInputBorder(),
                   ),
                   maxLines: 2,
+                ),
+                const SizedBox(height: 12),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.settingsPaymentInstrumentActiveLabel),
+                  value: _isActive,
+                  onChanged: (v) => setState(() => _isActive = v),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.settingsPaymentInstrumentSetDefault),
+                  value: _isDefault,
+                  onChanged: (v) => setState(() => _isDefault = v),
+                ),
+                TextFormField(
+                  controller: _statementClosingController,
+                  decoration: InputDecoration(
+                    labelText: l10n.settingsPaymentInstrumentStatementClosingDay,
+                    border: const OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _paymentDueController,
+                  decoration: InputDecoration(
+                    labelText: l10n.settingsPaymentInstrumentPaymentDueDay,
+                    border: const OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _aprController,
+                  decoration: InputDecoration(
+                    labelText: l10n.settingsPaymentInstrumentNominalApr,
+                    border: const OutlineInputBorder(),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _creditLimitController,
+                  decoration: InputDecoration(
+                    labelText: l10n.settingsPaymentInstrumentCreditLimit,
+                    border: const OutlineInputBorder(),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _displaySuffixController,
+                  decoration: InputDecoration(
+                    labelText: l10n.settingsPaymentInstrumentDisplaySuffix,
+                    border: const OutlineInputBorder(),
+                  ),
                 ),
               ],
             ),

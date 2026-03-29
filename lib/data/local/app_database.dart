@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
 import 'package:expense_app/data/local/category_seed.dart';
+import 'package:expense_app/data/local/income_category_seed.dart';
 
 part 'app_database.g.dart';
 
@@ -38,6 +39,127 @@ class Subcategories extends Table {
   BoolColumn get isSystemReserved => boolean().withDefault(const Constant(false))();
 
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DataClassName('IncomeCategoryRow')
+class IncomeCategories extends Table {
+  @override
+  String get tableName => 'income_categories';
+
+  TextColumn get id => text()();
+
+  TextColumn get name => text()();
+
+  TextColumn get description => text().nullable()();
+
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DataClassName('IncomeSubcategoryRow')
+class IncomeSubcategories extends Table {
+  @override
+  String get tableName => 'income_subcategories';
+
+  TextColumn get id => text()();
+
+  TextColumn get categoryId => text().references(
+        IncomeCategories,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
+
+  TextColumn get name => text()();
+
+  TextColumn get description => text().nullable()();
+
+  TextColumn get slug => text()();
+
+  BoolColumn get isSystemReserved => boolean().withDefault(const Constant(false))();
+
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Card / wallet profile for attribution only (no PAN, CVV, PIN).
+@DataClassName('PaymentInstrumentRow')
+class PaymentInstruments extends Table {
+  TextColumn get id => text()();
+
+  TextColumn get label => text()();
+
+  TextColumn get bankName => text().nullable()();
+
+  IntColumn get billingCycleDay => integer().nullable()();
+
+  RealColumn get annualFeeAmount => real().nullable()();
+
+  RealColumn get monthlyFeeAmount => real().nullable()();
+
+  TextColumn get feeDescription => text().withDefault(const Constant(''))();
+
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+
+  BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
+
+  IntColumn get statementClosingDay => integer().nullable()();
+
+  IntColumn get paymentDueDay => integer().nullable()();
+
+  RealColumn get nominalAprPercent => real().nullable()();
+
+  RealColumn get creditLimit => real().nullable()();
+
+  TextColumn get displaySuffix => text().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DataClassName('InstallmentPlanRow')
+class InstallmentPlans extends Table {
+  TextColumn get id => text()();
+
+  IntColumn get paymentCount => integer()();
+
+  IntColumn get intervalMonths => integer().withDefault(const Constant(1))();
+
+  TextColumn get anchorOccurredOn => text()();
+
+  TextColumn get categoryId => text().references(
+        Categories,
+        #id,
+        onDelete: KeyAction.restrict,
+      )();
+
+  TextColumn get subcategoryId => text().references(
+        Subcategories,
+        #id,
+        onDelete: KeyAction.restrict,
+      )();
+
+  TextColumn get paymentInstrumentId => text().nullable().references(
+        PaymentInstruments,
+        #id,
+        onDelete: KeyAction.setNull,
+      )();
+
+  RealColumn get perPaymentAmountOriginal => real()();
+
+  TextColumn get currencyCode => text().withDefault(const Constant('USD'))();
+
+  RealColumn get manualFxRateToUsd => real().withDefault(const Constant(1.0))();
+
+  RealColumn get perPaymentAmountUsd => real()();
+
+  TextColumn get description => text().withDefault(const Constant(''))();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -134,26 +256,45 @@ class Expenses extends Table {
 
   TextColumn get paymentExpectationConfirmedOn => text().nullable()();
 
+  TextColumn get installmentPlanId => text().nullable().references(
+        InstallmentPlans,
+        #id,
+        onDelete: KeyAction.setNull,
+      )();
+
+  IntColumn get installmentIndex => integer().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
 
-/// Card / wallet profile for attribution only (no PAN, CVV, PIN).
-@DataClassName('PaymentInstrumentRow')
-class PaymentInstruments extends Table {
+@DataClassName('IncomeEntryRow')
+class IncomeEntries extends Table {
   TextColumn get id => text()();
 
-  TextColumn get label => text()();
+  TextColumn get receivedOn => text()();
 
-  TextColumn get bankName => text().nullable()();
+  TextColumn get incomeCategoryId => text().references(
+        IncomeCategories,
+        #id,
+        onDelete: KeyAction.restrict,
+      )();
 
-  IntColumn get billingCycleDay => integer().nullable()();
+  TextColumn get incomeSubcategoryId => text().references(
+        IncomeSubcategories,
+        #id,
+        onDelete: KeyAction.restrict,
+      )();
 
-  RealColumn get annualFeeAmount => real().nullable()();
+  RealColumn get amountOriginal => real()();
 
-  RealColumn get monthlyFeeAmount => real().nullable()();
+  TextColumn get currencyCode => text().withDefault(const Constant('USD'))();
 
-  TextColumn get feeDescription => text().withDefault(const Constant(''))();
+  RealColumn get manualFxRateToUsd => real().withDefault(const Constant(1.0))();
+
+  RealColumn get amountUsd => real()();
+
+  TextColumn get description => text().withDefault(const Constant(''))();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -163,9 +304,13 @@ class PaymentInstruments extends Table {
   tables: [
     Categories,
     Subcategories,
-    Expenses,
+    IncomeCategories,
+    IncomeSubcategories,
     PaymentInstruments,
+    InstallmentPlans,
     RecExpenseSeries,
+    Expenses,
+    IncomeEntries,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -184,13 +329,14 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (Migrator m) async {
           await m.createAll();
           await CategorySeeder.ensureSeedData(this);
+          await IncomeCategorySeeder.ensureSeedData(this);
         },
         onUpgrade: (Migrator m, int from, int to) async {
           if (from < 2) {
@@ -227,6 +373,25 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(expenses, expenses.paymentExpectationStatus);
             await m.addColumn(expenses, expenses.paymentExpectationConfirmedOn);
           }
+          if (from < 11) {
+            await m.createTable(incomeEntries);
+          }
+          // Note: from 11–13, income_entries referenced expense categories; v14 replaces.
+          if (from < 12) {
+            await ensurePaymentInstrumentV2Columns();
+            await backfillPaymentInstrumentDefaultsIfNeeded();
+          }
+          if (from < 13) {
+            await m.createTable(installmentPlans);
+            await m.addColumn(expenses, expenses.installmentPlanId);
+            await m.addColumn(expenses, expenses.installmentIndex);
+          }
+          if (from < 14) {
+            await m.createTable(incomeCategories);
+            await m.createTable(incomeSubcategories);
+            await IncomeCategorySeeder.ensureSeedData(this);
+            await migrateIncomeEntriesToIncomeTaxonomyV14(m);
+          }
         },
         beforeOpen: (OpeningDetails details) async {
           await ensureExpenseDescriptionColumn();
@@ -235,8 +400,77 @@ class AppDatabase extends _$AppDatabase {
           await ensureExpenseRecurringSeriesIdColumn();
           await ensureExpenseSeriesOccurredUniqueIndex();
           await ensureExpensePaymentExpectationColumns();
+          await ensurePaymentInstrumentV2Columns();
+          await ensureExpenseInstallmentColumns();
+          await backfillPaymentInstrumentDefaultsIfNeeded();
+          await ensureIncomeTaxonomyDescriptionColumns();
+          await IncomeCategorySeeder.ensureSeedData(this);
         },
       );
+
+  /// Migrates `income_entries` from expense taxonomy FKs to dedicated income taxonomy.
+  Future<void> migrateIncomeEntriesToIncomeTaxonomyV14(Migrator m) async {
+    final defCat = IncomeCategorySeeder.kMigrationDefaultCategoryId;
+    final defSub = IncomeCategorySeeder.kMigrationDefaultSubcategoryId;
+    try {
+      final rows = await customSelect(
+        'SELECT id, received_on, category_id, subcategory_id, amount_original, '
+        'currency_code, manual_fx_rate_to_usd, amount_usd, description FROM income_entries',
+      ).get();
+      await customStatement('DROP TABLE income_entries');
+      await m.createTable(incomeEntries);
+      for (final row in rows) {
+        await into(incomeEntries).insert(
+          IncomeEntriesCompanion.insert(
+            id: row.read<String>('id'),
+            receivedOn: row.read<String>('received_on'),
+            incomeCategoryId: defCat,
+            incomeSubcategoryId: defSub,
+            amountOriginal: row.read<double>('amount_original'),
+            currencyCode: Value(row.read<String>('currency_code')),
+            manualFxRateToUsd: Value(row.read<double>('manual_fx_rate_to_usd')),
+            amountUsd: row.read<double>('amount_usd'),
+            description: Value(row.readNullable<String>('description') ?? ''),
+          ),
+        );
+      }
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('no such table')) {
+        await m.createTable(incomeEntries);
+        return;
+      }
+      if (msg.contains('no such column')) {
+        try {
+          await customStatement('DROP TABLE IF EXISTS income_entries');
+        } catch (_) {}
+        await m.createTable(incomeEntries);
+        return;
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> ensureIncomeTaxonomyDescriptionColumns() async {
+    const stmts = <String>[
+      'ALTER TABLE income_categories ADD COLUMN description TEXT',
+      'ALTER TABLE income_subcategories ADD COLUMN description TEXT',
+    ];
+    for (final sql in stmts) {
+      try {
+        await customStatement(sql);
+      } catch (e) {
+        final msg = e.toString().toLowerCase();
+        if (msg.contains('duplicate column') || msg.contains('already exists')) {
+          continue;
+        }
+        if (msg.contains('no such table')) {
+          continue;
+        }
+        rethrow;
+      }
+    }
+  }
 
   /// Ensures [Expenses.description] exists (WASM/web can report schema v4+ without the column).
   /// Safe to call repeatedly: ignores duplicate-column and missing-table errors.
@@ -341,6 +575,88 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
+  Future<void> ensurePaymentInstrumentV2Columns() async {
+    const stmts = <String>[
+      'ALTER TABLE payment_instruments ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1',
+      'ALTER TABLE payment_instruments ADD COLUMN is_default INTEGER NOT NULL DEFAULT 0',
+      'ALTER TABLE payment_instruments ADD COLUMN statement_closing_day INTEGER',
+      'ALTER TABLE payment_instruments ADD COLUMN payment_due_day INTEGER',
+      'ALTER TABLE payment_instruments ADD COLUMN nominal_apr_percent REAL',
+      'ALTER TABLE payment_instruments ADD COLUMN credit_limit REAL',
+      'ALTER TABLE payment_instruments ADD COLUMN display_suffix TEXT',
+    ];
+    for (final sql in stmts) {
+      try {
+        await customStatement(sql);
+      } catch (e) {
+        final msg = e.toString().toLowerCase();
+        if (msg.contains('duplicate column') || msg.contains('already exists')) {
+          continue;
+        }
+        if (msg.contains('no such table')) {
+          continue;
+        }
+        rethrow;
+      }
+    }
+  }
+
+  Future<void> ensureExpenseInstallmentColumns() async {
+    try {
+      await customStatement(
+        'ALTER TABLE expenses ADD COLUMN installment_plan_id TEXT '
+        'REFERENCES installment_plans (id) ON DELETE SET NULL',
+      );
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('duplicate column') || msg.contains('already exists')) {
+        return;
+      }
+      if (msg.contains('no such table')) {
+        return;
+      }
+      rethrow;
+    }
+    try {
+      await customStatement(
+        'ALTER TABLE expenses ADD COLUMN installment_index INTEGER',
+      );
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('duplicate column') || msg.contains('already exists')) {
+        return;
+      }
+      if (msg.contains('no such table')) {
+        return;
+      }
+      rethrow;
+    }
+  }
+
+  /// Ensures exactly one [PaymentInstruments.isDefault] when any row exists and none set.
+  Future<void> backfillPaymentInstrumentDefaultsIfNeeded() async {
+    try {
+      final rows = await select(paymentInstruments).get();
+      if (rows.isEmpty) {
+        return;
+      }
+      if (rows.any((r) => r.isDefault)) {
+        return;
+      }
+      final sorted = [...rows]..sort((a, b) => a.label.compareTo(b.label));
+      final id = sorted.first.id;
+      await (update(paymentInstruments)..where((t) => t.id.equals(id))).write(
+        const PaymentInstrumentsCompanion(isDefault: Value(true)),
+      );
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('no such table')) {
+        return;
+      }
+      rethrow;
+    }
+  }
+
   Future<void> ensureCategoryAndSubcategoryDescriptionColumns() async {
     const stmts = <String>[
       'ALTER TABLE categories ADD COLUMN description TEXT',
@@ -378,6 +694,11 @@ Future<AppDatabase> initializeAppDatabase() async {
   await db.ensureExpenseRecurringSeriesIdColumn();
   await db.ensureExpenseSeriesOccurredUniqueIndex();
   await db.ensureExpensePaymentExpectationColumns();
+  await db.ensurePaymentInstrumentV2Columns();
+  await db.ensureExpenseInstallmentColumns();
+  await db.backfillPaymentInstrumentDefaultsIfNeeded();
+  await db.ensureIncomeTaxonomyDescriptionColumns();
+  await IncomeCategorySeeder.ensureSeedData(db);
   _appDatabase = db;
   return db;
 }

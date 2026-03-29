@@ -9,18 +9,30 @@ final class BookBackupSnapshot {
     required this.exportedAt,
     required this.categories,
     required this.subcategories,
+    this.incomeCategories = const [],
+    this.incomeSubcategories = const [],
     required this.paymentInstruments,
     required this.expenseRecurringSeries,
     required this.expenses,
+    required this.incomeEntries,
+    required this.installmentPlans,
+    required this.partialPayments,
   });
 
-  static const int currentSchemaVersion = 3;
+  static const int currentSchemaVersion = 7;
 
   final int schemaVersion;
   final DateTime exportedAt;
   final List<Category> categories;
   final List<Subcategory> subcategories;
+  final List<IncomeCategory> incomeCategories;
+  final List<IncomeSubcategory> incomeSubcategories;
   final List<PaymentInstrument> paymentInstruments;
   final List<ExpenseRecurringSeries> expenseRecurringSeries;
   final List<Expense> expenses;
+  final List<IncomeEntry> incomeEntries;
+  final List<InstallmentPlan> installmentPlans;
+
+  /// Reserved for Phase 5+; export uses an empty array in Phase 4.8.
+  final List<PartialPayment> partialPayments;
 }

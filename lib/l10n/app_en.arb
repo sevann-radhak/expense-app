@@ -106,6 +106,26 @@
   "@reportsExpenseInclusionFootnote": {
     "description": "Explains realized vs scheduled rules under the Reports segmented control."
   },
+  "reportsExportCsvTooltip": "Export current report as CSV",
+  "@reportsExportCsvTooltip": {
+    "description": "App bar action: download expenses for the active Reports tab as CSV."
+  },
+  "reportsExportCsvUnavailable": "CSV export is available on the web app in this version.",
+  "@reportsExportCsvUnavailable": {
+    "description": "Shown when export is triggered on a non-web platform."
+  },
+  "reportsExportCsvSuccess": "CSV download started.",
+  "@reportsExportCsvSuccess": {
+    "description": "Brief confirmation after starting a web CSV download."
+  },
+  "reportsExportCsvFailed": "Could not export CSV",
+  "@reportsExportCsvFailed": {
+    "description": "Prefix before an error detail when CSV export fails."
+  },
+  "reportsExportCsvLoading": "Report data is still loading; try again in a moment.",
+  "@reportsExportCsvLoading": {
+    "description": "When export is tapped while expense stream is loading."
+  },
   "categoriesScreenSubtitle": "Taxonomy from your local database (debug / admin).",
   "@categoriesScreenSubtitle": {
     "description": "Short intro under the categories screen app bar."

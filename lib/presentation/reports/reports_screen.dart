@@ -3,60 +3,193 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:expense_app/application/application.dart';
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/expenses/expense_summary_list_tile.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/home/expense_form_dialog.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
+import 'package:expense_app/presentation/reports/report_csv_download.dart';
 import 'package:expense_app/presentation/reports/reports_category_pie_chart.dart';
 import 'package:expense_app/presentation/reports/reports_monthly_bar_chart.dart';
 
-class ReportsScreen extends ConsumerWidget {
-  const ReportsScreen({super.key});
+String _reportCsvFilename({
+  required int tabIndex,
+  required int year,
+  required int month,
+  required ReportCategoryPeriodScope categoryScope,
+}) {
+  final mm = month.toString().padLeft(2, '0');
+  switch (tabIndex) {
+    case 0:
+      return 'report_annual_$year.csv';
+    case 1:
+      return 'report_month_${year}_$mm.csv';
+    case 2:
+      if (categoryScope == ReportCategoryPeriodScope.fullYear) {
+        return 'report_by_category_year_$year.csv';
+      }
+      return 'report_by_category_${year}_$mm.csv';
+    default:
+      return 'report_export.csv';
+  }
+}
+
+void _handleReportsCsvExport(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+) {
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  final async = ref.read(reportExportExpensesProvider);
+  async.when(
+    data: (expenses) {
+      final categories = ref.read(categoriesStreamProvider).valueOrNull ?? [];
+      final allSubs =
+          ref.read(allSubcategoriesStreamProvider).valueOrNull ?? [];
+      final categoryNames = {for (final c in categories) c.id: c.name};
+      final subcategoryNames = {for (final s in allSubs) s.id: s.name};
+      final year = ref.read(selectedReportYearProvider);
+      final month = ref.read(selectedReportDetailMonthProvider);
+      final scope = ref.read(reportCategoryPeriodScopeProvider);
+      final tab = ref.read(reportsExportTabIndexProvider);
+      final filename = _reportCsvFilename(
+        tabIndex: tab,
+        year: year,
+        month: month,
+        categoryScope: scope,
+      );
+      final csv = buildReportExpensesCsv(
+        expenses: expenses,
+        categoryNames: categoryNames,
+        subcategoryNames: subcategoryNames,
+        unknownCategoryLabel: l10n.taxonomyUnknownLabel,
+        unknownSubcategoryLabel: l10n.taxonomyUnknownLabel,
+      );
+      if (!kIsWeb) {
+        messenger?.showSnackBar(
+          SnackBar(content: Text(l10n.reportsExportCsvUnavailable)),
+        );
+        return;
+      }
+      try {
+        triggerReportCsvDownload(filename, csv);
+        messenger?.showSnackBar(
+          SnackBar(content: Text(l10n.reportsExportCsvSuccess)),
+        );
+      } catch (e) {
+        messenger?.showSnackBar(
+          SnackBar(
+            content: Text('${l10n.reportsExportCsvFailed}: $e'),
+          ),
+        );
+      }
+    },
+    loading: () {
+      messenger?.showSnackBar(
+        SnackBar(content: Text(l10n.reportsExportCsvLoading)),
+      );
+    },
+    error: (e, _) {
+      messenger?.showSnackBar(
+        SnackBar(content: Text('${l10n.reportsExportCsvFailed}: $e')),
+      );
+    },
+  );
+}
+
+class _ReportsCsvExportButton extends ConsumerWidget {
+  const _ReportsCsvExportButton();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    return IconButton(
+      icon: const Icon(Icons.download_outlined),
+      tooltip: l10n.reportsExportCsvTooltip,
+      onPressed: () => _handleReportsCsvExport(context, ref, l10n),
+    );
+  }
+}
 
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.reportsTitle),
-          bottom: TabBar(
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            tabs: [
-              Tab(text: l10n.reportsTabAnnual),
-              Tab(text: l10n.reportsTabByMonth),
-              Tab(text: l10n.reportsTabByCategory),
-            ],
-          ),
-        ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: _ReportYearStrip(),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: _ReportExpenseInclusionStrip(),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _ReportsAnnualTabBody(),
-                  _ReportsByMonthTabBody(),
-                  _ReportsByCategoryTabBody(),
-                ],
-              ),
-            ),
+class ReportsScreen extends ConsumerStatefulWidget {
+  const ReportsScreen({super.key});
+
+  @override
+  ConsumerState<ReportsScreen> createState() => _ReportsScreenState();
+}
+
+class _ReportsScreenState extends ConsumerState<ReportsScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_syncExportTabIndex);
+  }
+
+  void _syncExportTabIndex() {
+    if (_tabController.indexIsChanging) {
+      return;
+    }
+    ref.read(reportsExportTabIndexProvider.notifier).state =
+        _tabController.index;
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_syncExportTabIndex);
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.reportsTitle),
+        actions: const [
+          _ReportsCsvExportButton(),
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          tabs: [
+            Tab(text: l10n.reportsTabAnnual),
+            Tab(text: l10n.reportsTabByMonth),
+            Tab(text: l10n.reportsTabByCategory),
           ],
         ),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: _ReportYearStrip(),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: _ReportExpenseInclusionStrip(),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: <Widget>[
+                _ReportsAnnualTabBody(),
+                _ReportsByMonthTabBody(),
+                _ReportsByCategoryTabBody(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

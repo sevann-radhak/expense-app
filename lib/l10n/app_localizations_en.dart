@@ -117,6 +117,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'Realized = occurred on or before today; scheduled = after today, using your device’s local calendar date (time ignored). Totals refresh when data changes; they do not auto-update at midnight.';
 
   @override
+  String get reportsExportCsvTooltip => 'Export current report as CSV';
+
+  @override
+  String get reportsExportCsvUnavailable =>
+      'CSV export is available on the web app in this version.';
+
+  @override
+  String get reportsExportCsvSuccess => 'CSV download started.';
+
+  @override
+  String get reportsExportCsvFailed => 'Could not export CSV';
+
+  @override
+  String get reportsExportCsvLoading =>
+      'Report data is still loading; try again in a moment.';
+
+  @override
   String get categoriesScreenSubtitle =>
       'Taxonomy from your local database (debug / admin).';
 

@@ -298,6 +298,36 @@ abstract class AppLocalizations {
   /// **'Realized = occurred on or before today; scheduled = after today, using your device’s local calendar date (time ignored). Totals refresh when data changes; they do not auto-update at midnight.'**
   String get reportsExpenseInclusionFootnote;
 
+  /// App bar action: download expenses for the active Reports tab as CSV.
+  ///
+  /// In en, this message translates to:
+  /// **'Export current report as CSV'**
+  String get reportsExportCsvTooltip;
+
+  /// Shown when export is triggered on a non-web platform.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV export is available on the web app in this version.'**
+  String get reportsExportCsvUnavailable;
+
+  /// Brief confirmation after starting a web CSV download.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV download started.'**
+  String get reportsExportCsvSuccess;
+
+  /// Prefix before an error detail when CSV export fails.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export CSV'**
+  String get reportsExportCsvFailed;
+
+  /// When export is tapped while expense stream is loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Report data is still loading; try again in a moment.'**
+  String get reportsExportCsvLoading;
+
   /// Short intro under the categories screen app bar.
   ///
   /// In en, this message translates to:

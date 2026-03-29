@@ -116,6 +116,24 @@ final subcategoriesForCategoryProvider =
           .watchSubcategories(categoryId);
     });
 
+/// Active Reports tab: 0 Annual, 1 By month, 2 By category (drives CSV export scope).
+final reportsExportTabIndexProvider = StateProvider<int>((ref) => 0);
+
+/// Expenses for the current Reports tab, respecting year/month/category scope and inclusion filter.
+final reportExportExpensesProvider = Provider<AsyncValue<List<Expense>>>((ref) {
+  final tab = ref.watch(reportsExportTabIndexProvider);
+  switch (tab) {
+    case 0:
+      return ref.watch(expensesForSelectedReportYearProvider);
+    case 1:
+      return ref.watch(expensesForReportDetailMonthProvider);
+    case 2:
+      return ref.watch(expensesForReportCategoryScopeProvider);
+    default:
+      return const AsyncValue.data(<Expense>[]);
+  }
+});
+
 /// Updates report year and resets detail month when the year no longer matches “today”.
 void bumpReportYear(WidgetRef ref, int delta) {
   final y = ref.read(selectedReportYearProvider) + delta;

@@ -55,6 +55,7 @@ void main() {
       categories: base.categories,
       subcategories: base.subcategories,
       paymentInstruments: base.paymentInstruments,
+      expenseRecurringSeries: base.expenseRecurringSeries,
       expenses: [...base.expenses, badExpense],
     );
     final report = await importBookBackupReplacingAll(db, tainted);
@@ -70,6 +71,7 @@ void main() {
       categories: const [Category(id: 'c1', name: 'A', sortOrder: 0)],
       subcategories: const [],
       paymentInstruments: const [],
+      expenseRecurringSeries: const [],
       expenses: [
         Expense(
           id: 'e1',

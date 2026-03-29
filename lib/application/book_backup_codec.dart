@@ -1,15 +1,17 @@
 import 'dart:convert';
 
 import 'package:expense_app/application/book_backup_snapshot.dart';
+import 'package:expense_app/application/recurrence_json_codec.dart';
 import 'package:expense_app/domain/domain.dart';
 
-/// JSON keys for the v1 backup document (stable for importers).
+/// JSON keys for the backup document (stable for importers).
 abstract final class BookBackupJsonKeys {
   static const schemaVersion = 'schemaVersion';
   static const exportedAt = 'exportedAt';
   static const categories = 'categories';
   static const subcategories = 'subcategories';
   static const paymentInstruments = 'paymentInstruments';
+  static const expenseRecurringSeries = 'expenseRecurringSeries';
   static const expenses = 'expenses';
 }
 
@@ -24,9 +26,9 @@ BookBackupSnapshot decodeBookBackup(String jsonUtf8) {
     throw const FormatException('Backup root must be a JSON object');
   }
   final v = root[BookBackupJsonKeys.schemaVersion];
-  if (v is! int || v != BookBackupSnapshot.currentSchemaVersion) {
+  if (v is! int || v < 1 || v > BookBackupSnapshot.currentSchemaVersion) {
     throw FormatException(
-      'Unsupported backup schemaVersion: $v (expected ${BookBackupSnapshot.currentSchemaVersion})',
+      'Unsupported backup schemaVersion: $v (expected 1–${BookBackupSnapshot.currentSchemaVersion})',
     );
   }
   final at = root[BookBackupJsonKeys.exportedAt];
@@ -56,6 +58,16 @@ BookBackupSnapshot decodeBookBackup(String jsonUtf8) {
   }
   final paymentInstruments = piList.map((e) => _paymentInstrumentFromJson(e)).toList();
 
+  List<ExpenseRecurringSeries> expenseRecurringSeries = const [];
+  if (v >= 2) {
+    final sList = root[BookBackupJsonKeys.expenseRecurringSeries];
+    if (sList is! List) {
+      throw const FormatException('expenseRecurringSeries must be an array');
+    }
+    expenseRecurringSeries =
+        sList.map((e) => _expenseRecurringSeriesFromJson(e)).toList();
+  }
+
   final expList = root[BookBackupJsonKeys.expenses];
   if (expList is! List) {
     throw const FormatException('expenses must be an array');
@@ -63,11 +75,12 @@ BookBackupSnapshot decodeBookBackup(String jsonUtf8) {
   final expenses = expList.map((e) => _expenseFromJson(e)).toList();
 
   return BookBackupSnapshot(
-    schemaVersion: BookBackupSnapshot.currentSchemaVersion,
+    schemaVersion: v,
     exportedAt: exportedAt,
     categories: categories,
     subcategories: subcategories,
     paymentInstruments: paymentInstruments,
+    expenseRecurringSeries: expenseRecurringSeries,
     expenses: expenses,
   );
 }
@@ -80,6 +93,8 @@ Map<String, dynamic> _snapshotToMap(BookBackupSnapshot s) {
     BookBackupJsonKeys.subcategories: s.subcategories.map(_subcategoryToMap).toList(),
     BookBackupJsonKeys.paymentInstruments:
         s.paymentInstruments.map(_paymentInstrumentToMap).toList(),
+    BookBackupJsonKeys.expenseRecurringSeries:
+        s.expenseRecurringSeries.map(_expenseRecurringSeriesToMap).toList(),
     BookBackupJsonKeys.expenses: s.expenses.map(_expenseToMap).toList(),
   };
 }
@@ -192,8 +207,82 @@ PaymentInstrument _paymentInstrumentFromJson(dynamic e) {
   );
 }
 
-Map<String, dynamic> _expenseToMap(Expense x) {
+Map<String, dynamic> _expenseRecurringSeriesToMap(ExpenseRecurringSeries s) {
   return <String, dynamic>{
+    'id': s.id,
+    'anchorOccurredOn': ExpenseDates.toStorageDate(s.anchorOccurredOn),
+    'recurrence': encodeRecurrencePayload(
+      rule: s.rule,
+      endCondition: s.endCondition,
+    ),
+    'horizonMonths': s.horizonMonths,
+    'active': s.active,
+    'categoryId': s.categoryId,
+    'subcategoryId': s.subcategoryId,
+    'amountOriginal': s.amountOriginal,
+    'currencyCode': s.currencyCode,
+    'manualFxRateToUsd': s.manualFxRateToUsd,
+    'amountUsd': s.amountUsd,
+    'paidWithCreditCard': s.paidWithCreditCard,
+    'description': s.description,
+    'paymentInstrumentId': s.paymentInstrumentId,
+  };
+}
+
+ExpenseRecurringSeries _expenseRecurringSeriesFromJson(dynamic e) {
+  if (e is! Map<String, dynamic>) {
+    throw const FormatException('expenseRecurringSeries entry must be an object');
+  }
+  final id = e['id'];
+  final anchor = e['anchorOccurredOn'];
+  final rec = e['recurrence'];
+  final hm = e['horizonMonths'];
+  final active = e['active'];
+  final categoryId = e['categoryId'];
+  final subcategoryId = e['subcategoryId'];
+  final amountOriginal = e['amountOriginal'];
+  final currencyCode = e['currencyCode'];
+  final manualFx = e['manualFxRateToUsd'];
+  final amountUsd = e['amountUsd'];
+  final paidCard = e['paidWithCreditCard'];
+  if (id is! String ||
+      anchor is! String ||
+      rec is! Map<String, dynamic> ||
+      hm is! int ||
+      active is! bool ||
+      categoryId is! String ||
+      subcategoryId is! String ||
+      amountOriginal is! num ||
+      currencyCode is! String ||
+      manualFx is! num ||
+      amountUsd is! num ||
+      paidCard is! bool) {
+    throw const FormatException('expenseRecurringSeries required fields');
+  }
+  final (rule, end) = decodeRecurrencePayloadMap(rec);
+  final desc = e['description'];
+  final pi = e['paymentInstrumentId'];
+  return ExpenseRecurringSeries(
+    id: id,
+    anchorOccurredOn: ExpenseDates.fromStorageDate(anchor),
+    rule: rule,
+    endCondition: end,
+    horizonMonths: hm,
+    active: active,
+    categoryId: categoryId,
+    subcategoryId: subcategoryId,
+    amountOriginal: amountOriginal.toDouble(),
+    currencyCode: currencyCode,
+    manualFxRateToUsd: manualFx.toDouble(),
+    amountUsd: amountUsd.toDouble(),
+    paidWithCreditCard: paidCard,
+    description: desc is String ? desc : '',
+    paymentInstrumentId: pi is String ? pi : null,
+  );
+}
+
+Map<String, dynamic> _expenseToMap(Expense x) {
+  final m = <String, dynamic>{
     'id': x.id,
     'occurredOn': ExpenseDates.toStorageDate(x.occurredOn),
     'categoryId': x.categoryId,
@@ -206,6 +295,11 @@ Map<String, dynamic> _expenseToMap(Expense x) {
     'description': x.description,
     'paymentInstrumentId': x.paymentInstrumentId,
   };
+  final rs = x.recurringSeriesId;
+  if (rs != null && rs.isNotEmpty) {
+    m['recurringSeriesId'] = rs;
+  }
+  return m;
 }
 
 Expense _expenseFromJson(dynamic e) {
@@ -234,6 +328,7 @@ Expense _expenseFromJson(dynamic e) {
   }
   final desc = e['description'];
   final pi = e['paymentInstrumentId'];
+  final rs = e['recurringSeriesId'];
   return Expense(
     id: id,
     occurredOn: ExpenseDates.fromStorageDate(occurredOn),
@@ -246,5 +341,6 @@ Expense _expenseFromJson(dynamic e) {
     paidWithCreditCard: paidCard,
     description: desc is String ? desc : '',
     paymentInstrumentId: pi is String ? pi : null,
+    recurringSeriesId: rs is String && rs.isNotEmpty ? rs : null,
   );
 }

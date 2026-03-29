@@ -43,6 +43,52 @@ class Subcategories extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+@DataClassName('ExpenseRecurringSeriesRow')
+class RecExpenseSeries extends Table {
+  @override
+  String get tableName => 'expense_recurring_series';
+
+  TextColumn get id => text()();
+
+  TextColumn get anchorOccurredOn => text()();
+
+  /// Recurrence payload JSON (application/recurrence_json_codec.dart v1).
+  TextColumn get recurrenceJson => text()();
+
+  IntColumn get horizonMonths => integer()();
+
+  BoolColumn get active => boolean().withDefault(const Constant(true))();
+
+  TextColumn get categoryId => text().references(
+        Categories,
+        #id,
+        onDelete: KeyAction.restrict,
+      )();
+
+  TextColumn get subcategoryId => text().references(
+        Subcategories,
+        #id,
+        onDelete: KeyAction.restrict,
+      )();
+
+  RealColumn get amountOriginal => real()();
+
+  TextColumn get currencyCode => text().withDefault(const Constant('USD'))();
+
+  RealColumn get manualFxRateToUsd => real().withDefault(const Constant(1.0))();
+
+  RealColumn get amountUsd => real()();
+
+  BoolColumn get paidWithCreditCard => boolean().withDefault(const Constant(false))();
+
+  TextColumn get description => text().withDefault(const Constant(''))();
+
+  TextColumn get paymentInstrumentId => text().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DataClassName('ExpenseRow')
 class Expenses extends Table {
   TextColumn get id => text()();
@@ -77,6 +123,13 @@ class Expenses extends Table {
   /// Optional card profile id; validated in [DriftExpenseRepository].
   TextColumn get paymentInstrumentId => text().nullable()();
 
+  /// Generated from [RecExpenseSeries] when non-null.
+  TextColumn get recurringSeriesId => text().nullable().references(
+        RecExpenseSeries,
+        #id,
+        onDelete: KeyAction.cascade,
+      )();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -102,7 +155,15 @@ class PaymentInstruments extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Categories, Subcategories, Expenses, PaymentInstruments])
+@DriftDatabase(
+  tables: [
+    Categories,
+    Subcategories,
+    Expenses,
+    PaymentInstruments,
+    RecExpenseSeries,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
@@ -119,7 +180,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -149,11 +210,22 @@ class AppDatabase extends _$AppDatabase {
           if (from < 8) {
             await m.addColumn(expenses, expenses.paymentInstrumentId);
           }
+          if (from < 9) {
+            await m.createTable(recExpenseSeries);
+            await m.addColumn(expenses, expenses.recurringSeriesId);
+            await customStatement(
+              'CREATE UNIQUE INDEX IF NOT EXISTS ux_expense_series_occurred '
+              'ON expenses (recurring_series_id, occurred_on) '
+              'WHERE recurring_series_id IS NOT NULL',
+            );
+          }
         },
         beforeOpen: (OpeningDetails details) async {
           await ensureExpenseDescriptionColumn();
           await ensureCategoryAndSubcategoryDescriptionColumns();
           await ensureExpensePaymentInstrumentIdColumn();
+          await ensureExpenseRecurringSeriesIdColumn();
+          await ensureExpenseSeriesOccurredUniqueIndex();
         },
       );
 
@@ -182,6 +254,40 @@ class AppDatabase extends _$AppDatabase {
     try {
       await customStatement(
         'ALTER TABLE expenses ADD COLUMN payment_instrument_id TEXT',
+      );
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('duplicate column') || msg.contains('already exists')) {
+        return;
+      }
+      if (msg.contains('no such table')) {
+        return;
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> ensureExpenseSeriesOccurredUniqueIndex() async {
+    try {
+      await customStatement(
+        'CREATE UNIQUE INDEX IF NOT EXISTS ux_expense_series_occurred '
+        'ON expenses (recurring_series_id, occurred_on) '
+        'WHERE recurring_series_id IS NOT NULL',
+      );
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('no such column')) {
+        return;
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> ensureExpenseRecurringSeriesIdColumn() async {
+    try {
+      await customStatement(
+        'ALTER TABLE expenses ADD COLUMN recurring_series_id TEXT '
+        'REFERENCES expense_recurring_series (id) ON DELETE CASCADE',
       );
     } catch (e) {
       final msg = e.toString().toLowerCase();
@@ -229,6 +335,8 @@ Future<AppDatabase> initializeAppDatabase() async {
   await db.ensureExpenseDescriptionColumn();
   await db.ensureCategoryAndSubcategoryDescriptionColumns();
   await db.ensureExpensePaymentInstrumentIdColumn();
+  await db.ensureExpenseRecurringSeriesIdColumn();
+  await db.ensureExpenseSeriesOccurredUniqueIndex();
   _appDatabase = db;
   return db;
 }

@@ -34,6 +34,7 @@ class Expense {
     required this.paidWithCreditCard,
     this.description = '',
     this.paymentInstrumentId,
+    this.recurringSeriesId,
   });
 
   final String id;
@@ -61,6 +62,9 @@ class Expense {
   /// Optional link to a card profile (metadata only at rest).
   final String? paymentInstrumentId;
 
+  /// When set, this row was generated from a recurring series (Phase 4.1).
+  final String? recurringSeriesId;
+
   static double computeUsd(double amountOriginal, double manualFxRateToUsd) {
     return amountOriginal * manualFxRateToUsd;
   }
@@ -77,7 +81,9 @@ class Expense {
     bool? paidWithCreditCard,
     String? description,
     String? paymentInstrumentId,
+    String? recurringSeriesId,
     bool clearPaymentInstrumentId = false,
+    bool clearRecurringSeriesId = false,
   }) {
     return Expense(
       id: id ?? this.id,
@@ -93,6 +99,9 @@ class Expense {
       paymentInstrumentId: clearPaymentInstrumentId
           ? null
           : (paymentInstrumentId ?? this.paymentInstrumentId),
+      recurringSeriesId: clearRecurringSeriesId
+          ? null
+          : (recurringSeriesId ?? this.recurringSeriesId),
     );
   }
 }

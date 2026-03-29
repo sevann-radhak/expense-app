@@ -4,4 +4,5 @@ library;
 export 'book_backup_codec.dart';
 export 'book_backup_snapshot.dart';
 export 'expense_api_dto.dart';
+export 'recurrence_json_codec.dart';
 export 'report_expense_csv.dart';

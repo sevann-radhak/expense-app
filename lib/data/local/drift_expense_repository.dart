@@ -75,6 +75,7 @@ class DriftExpenseRepository implements ExpenseRepository {
       paidWithCreditCard: r.paidWithCreditCard,
       description: r.description,
       paymentInstrumentId: r.paymentInstrumentId,
+      recurringSeriesId: r.recurringSeriesId,
     );
   }
 
@@ -144,6 +145,7 @@ class DriftExpenseRepository implements ExpenseRepository {
             paidWithCreditCard: Value(e.paidWithCreditCard),
             description: Value(e.description),
             paymentInstrumentId: Value(e.paymentInstrumentId),
+            recurringSeriesId: Value(e.recurringSeriesId),
           ),
         );
   }
@@ -176,6 +178,7 @@ class DriftExpenseRepository implements ExpenseRepository {
         paidWithCreditCard: Value(e.paidWithCreditCard),
         description: Value(e.description),
         paymentInstrumentId: Value(e.paymentInstrumentId),
+        recurringSeriesId: Value(e.recurringSeriesId),
       ),
     );
     if (updated == 0) {

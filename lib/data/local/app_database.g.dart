@@ -790,6 +790,874 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
   }
 }
 
+class $RecExpenseSeriesTable extends RecExpenseSeries
+    with TableInfo<$RecExpenseSeriesTable, ExpenseRecurringSeriesRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RecExpenseSeriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _anchorOccurredOnMeta = const VerificationMeta(
+    'anchorOccurredOn',
+  );
+  @override
+  late final GeneratedColumn<String> anchorOccurredOn = GeneratedColumn<String>(
+    'anchor_occurred_on',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recurrenceJsonMeta = const VerificationMeta(
+    'recurrenceJson',
+  );
+  @override
+  late final GeneratedColumn<String> recurrenceJson = GeneratedColumn<String>(
+    'recurrence_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _horizonMonthsMeta = const VerificationMeta(
+    'horizonMonths',
+  );
+  @override
+  late final GeneratedColumn<int> horizonMonths = GeneratedColumn<int>(
+    'horizon_months',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _activeMeta = const VerificationMeta('active');
+  @override
+  late final GeneratedColumn<bool> active = GeneratedColumn<bool>(
+    'active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES categories (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _subcategoryIdMeta = const VerificationMeta(
+    'subcategoryId',
+  );
+  @override
+  late final GeneratedColumn<String> subcategoryId = GeneratedColumn<String>(
+    'subcategory_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES subcategories (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _amountOriginalMeta = const VerificationMeta(
+    'amountOriginal',
+  );
+  @override
+  late final GeneratedColumn<double> amountOriginal = GeneratedColumn<double>(
+    'amount_original',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currencyCodeMeta = const VerificationMeta(
+    'currencyCode',
+  );
+  @override
+  late final GeneratedColumn<String> currencyCode = GeneratedColumn<String>(
+    'currency_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('USD'),
+  );
+  static const VerificationMeta _manualFxRateToUsdMeta = const VerificationMeta(
+    'manualFxRateToUsd',
+  );
+  @override
+  late final GeneratedColumn<double> manualFxRateToUsd =
+      GeneratedColumn<double>(
+        'manual_fx_rate_to_usd',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(1.0),
+      );
+  static const VerificationMeta _amountUsdMeta = const VerificationMeta(
+    'amountUsd',
+  );
+  @override
+  late final GeneratedColumn<double> amountUsd = GeneratedColumn<double>(
+    'amount_usd',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _paidWithCreditCardMeta =
+      const VerificationMeta('paidWithCreditCard');
+  @override
+  late final GeneratedColumn<bool> paidWithCreditCard = GeneratedColumn<bool>(
+    'paid_with_credit_card',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("paid_with_credit_card" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _paymentInstrumentIdMeta =
+      const VerificationMeta('paymentInstrumentId');
+  @override
+  late final GeneratedColumn<String> paymentInstrumentId =
+      GeneratedColumn<String>(
+        'payment_instrument_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    anchorOccurredOn,
+    recurrenceJson,
+    horizonMonths,
+    active,
+    categoryId,
+    subcategoryId,
+    amountOriginal,
+    currencyCode,
+    manualFxRateToUsd,
+    amountUsd,
+    paidWithCreditCard,
+    description,
+    paymentInstrumentId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'expense_recurring_series';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExpenseRecurringSeriesRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('anchor_occurred_on')) {
+      context.handle(
+        _anchorOccurredOnMeta,
+        anchorOccurredOn.isAcceptableOrUnknown(
+          data['anchor_occurred_on']!,
+          _anchorOccurredOnMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_anchorOccurredOnMeta);
+    }
+    if (data.containsKey('recurrence_json')) {
+      context.handle(
+        _recurrenceJsonMeta,
+        recurrenceJson.isAcceptableOrUnknown(
+          data['recurrence_json']!,
+          _recurrenceJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_recurrenceJsonMeta);
+    }
+    if (data.containsKey('horizon_months')) {
+      context.handle(
+        _horizonMonthsMeta,
+        horizonMonths.isAcceptableOrUnknown(
+          data['horizon_months']!,
+          _horizonMonthsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_horizonMonthsMeta);
+    }
+    if (data.containsKey('active')) {
+      context.handle(
+        _activeMeta,
+        active.isAcceptableOrUnknown(data['active']!, _activeMeta),
+      );
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('subcategory_id')) {
+      context.handle(
+        _subcategoryIdMeta,
+        subcategoryId.isAcceptableOrUnknown(
+          data['subcategory_id']!,
+          _subcategoryIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_subcategoryIdMeta);
+    }
+    if (data.containsKey('amount_original')) {
+      context.handle(
+        _amountOriginalMeta,
+        amountOriginal.isAcceptableOrUnknown(
+          data['amount_original']!,
+          _amountOriginalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_amountOriginalMeta);
+    }
+    if (data.containsKey('currency_code')) {
+      context.handle(
+        _currencyCodeMeta,
+        currencyCode.isAcceptableOrUnknown(
+          data['currency_code']!,
+          _currencyCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('manual_fx_rate_to_usd')) {
+      context.handle(
+        _manualFxRateToUsdMeta,
+        manualFxRateToUsd.isAcceptableOrUnknown(
+          data['manual_fx_rate_to_usd']!,
+          _manualFxRateToUsdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('amount_usd')) {
+      context.handle(
+        _amountUsdMeta,
+        amountUsd.isAcceptableOrUnknown(data['amount_usd']!, _amountUsdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountUsdMeta);
+    }
+    if (data.containsKey('paid_with_credit_card')) {
+      context.handle(
+        _paidWithCreditCardMeta,
+        paidWithCreditCard.isAcceptableOrUnknown(
+          data['paid_with_credit_card']!,
+          _paidWithCreditCardMeta,
+        ),
+      );
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('payment_instrument_id')) {
+      context.handle(
+        _paymentInstrumentIdMeta,
+        paymentInstrumentId.isAcceptableOrUnknown(
+          data['payment_instrument_id']!,
+          _paymentInstrumentIdMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ExpenseRecurringSeriesRow map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExpenseRecurringSeriesRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      anchorOccurredOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}anchor_occurred_on'],
+      )!,
+      recurrenceJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recurrence_json'],
+      )!,
+      horizonMonths: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}horizon_months'],
+      )!,
+      active: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}active'],
+      )!,
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      )!,
+      subcategoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subcategory_id'],
+      )!,
+      amountOriginal: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount_original'],
+      )!,
+      currencyCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency_code'],
+      )!,
+      manualFxRateToUsd: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}manual_fx_rate_to_usd'],
+      )!,
+      amountUsd: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount_usd'],
+      )!,
+      paidWithCreditCard: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}paid_with_credit_card'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      paymentInstrumentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_instrument_id'],
+      ),
+    );
+  }
+
+  @override
+  $RecExpenseSeriesTable createAlias(String alias) {
+    return $RecExpenseSeriesTable(attachedDatabase, alias);
+  }
+}
+
+class ExpenseRecurringSeriesRow extends DataClass
+    implements Insertable<ExpenseRecurringSeriesRow> {
+  final String id;
+  final String anchorOccurredOn;
+
+  /// Recurrence payload JSON (application/recurrence_json_codec.dart v1).
+  final String recurrenceJson;
+  final int horizonMonths;
+  final bool active;
+  final String categoryId;
+  final String subcategoryId;
+  final double amountOriginal;
+  final String currencyCode;
+  final double manualFxRateToUsd;
+  final double amountUsd;
+  final bool paidWithCreditCard;
+  final String description;
+  final String? paymentInstrumentId;
+  const ExpenseRecurringSeriesRow({
+    required this.id,
+    required this.anchorOccurredOn,
+    required this.recurrenceJson,
+    required this.horizonMonths,
+    required this.active,
+    required this.categoryId,
+    required this.subcategoryId,
+    required this.amountOriginal,
+    required this.currencyCode,
+    required this.manualFxRateToUsd,
+    required this.amountUsd,
+    required this.paidWithCreditCard,
+    required this.description,
+    this.paymentInstrumentId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['anchor_occurred_on'] = Variable<String>(anchorOccurredOn);
+    map['recurrence_json'] = Variable<String>(recurrenceJson);
+    map['horizon_months'] = Variable<int>(horizonMonths);
+    map['active'] = Variable<bool>(active);
+    map['category_id'] = Variable<String>(categoryId);
+    map['subcategory_id'] = Variable<String>(subcategoryId);
+    map['amount_original'] = Variable<double>(amountOriginal);
+    map['currency_code'] = Variable<String>(currencyCode);
+    map['manual_fx_rate_to_usd'] = Variable<double>(manualFxRateToUsd);
+    map['amount_usd'] = Variable<double>(amountUsd);
+    map['paid_with_credit_card'] = Variable<bool>(paidWithCreditCard);
+    map['description'] = Variable<String>(description);
+    if (!nullToAbsent || paymentInstrumentId != null) {
+      map['payment_instrument_id'] = Variable<String>(paymentInstrumentId);
+    }
+    return map;
+  }
+
+  RecExpenseSeriesCompanion toCompanion(bool nullToAbsent) {
+    return RecExpenseSeriesCompanion(
+      id: Value(id),
+      anchorOccurredOn: Value(anchorOccurredOn),
+      recurrenceJson: Value(recurrenceJson),
+      horizonMonths: Value(horizonMonths),
+      active: Value(active),
+      categoryId: Value(categoryId),
+      subcategoryId: Value(subcategoryId),
+      amountOriginal: Value(amountOriginal),
+      currencyCode: Value(currencyCode),
+      manualFxRateToUsd: Value(manualFxRateToUsd),
+      amountUsd: Value(amountUsd),
+      paidWithCreditCard: Value(paidWithCreditCard),
+      description: Value(description),
+      paymentInstrumentId: paymentInstrumentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentInstrumentId),
+    );
+  }
+
+  factory ExpenseRecurringSeriesRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExpenseRecurringSeriesRow(
+      id: serializer.fromJson<String>(json['id']),
+      anchorOccurredOn: serializer.fromJson<String>(json['anchorOccurredOn']),
+      recurrenceJson: serializer.fromJson<String>(json['recurrenceJson']),
+      horizonMonths: serializer.fromJson<int>(json['horizonMonths']),
+      active: serializer.fromJson<bool>(json['active']),
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+      subcategoryId: serializer.fromJson<String>(json['subcategoryId']),
+      amountOriginal: serializer.fromJson<double>(json['amountOriginal']),
+      currencyCode: serializer.fromJson<String>(json['currencyCode']),
+      manualFxRateToUsd: serializer.fromJson<double>(json['manualFxRateToUsd']),
+      amountUsd: serializer.fromJson<double>(json['amountUsd']),
+      paidWithCreditCard: serializer.fromJson<bool>(json['paidWithCreditCard']),
+      description: serializer.fromJson<String>(json['description']),
+      paymentInstrumentId: serializer.fromJson<String?>(
+        json['paymentInstrumentId'],
+      ),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'anchorOccurredOn': serializer.toJson<String>(anchorOccurredOn),
+      'recurrenceJson': serializer.toJson<String>(recurrenceJson),
+      'horizonMonths': serializer.toJson<int>(horizonMonths),
+      'active': serializer.toJson<bool>(active),
+      'categoryId': serializer.toJson<String>(categoryId),
+      'subcategoryId': serializer.toJson<String>(subcategoryId),
+      'amountOriginal': serializer.toJson<double>(amountOriginal),
+      'currencyCode': serializer.toJson<String>(currencyCode),
+      'manualFxRateToUsd': serializer.toJson<double>(manualFxRateToUsd),
+      'amountUsd': serializer.toJson<double>(amountUsd),
+      'paidWithCreditCard': serializer.toJson<bool>(paidWithCreditCard),
+      'description': serializer.toJson<String>(description),
+      'paymentInstrumentId': serializer.toJson<String?>(paymentInstrumentId),
+    };
+  }
+
+  ExpenseRecurringSeriesRow copyWith({
+    String? id,
+    String? anchorOccurredOn,
+    String? recurrenceJson,
+    int? horizonMonths,
+    bool? active,
+    String? categoryId,
+    String? subcategoryId,
+    double? amountOriginal,
+    String? currencyCode,
+    double? manualFxRateToUsd,
+    double? amountUsd,
+    bool? paidWithCreditCard,
+    String? description,
+    Value<String?> paymentInstrumentId = const Value.absent(),
+  }) => ExpenseRecurringSeriesRow(
+    id: id ?? this.id,
+    anchorOccurredOn: anchorOccurredOn ?? this.anchorOccurredOn,
+    recurrenceJson: recurrenceJson ?? this.recurrenceJson,
+    horizonMonths: horizonMonths ?? this.horizonMonths,
+    active: active ?? this.active,
+    categoryId: categoryId ?? this.categoryId,
+    subcategoryId: subcategoryId ?? this.subcategoryId,
+    amountOriginal: amountOriginal ?? this.amountOriginal,
+    currencyCode: currencyCode ?? this.currencyCode,
+    manualFxRateToUsd: manualFxRateToUsd ?? this.manualFxRateToUsd,
+    amountUsd: amountUsd ?? this.amountUsd,
+    paidWithCreditCard: paidWithCreditCard ?? this.paidWithCreditCard,
+    description: description ?? this.description,
+    paymentInstrumentId: paymentInstrumentId.present
+        ? paymentInstrumentId.value
+        : this.paymentInstrumentId,
+  );
+  ExpenseRecurringSeriesRow copyWithCompanion(RecExpenseSeriesCompanion data) {
+    return ExpenseRecurringSeriesRow(
+      id: data.id.present ? data.id.value : this.id,
+      anchorOccurredOn: data.anchorOccurredOn.present
+          ? data.anchorOccurredOn.value
+          : this.anchorOccurredOn,
+      recurrenceJson: data.recurrenceJson.present
+          ? data.recurrenceJson.value
+          : this.recurrenceJson,
+      horizonMonths: data.horizonMonths.present
+          ? data.horizonMonths.value
+          : this.horizonMonths,
+      active: data.active.present ? data.active.value : this.active,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      subcategoryId: data.subcategoryId.present
+          ? data.subcategoryId.value
+          : this.subcategoryId,
+      amountOriginal: data.amountOriginal.present
+          ? data.amountOriginal.value
+          : this.amountOriginal,
+      currencyCode: data.currencyCode.present
+          ? data.currencyCode.value
+          : this.currencyCode,
+      manualFxRateToUsd: data.manualFxRateToUsd.present
+          ? data.manualFxRateToUsd.value
+          : this.manualFxRateToUsd,
+      amountUsd: data.amountUsd.present ? data.amountUsd.value : this.amountUsd,
+      paidWithCreditCard: data.paidWithCreditCard.present
+          ? data.paidWithCreditCard.value
+          : this.paidWithCreditCard,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      paymentInstrumentId: data.paymentInstrumentId.present
+          ? data.paymentInstrumentId.value
+          : this.paymentInstrumentId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExpenseRecurringSeriesRow(')
+          ..write('id: $id, ')
+          ..write('anchorOccurredOn: $anchorOccurredOn, ')
+          ..write('recurrenceJson: $recurrenceJson, ')
+          ..write('horizonMonths: $horizonMonths, ')
+          ..write('active: $active, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('subcategoryId: $subcategoryId, ')
+          ..write('amountOriginal: $amountOriginal, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('manualFxRateToUsd: $manualFxRateToUsd, ')
+          ..write('amountUsd: $amountUsd, ')
+          ..write('paidWithCreditCard: $paidWithCreditCard, ')
+          ..write('description: $description, ')
+          ..write('paymentInstrumentId: $paymentInstrumentId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    anchorOccurredOn,
+    recurrenceJson,
+    horizonMonths,
+    active,
+    categoryId,
+    subcategoryId,
+    amountOriginal,
+    currencyCode,
+    manualFxRateToUsd,
+    amountUsd,
+    paidWithCreditCard,
+    description,
+    paymentInstrumentId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExpenseRecurringSeriesRow &&
+          other.id == this.id &&
+          other.anchorOccurredOn == this.anchorOccurredOn &&
+          other.recurrenceJson == this.recurrenceJson &&
+          other.horizonMonths == this.horizonMonths &&
+          other.active == this.active &&
+          other.categoryId == this.categoryId &&
+          other.subcategoryId == this.subcategoryId &&
+          other.amountOriginal == this.amountOriginal &&
+          other.currencyCode == this.currencyCode &&
+          other.manualFxRateToUsd == this.manualFxRateToUsd &&
+          other.amountUsd == this.amountUsd &&
+          other.paidWithCreditCard == this.paidWithCreditCard &&
+          other.description == this.description &&
+          other.paymentInstrumentId == this.paymentInstrumentId);
+}
+
+class RecExpenseSeriesCompanion
+    extends UpdateCompanion<ExpenseRecurringSeriesRow> {
+  final Value<String> id;
+  final Value<String> anchorOccurredOn;
+  final Value<String> recurrenceJson;
+  final Value<int> horizonMonths;
+  final Value<bool> active;
+  final Value<String> categoryId;
+  final Value<String> subcategoryId;
+  final Value<double> amountOriginal;
+  final Value<String> currencyCode;
+  final Value<double> manualFxRateToUsd;
+  final Value<double> amountUsd;
+  final Value<bool> paidWithCreditCard;
+  final Value<String> description;
+  final Value<String?> paymentInstrumentId;
+  final Value<int> rowid;
+  const RecExpenseSeriesCompanion({
+    this.id = const Value.absent(),
+    this.anchorOccurredOn = const Value.absent(),
+    this.recurrenceJson = const Value.absent(),
+    this.horizonMonths = const Value.absent(),
+    this.active = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.subcategoryId = const Value.absent(),
+    this.amountOriginal = const Value.absent(),
+    this.currencyCode = const Value.absent(),
+    this.manualFxRateToUsd = const Value.absent(),
+    this.amountUsd = const Value.absent(),
+    this.paidWithCreditCard = const Value.absent(),
+    this.description = const Value.absent(),
+    this.paymentInstrumentId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RecExpenseSeriesCompanion.insert({
+    required String id,
+    required String anchorOccurredOn,
+    required String recurrenceJson,
+    required int horizonMonths,
+    this.active = const Value.absent(),
+    required String categoryId,
+    required String subcategoryId,
+    required double amountOriginal,
+    this.currencyCode = const Value.absent(),
+    this.manualFxRateToUsd = const Value.absent(),
+    required double amountUsd,
+    this.paidWithCreditCard = const Value.absent(),
+    this.description = const Value.absent(),
+    this.paymentInstrumentId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       anchorOccurredOn = Value(anchorOccurredOn),
+       recurrenceJson = Value(recurrenceJson),
+       horizonMonths = Value(horizonMonths),
+       categoryId = Value(categoryId),
+       subcategoryId = Value(subcategoryId),
+       amountOriginal = Value(amountOriginal),
+       amountUsd = Value(amountUsd);
+  static Insertable<ExpenseRecurringSeriesRow> custom({
+    Expression<String>? id,
+    Expression<String>? anchorOccurredOn,
+    Expression<String>? recurrenceJson,
+    Expression<int>? horizonMonths,
+    Expression<bool>? active,
+    Expression<String>? categoryId,
+    Expression<String>? subcategoryId,
+    Expression<double>? amountOriginal,
+    Expression<String>? currencyCode,
+    Expression<double>? manualFxRateToUsd,
+    Expression<double>? amountUsd,
+    Expression<bool>? paidWithCreditCard,
+    Expression<String>? description,
+    Expression<String>? paymentInstrumentId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (anchorOccurredOn != null) 'anchor_occurred_on': anchorOccurredOn,
+      if (recurrenceJson != null) 'recurrence_json': recurrenceJson,
+      if (horizonMonths != null) 'horizon_months': horizonMonths,
+      if (active != null) 'active': active,
+      if (categoryId != null) 'category_id': categoryId,
+      if (subcategoryId != null) 'subcategory_id': subcategoryId,
+      if (amountOriginal != null) 'amount_original': amountOriginal,
+      if (currencyCode != null) 'currency_code': currencyCode,
+      if (manualFxRateToUsd != null) 'manual_fx_rate_to_usd': manualFxRateToUsd,
+      if (amountUsd != null) 'amount_usd': amountUsd,
+      if (paidWithCreditCard != null)
+        'paid_with_credit_card': paidWithCreditCard,
+      if (description != null) 'description': description,
+      if (paymentInstrumentId != null)
+        'payment_instrument_id': paymentInstrumentId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RecExpenseSeriesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? anchorOccurredOn,
+    Value<String>? recurrenceJson,
+    Value<int>? horizonMonths,
+    Value<bool>? active,
+    Value<String>? categoryId,
+    Value<String>? subcategoryId,
+    Value<double>? amountOriginal,
+    Value<String>? currencyCode,
+    Value<double>? manualFxRateToUsd,
+    Value<double>? amountUsd,
+    Value<bool>? paidWithCreditCard,
+    Value<String>? description,
+    Value<String?>? paymentInstrumentId,
+    Value<int>? rowid,
+  }) {
+    return RecExpenseSeriesCompanion(
+      id: id ?? this.id,
+      anchorOccurredOn: anchorOccurredOn ?? this.anchorOccurredOn,
+      recurrenceJson: recurrenceJson ?? this.recurrenceJson,
+      horizonMonths: horizonMonths ?? this.horizonMonths,
+      active: active ?? this.active,
+      categoryId: categoryId ?? this.categoryId,
+      subcategoryId: subcategoryId ?? this.subcategoryId,
+      amountOriginal: amountOriginal ?? this.amountOriginal,
+      currencyCode: currencyCode ?? this.currencyCode,
+      manualFxRateToUsd: manualFxRateToUsd ?? this.manualFxRateToUsd,
+      amountUsd: amountUsd ?? this.amountUsd,
+      paidWithCreditCard: paidWithCreditCard ?? this.paidWithCreditCard,
+      description: description ?? this.description,
+      paymentInstrumentId: paymentInstrumentId ?? this.paymentInstrumentId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (anchorOccurredOn.present) {
+      map['anchor_occurred_on'] = Variable<String>(anchorOccurredOn.value);
+    }
+    if (recurrenceJson.present) {
+      map['recurrence_json'] = Variable<String>(recurrenceJson.value);
+    }
+    if (horizonMonths.present) {
+      map['horizon_months'] = Variable<int>(horizonMonths.value);
+    }
+    if (active.present) {
+      map['active'] = Variable<bool>(active.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (subcategoryId.present) {
+      map['subcategory_id'] = Variable<String>(subcategoryId.value);
+    }
+    if (amountOriginal.present) {
+      map['amount_original'] = Variable<double>(amountOriginal.value);
+    }
+    if (currencyCode.present) {
+      map['currency_code'] = Variable<String>(currencyCode.value);
+    }
+    if (manualFxRateToUsd.present) {
+      map['manual_fx_rate_to_usd'] = Variable<double>(manualFxRateToUsd.value);
+    }
+    if (amountUsd.present) {
+      map['amount_usd'] = Variable<double>(amountUsd.value);
+    }
+    if (paidWithCreditCard.present) {
+      map['paid_with_credit_card'] = Variable<bool>(paidWithCreditCard.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (paymentInstrumentId.present) {
+      map['payment_instrument_id'] = Variable<String>(
+        paymentInstrumentId.value,
+      );
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecExpenseSeriesCompanion(')
+          ..write('id: $id, ')
+          ..write('anchorOccurredOn: $anchorOccurredOn, ')
+          ..write('recurrenceJson: $recurrenceJson, ')
+          ..write('horizonMonths: $horizonMonths, ')
+          ..write('active: $active, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('subcategoryId: $subcategoryId, ')
+          ..write('amountOriginal: $amountOriginal, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('manualFxRateToUsd: $manualFxRateToUsd, ')
+          ..write('amountUsd: $amountUsd, ')
+          ..write('paidWithCreditCard: $paidWithCreditCard, ')
+          ..write('description: $description, ')
+          ..write('paymentInstrumentId: $paymentInstrumentId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ExpensesTable extends Expenses
     with TableInfo<$ExpensesTable, ExpenseRow> {
   @override
@@ -928,6 +1796,21 @@ class $ExpensesTable extends Expenses
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _recurringSeriesIdMeta = const VerificationMeta(
+    'recurringSeriesId',
+  );
+  @override
+  late final GeneratedColumn<String> recurringSeriesId =
+      GeneratedColumn<String>(
+        'recurring_series_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES expense_recurring_series (id) ON DELETE CASCADE',
+        ),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -941,6 +1824,7 @@ class $ExpensesTable extends Expenses
     paidWithCreditCard,
     description,
     paymentInstrumentId,
+    recurringSeriesId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1050,6 +1934,15 @@ class $ExpensesTable extends Expenses
         ),
       );
     }
+    if (data.containsKey('recurring_series_id')) {
+      context.handle(
+        _recurringSeriesIdMeta,
+        recurringSeriesId.isAcceptableOrUnknown(
+          data['recurring_series_id']!,
+          _recurringSeriesIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1103,6 +1996,10 @@ class $ExpensesTable extends Expenses
         DriftSqlType.string,
         data['${effectivePrefix}payment_instrument_id'],
       ),
+      recurringSeriesId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recurring_series_id'],
+      ),
     );
   }
 
@@ -1126,8 +2023,11 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
   final bool paidWithCreditCard;
   final String description;
 
-  /// Optional profile id; validated in [DriftExpenseRepository] (no DB FK on web).
+  /// Optional card profile id; validated in [DriftExpenseRepository].
   final String? paymentInstrumentId;
+
+  /// Generated from [RecExpenseSeries] when non-null.
+  final String? recurringSeriesId;
   const ExpenseRow({
     required this.id,
     required this.occurredOn,
@@ -1140,6 +2040,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     required this.paidWithCreditCard,
     required this.description,
     this.paymentInstrumentId,
+    this.recurringSeriesId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1156,6 +2057,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     map['description'] = Variable<String>(description);
     if (!nullToAbsent || paymentInstrumentId != null) {
       map['payment_instrument_id'] = Variable<String>(paymentInstrumentId);
+    }
+    if (!nullToAbsent || recurringSeriesId != null) {
+      map['recurring_series_id'] = Variable<String>(recurringSeriesId);
     }
     return map;
   }
@@ -1175,6 +2079,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       paymentInstrumentId: paymentInstrumentId == null && nullToAbsent
           ? const Value.absent()
           : Value(paymentInstrumentId),
+      recurringSeriesId: recurringSeriesId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(recurringSeriesId),
     );
   }
 
@@ -1197,6 +2104,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       paymentInstrumentId: serializer.fromJson<String?>(
         json['paymentInstrumentId'],
       ),
+      recurringSeriesId: serializer.fromJson<String?>(
+        json['recurringSeriesId'],
+      ),
     );
   }
   @override
@@ -1214,6 +2124,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       'paidWithCreditCard': serializer.toJson<bool>(paidWithCreditCard),
       'description': serializer.toJson<String>(description),
       'paymentInstrumentId': serializer.toJson<String?>(paymentInstrumentId),
+      'recurringSeriesId': serializer.toJson<String?>(recurringSeriesId),
     };
   }
 
@@ -1229,6 +2140,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     bool? paidWithCreditCard,
     String? description,
     Value<String?> paymentInstrumentId = const Value.absent(),
+    Value<String?> recurringSeriesId = const Value.absent(),
   }) => ExpenseRow(
     id: id ?? this.id,
     occurredOn: occurredOn ?? this.occurredOn,
@@ -1243,6 +2155,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     paymentInstrumentId: paymentInstrumentId.present
         ? paymentInstrumentId.value
         : this.paymentInstrumentId,
+    recurringSeriesId: recurringSeriesId.present
+        ? recurringSeriesId.value
+        : this.recurringSeriesId,
   );
   ExpenseRow copyWithCompanion(ExpensesCompanion data) {
     return ExpenseRow(
@@ -1275,6 +2190,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       paymentInstrumentId: data.paymentInstrumentId.present
           ? data.paymentInstrumentId.value
           : this.paymentInstrumentId,
+      recurringSeriesId: data.recurringSeriesId.present
+          ? data.recurringSeriesId.value
+          : this.recurringSeriesId,
     );
   }
 
@@ -1291,7 +2209,8 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
           ..write('amountUsd: $amountUsd, ')
           ..write('paidWithCreditCard: $paidWithCreditCard, ')
           ..write('description: $description, ')
-          ..write('paymentInstrumentId: $paymentInstrumentId')
+          ..write('paymentInstrumentId: $paymentInstrumentId, ')
+          ..write('recurringSeriesId: $recurringSeriesId')
           ..write(')'))
         .toString();
   }
@@ -1309,6 +2228,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     paidWithCreditCard,
     description,
     paymentInstrumentId,
+    recurringSeriesId,
   );
   @override
   bool operator ==(Object other) =>
@@ -1324,7 +2244,8 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
           other.amountUsd == this.amountUsd &&
           other.paidWithCreditCard == this.paidWithCreditCard &&
           other.description == this.description &&
-          other.paymentInstrumentId == this.paymentInstrumentId);
+          other.paymentInstrumentId == this.paymentInstrumentId &&
+          other.recurringSeriesId == this.recurringSeriesId);
 }
 
 class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
@@ -1339,6 +2260,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
   final Value<bool> paidWithCreditCard;
   final Value<String> description;
   final Value<String?> paymentInstrumentId;
+  final Value<String?> recurringSeriesId;
   final Value<int> rowid;
   const ExpensesCompanion({
     this.id = const Value.absent(),
@@ -1352,6 +2274,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     this.paidWithCreditCard = const Value.absent(),
     this.description = const Value.absent(),
     this.paymentInstrumentId = const Value.absent(),
+    this.recurringSeriesId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ExpensesCompanion.insert({
@@ -1366,6 +2289,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     this.paidWithCreditCard = const Value.absent(),
     this.description = const Value.absent(),
     this.paymentInstrumentId = const Value.absent(),
+    this.recurringSeriesId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        occurredOn = Value(occurredOn),
@@ -1385,6 +2309,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     Expression<bool>? paidWithCreditCard,
     Expression<String>? description,
     Expression<String>? paymentInstrumentId,
+    Expression<String>? recurringSeriesId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1401,6 +2326,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
       if (description != null) 'description': description,
       if (paymentInstrumentId != null)
         'payment_instrument_id': paymentInstrumentId,
+      if (recurringSeriesId != null) 'recurring_series_id': recurringSeriesId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1417,6 +2343,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     Value<bool>? paidWithCreditCard,
     Value<String>? description,
     Value<String?>? paymentInstrumentId,
+    Value<String?>? recurringSeriesId,
     Value<int>? rowid,
   }) {
     return ExpensesCompanion(
@@ -1431,6 +2358,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
       paidWithCreditCard: paidWithCreditCard ?? this.paidWithCreditCard,
       description: description ?? this.description,
       paymentInstrumentId: paymentInstrumentId ?? this.paymentInstrumentId,
+      recurringSeriesId: recurringSeriesId ?? this.recurringSeriesId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1473,6 +2401,9 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
         paymentInstrumentId.value,
       );
     }
+    if (recurringSeriesId.present) {
+      map['recurring_series_id'] = Variable<String>(recurringSeriesId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1493,6 +2424,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
           ..write('paidWithCreditCard: $paidWithCreditCard, ')
           ..write('description: $description, ')
           ..write('paymentInstrumentId: $paymentInstrumentId, ')
+          ..write('recurringSeriesId: $recurringSeriesId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1996,6 +2928,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $SubcategoriesTable subcategories = $SubcategoriesTable(this);
+  late final $RecExpenseSeriesTable recExpenseSeries = $RecExpenseSeriesTable(
+    this,
+  );
   late final $ExpensesTable expenses = $ExpensesTable(this);
   late final $PaymentInstrumentsTable paymentInstruments =
       $PaymentInstrumentsTable(this);
@@ -2006,6 +2941,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     categories,
     subcategories,
+    recExpenseSeries,
     expenses,
     paymentInstruments,
   ];
@@ -2017,6 +2953,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('subcategories', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'expense_recurring_series',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('expenses', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -2058,6 +3001,32 @@ final class $$CategoriesTableReferences
     ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_subcategoriesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $RecExpenseSeriesTable,
+    List<ExpenseRecurringSeriesRow>
+  >
+  _recExpenseSeriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.recExpenseSeries,
+    aliasName: $_aliasNameGenerator(
+      db.categories.id,
+      db.recExpenseSeries.categoryId,
+    ),
+  );
+
+  $$RecExpenseSeriesTableProcessedTableManager get recExpenseSeriesRefs {
+    final manager = $$RecExpenseSeriesTableTableManager(
+      $_db,
+      $_db.recExpenseSeries,
+    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _recExpenseSeriesRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -2127,6 +3096,31 @@ class $$CategoriesTableFilterComposer
           }) => $$SubcategoriesTableFilterComposer(
             $db: $db,
             $table: $db.subcategories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> recExpenseSeriesRefs(
+    Expression<bool> Function($$RecExpenseSeriesTableFilterComposer f) f,
+  ) {
+    final $$RecExpenseSeriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.recExpenseSeries,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecExpenseSeriesTableFilterComposer(
+            $db: $db,
+            $table: $db.recExpenseSeries,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -2240,6 +3234,31 @@ class $$CategoriesTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> recExpenseSeriesRefs<T extends Object>(
+    Expression<T> Function($$RecExpenseSeriesTableAnnotationComposer a) f,
+  ) {
+    final $$RecExpenseSeriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.recExpenseSeries,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecExpenseSeriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.recExpenseSeries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> expensesRefs<T extends Object>(
     Expression<T> Function($$ExpensesTableAnnotationComposer a) f,
   ) {
@@ -2279,7 +3298,11 @@ class $$CategoriesTableTableManager
           $$CategoriesTableUpdateCompanionBuilder,
           (CategoryRow, $$CategoriesTableReferences),
           CategoryRow,
-          PrefetchHooks Function({bool subcategoriesRefs, bool expensesRefs})
+          PrefetchHooks Function({
+            bool subcategoriesRefs,
+            bool recExpenseSeriesRefs,
+            bool expensesRefs,
+          })
         > {
   $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
     : super(
@@ -2329,11 +3352,16 @@ class $$CategoriesTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({subcategoriesRefs = false, expensesRefs = false}) {
+              ({
+                subcategoriesRefs = false,
+                recExpenseSeriesRefs = false,
+                expensesRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (subcategoriesRefs) db.subcategories,
+                    if (recExpenseSeriesRefs) db.recExpenseSeries,
                     if (expensesRefs) db.expenses,
                   ],
                   addJoins: null,
@@ -2354,6 +3382,27 @@ class $$CategoriesTableTableManager
                                 table,
                                 p0,
                               ).subcategoriesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.categoryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (recExpenseSeriesRefs)
+                        await $_getPrefetchedData<
+                          CategoryRow,
+                          $CategoriesTable,
+                          ExpenseRecurringSeriesRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CategoriesTableReferences
+                              ._recExpenseSeriesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CategoriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).recExpenseSeriesRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.categoryId == item.id,
@@ -2401,7 +3450,11 @@ typedef $$CategoriesTableProcessedTableManager =
       $$CategoriesTableUpdateCompanionBuilder,
       (CategoryRow, $$CategoriesTableReferences),
       CategoryRow,
-      PrefetchHooks Function({bool subcategoriesRefs, bool expensesRefs})
+      PrefetchHooks Function({
+        bool subcategoriesRefs,
+        bool recExpenseSeriesRefs,
+        bool expensesRefs,
+      })
     >;
 typedef $$SubcategoriesTableCreateCompanionBuilder =
     SubcategoriesCompanion Function({
@@ -2450,6 +3503,32 @@ final class $$SubcategoriesTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $RecExpenseSeriesTable,
+    List<ExpenseRecurringSeriesRow>
+  >
+  _recExpenseSeriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.recExpenseSeries,
+    aliasName: $_aliasNameGenerator(
+      db.subcategories.id,
+      db.recExpenseSeries.subcategoryId,
+    ),
+  );
+
+  $$RecExpenseSeriesTableProcessedTableManager get recExpenseSeriesRefs {
+    final manager = $$RecExpenseSeriesTableTableManager(
+      $_db,
+      $_db.recExpenseSeries,
+    ).filter((f) => f.subcategoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _recExpenseSeriesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 
@@ -2535,6 +3614,31 @@ class $$SubcategoriesTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> recExpenseSeriesRefs(
+    Expression<bool> Function($$RecExpenseSeriesTableFilterComposer f) f,
+  ) {
+    final $$RecExpenseSeriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.recExpenseSeries,
+      getReferencedColumn: (t) => t.subcategoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecExpenseSeriesTableFilterComposer(
+            $db: $db,
+            $table: $db.recExpenseSeries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 
   Expression<bool> expensesRefs(
@@ -2680,6 +3784,31 @@ class $$SubcategoriesTableAnnotationComposer
     return composer;
   }
 
+  Expression<T> recExpenseSeriesRefs<T extends Object>(
+    Expression<T> Function($$RecExpenseSeriesTableAnnotationComposer a) f,
+  ) {
+    final $$RecExpenseSeriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.recExpenseSeries,
+      getReferencedColumn: (t) => t.subcategoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecExpenseSeriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.recExpenseSeries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> expensesRefs<T extends Object>(
     Expression<T> Function($$ExpensesTableAnnotationComposer a) f,
   ) {
@@ -2719,7 +3848,11 @@ class $$SubcategoriesTableTableManager
           $$SubcategoriesTableUpdateCompanionBuilder,
           (SubcategoryRow, $$SubcategoriesTableReferences),
           SubcategoryRow,
-          PrefetchHooks Function({bool categoryId, bool expensesRefs})
+          PrefetchHooks Function({
+            bool categoryId,
+            bool recExpenseSeriesRefs,
+            bool expensesRefs,
+          })
         > {
   $$SubcategoriesTableTableManager(_$AppDatabase db, $SubcategoriesTable table)
     : super(
@@ -2780,69 +3913,100 @@ class $$SubcategoriesTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({categoryId = false, expensesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (expensesRefs) db.expenses],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (categoryId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.categoryId,
-                                referencedTable: $$SubcategoriesTableReferences
-                                    ._categoryIdTable(db),
-                                referencedColumn: $$SubcategoriesTableReferences
-                                    ._categoryIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({
+                categoryId = false,
+                recExpenseSeriesRefs = false,
+                expensesRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (recExpenseSeriesRefs) db.recExpenseSeries,
+                    if (expensesRefs) db.expenses,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (categoryId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.categoryId,
+                                    referencedTable:
+                                        $$SubcategoriesTableReferences
+                                            ._categoryIdTable(db),
+                                    referencedColumn:
+                                        $$SubcategoriesTableReferences
+                                            ._categoryIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (recExpenseSeriesRefs)
+                        await $_getPrefetchedData<
+                          SubcategoryRow,
+                          $SubcategoriesTable,
+                          ExpenseRecurringSeriesRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SubcategoriesTableReferences
+                              ._recExpenseSeriesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SubcategoriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).recExpenseSeriesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.subcategoryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (expensesRefs)
+                        await $_getPrefetchedData<
+                          SubcategoryRow,
+                          $SubcategoriesTable,
+                          ExpenseRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SubcategoriesTableReferences
+                              ._expensesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SubcategoriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).expensesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.subcategoryId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (expensesRefs)
-                    await $_getPrefetchedData<
-                      SubcategoryRow,
-                      $SubcategoriesTable,
-                      ExpenseRow
-                    >(
-                      currentTable: table,
-                      referencedTable: $$SubcategoriesTableReferences
-                          ._expensesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$SubcategoriesTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).expensesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.subcategoryId == item.id,
-                          ),
-                      typedResults: items,
-                    ),
-                ];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -2859,7 +4023,730 @@ typedef $$SubcategoriesTableProcessedTableManager =
       $$SubcategoriesTableUpdateCompanionBuilder,
       (SubcategoryRow, $$SubcategoriesTableReferences),
       SubcategoryRow,
-      PrefetchHooks Function({bool categoryId, bool expensesRefs})
+      PrefetchHooks Function({
+        bool categoryId,
+        bool recExpenseSeriesRefs,
+        bool expensesRefs,
+      })
+    >;
+typedef $$RecExpenseSeriesTableCreateCompanionBuilder =
+    RecExpenseSeriesCompanion Function({
+      required String id,
+      required String anchorOccurredOn,
+      required String recurrenceJson,
+      required int horizonMonths,
+      Value<bool> active,
+      required String categoryId,
+      required String subcategoryId,
+      required double amountOriginal,
+      Value<String> currencyCode,
+      Value<double> manualFxRateToUsd,
+      required double amountUsd,
+      Value<bool> paidWithCreditCard,
+      Value<String> description,
+      Value<String?> paymentInstrumentId,
+      Value<int> rowid,
+    });
+typedef $$RecExpenseSeriesTableUpdateCompanionBuilder =
+    RecExpenseSeriesCompanion Function({
+      Value<String> id,
+      Value<String> anchorOccurredOn,
+      Value<String> recurrenceJson,
+      Value<int> horizonMonths,
+      Value<bool> active,
+      Value<String> categoryId,
+      Value<String> subcategoryId,
+      Value<double> amountOriginal,
+      Value<String> currencyCode,
+      Value<double> manualFxRateToUsd,
+      Value<double> amountUsd,
+      Value<bool> paidWithCreditCard,
+      Value<String> description,
+      Value<String?> paymentInstrumentId,
+      Value<int> rowid,
+    });
+
+final class $$RecExpenseSeriesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $RecExpenseSeriesTable,
+          ExpenseRecurringSeriesRow
+        > {
+  $$RecExpenseSeriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CategoriesTable _categoryIdTable(_$AppDatabase db) =>
+      db.categories.createAlias(
+        $_aliasNameGenerator(db.recExpenseSeries.categoryId, db.categories.id),
+      );
+
+  $$CategoriesTableProcessedTableManager get categoryId {
+    final $_column = $_itemColumn<String>('category_id')!;
+
+    final manager = $$CategoriesTableTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $SubcategoriesTable _subcategoryIdTable(_$AppDatabase db) =>
+      db.subcategories.createAlias(
+        $_aliasNameGenerator(
+          db.recExpenseSeries.subcategoryId,
+          db.subcategories.id,
+        ),
+      );
+
+  $$SubcategoriesTableProcessedTableManager get subcategoryId {
+    final $_column = $_itemColumn<String>('subcategory_id')!;
+
+    final manager = $$SubcategoriesTableTableManager(
+      $_db,
+      $_db.subcategories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_subcategoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$ExpensesTable, List<ExpenseRow>>
+  _expensesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.expenses,
+    aliasName: $_aliasNameGenerator(
+      db.recExpenseSeries.id,
+      db.expenses.recurringSeriesId,
+    ),
+  );
+
+  $$ExpensesTableProcessedTableManager get expensesRefs {
+    final manager = $$ExpensesTableTableManager($_db, $_db.expenses).filter(
+      (f) => f.recurringSeriesId.id.sqlEquals($_itemColumn<String>('id')!),
+    );
+
+    final cache = $_typedResult.readTableOrNull(_expensesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$RecExpenseSeriesTableFilterComposer
+    extends Composer<_$AppDatabase, $RecExpenseSeriesTable> {
+  $$RecExpenseSeriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get anchorOccurredOn => $composableBuilder(
+    column: $table.anchorOccurredOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recurrenceJson => $composableBuilder(
+    column: $table.recurrenceJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get horizonMonths => $composableBuilder(
+    column: $table.horizonMonths,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get active => $composableBuilder(
+    column: $table.active,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amountOriginal => $composableBuilder(
+    column: $table.amountOriginal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get manualFxRateToUsd => $composableBuilder(
+    column: $table.manualFxRateToUsd,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amountUsd => $composableBuilder(
+    column: $table.amountUsd,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get paidWithCreditCard => $composableBuilder(
+    column: $table.paidWithCreditCard,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentInstrumentId => $composableBuilder(
+    column: $table.paymentInstrumentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CategoriesTableFilterComposer get categoryId {
+    final $$CategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SubcategoriesTableFilterComposer get subcategoryId {
+    final $$SubcategoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.subcategoryId,
+      referencedTable: $db.subcategories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SubcategoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.subcategories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> expensesRefs(
+    Expression<bool> Function($$ExpensesTableFilterComposer f) f,
+  ) {
+    final $$ExpensesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.recurringSeriesId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableFilterComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$RecExpenseSeriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $RecExpenseSeriesTable> {
+  $$RecExpenseSeriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get anchorOccurredOn => $composableBuilder(
+    column: $table.anchorOccurredOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recurrenceJson => $composableBuilder(
+    column: $table.recurrenceJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get horizonMonths => $composableBuilder(
+    column: $table.horizonMonths,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get active => $composableBuilder(
+    column: $table.active,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amountOriginal => $composableBuilder(
+    column: $table.amountOriginal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get manualFxRateToUsd => $composableBuilder(
+    column: $table.manualFxRateToUsd,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amountUsd => $composableBuilder(
+    column: $table.amountUsd,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get paidWithCreditCard => $composableBuilder(
+    column: $table.paidWithCreditCard,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paymentInstrumentId => $composableBuilder(
+    column: $table.paymentInstrumentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CategoriesTableOrderingComposer get categoryId {
+    final $$CategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SubcategoriesTableOrderingComposer get subcategoryId {
+    final $$SubcategoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.subcategoryId,
+      referencedTable: $db.subcategories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SubcategoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.subcategories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$RecExpenseSeriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RecExpenseSeriesTable> {
+  $$RecExpenseSeriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get anchorOccurredOn => $composableBuilder(
+    column: $table.anchorOccurredOn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get recurrenceJson => $composableBuilder(
+    column: $table.recurrenceJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get horizonMonths => $composableBuilder(
+    column: $table.horizonMonths,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get active =>
+      $composableBuilder(column: $table.active, builder: (column) => column);
+
+  GeneratedColumn<double> get amountOriginal => $composableBuilder(
+    column: $table.amountOriginal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get manualFxRateToUsd => $composableBuilder(
+    column: $table.manualFxRateToUsd,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get amountUsd =>
+      $composableBuilder(column: $table.amountUsd, builder: (column) => column);
+
+  GeneratedColumn<bool> get paidWithCreditCard => $composableBuilder(
+    column: $table.paidWithCreditCard,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get paymentInstrumentId => $composableBuilder(
+    column: $table.paymentInstrumentId,
+    builder: (column) => column,
+  );
+
+  $$CategoriesTableAnnotationComposer get categoryId {
+    final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SubcategoriesTableAnnotationComposer get subcategoryId {
+    final $$SubcategoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.subcategoryId,
+      referencedTable: $db.subcategories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SubcategoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.subcategories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> expensesRefs<T extends Object>(
+    Expression<T> Function($$ExpensesTableAnnotationComposer a) f,
+  ) {
+    final $$ExpensesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.expenses,
+      getReferencedColumn: (t) => t.recurringSeriesId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ExpensesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.expenses,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$RecExpenseSeriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RecExpenseSeriesTable,
+          ExpenseRecurringSeriesRow,
+          $$RecExpenseSeriesTableFilterComposer,
+          $$RecExpenseSeriesTableOrderingComposer,
+          $$RecExpenseSeriesTableAnnotationComposer,
+          $$RecExpenseSeriesTableCreateCompanionBuilder,
+          $$RecExpenseSeriesTableUpdateCompanionBuilder,
+          (ExpenseRecurringSeriesRow, $$RecExpenseSeriesTableReferences),
+          ExpenseRecurringSeriesRow,
+          PrefetchHooks Function({
+            bool categoryId,
+            bool subcategoryId,
+            bool expensesRefs,
+          })
+        > {
+  $$RecExpenseSeriesTableTableManager(
+    _$AppDatabase db,
+    $RecExpenseSeriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RecExpenseSeriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RecExpenseSeriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RecExpenseSeriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> anchorOccurredOn = const Value.absent(),
+                Value<String> recurrenceJson = const Value.absent(),
+                Value<int> horizonMonths = const Value.absent(),
+                Value<bool> active = const Value.absent(),
+                Value<String> categoryId = const Value.absent(),
+                Value<String> subcategoryId = const Value.absent(),
+                Value<double> amountOriginal = const Value.absent(),
+                Value<String> currencyCode = const Value.absent(),
+                Value<double> manualFxRateToUsd = const Value.absent(),
+                Value<double> amountUsd = const Value.absent(),
+                Value<bool> paidWithCreditCard = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String?> paymentInstrumentId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RecExpenseSeriesCompanion(
+                id: id,
+                anchorOccurredOn: anchorOccurredOn,
+                recurrenceJson: recurrenceJson,
+                horizonMonths: horizonMonths,
+                active: active,
+                categoryId: categoryId,
+                subcategoryId: subcategoryId,
+                amountOriginal: amountOriginal,
+                currencyCode: currencyCode,
+                manualFxRateToUsd: manualFxRateToUsd,
+                amountUsd: amountUsd,
+                paidWithCreditCard: paidWithCreditCard,
+                description: description,
+                paymentInstrumentId: paymentInstrumentId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String anchorOccurredOn,
+                required String recurrenceJson,
+                required int horizonMonths,
+                Value<bool> active = const Value.absent(),
+                required String categoryId,
+                required String subcategoryId,
+                required double amountOriginal,
+                Value<String> currencyCode = const Value.absent(),
+                Value<double> manualFxRateToUsd = const Value.absent(),
+                required double amountUsd,
+                Value<bool> paidWithCreditCard = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String?> paymentInstrumentId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RecExpenseSeriesCompanion.insert(
+                id: id,
+                anchorOccurredOn: anchorOccurredOn,
+                recurrenceJson: recurrenceJson,
+                horizonMonths: horizonMonths,
+                active: active,
+                categoryId: categoryId,
+                subcategoryId: subcategoryId,
+                amountOriginal: amountOriginal,
+                currencyCode: currencyCode,
+                manualFxRateToUsd: manualFxRateToUsd,
+                amountUsd: amountUsd,
+                paidWithCreditCard: paidWithCreditCard,
+                description: description,
+                paymentInstrumentId: paymentInstrumentId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$RecExpenseSeriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                categoryId = false,
+                subcategoryId = false,
+                expensesRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [if (expensesRefs) db.expenses],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (categoryId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.categoryId,
+                                    referencedTable:
+                                        $$RecExpenseSeriesTableReferences
+                                            ._categoryIdTable(db),
+                                    referencedColumn:
+                                        $$RecExpenseSeriesTableReferences
+                                            ._categoryIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (subcategoryId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.subcategoryId,
+                                    referencedTable:
+                                        $$RecExpenseSeriesTableReferences
+                                            ._subcategoryIdTable(db),
+                                    referencedColumn:
+                                        $$RecExpenseSeriesTableReferences
+                                            ._subcategoryIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (expensesRefs)
+                        await $_getPrefetchedData<
+                          ExpenseRecurringSeriesRow,
+                          $RecExpenseSeriesTable,
+                          ExpenseRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$RecExpenseSeriesTableReferences
+                              ._expensesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$RecExpenseSeriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).expensesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.recurringSeriesId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$RecExpenseSeriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RecExpenseSeriesTable,
+      ExpenseRecurringSeriesRow,
+      $$RecExpenseSeriesTableFilterComposer,
+      $$RecExpenseSeriesTableOrderingComposer,
+      $$RecExpenseSeriesTableAnnotationComposer,
+      $$RecExpenseSeriesTableCreateCompanionBuilder,
+      $$RecExpenseSeriesTableUpdateCompanionBuilder,
+      (ExpenseRecurringSeriesRow, $$RecExpenseSeriesTableReferences),
+      ExpenseRecurringSeriesRow,
+      PrefetchHooks Function({
+        bool categoryId,
+        bool subcategoryId,
+        bool expensesRefs,
+      })
     >;
 typedef $$ExpensesTableCreateCompanionBuilder =
     ExpensesCompanion Function({
@@ -2874,6 +4761,7 @@ typedef $$ExpensesTableCreateCompanionBuilder =
       Value<bool> paidWithCreditCard,
       Value<String> description,
       Value<String?> paymentInstrumentId,
+      Value<String?> recurringSeriesId,
       Value<int> rowid,
     });
 typedef $$ExpensesTableUpdateCompanionBuilder =
@@ -2889,6 +4777,7 @@ typedef $$ExpensesTableUpdateCompanionBuilder =
       Value<bool> paidWithCreditCard,
       Value<String> description,
       Value<String?> paymentInstrumentId,
+      Value<String?> recurringSeriesId,
       Value<int> rowid,
     });
 
@@ -2928,6 +4817,28 @@ final class $$ExpensesTableReferences
       $_db.subcategories,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_subcategoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $RecExpenseSeriesTable _recurringSeriesIdTable(_$AppDatabase db) =>
+      db.recExpenseSeries.createAlias(
+        $_aliasNameGenerator(
+          db.expenses.recurringSeriesId,
+          db.recExpenseSeries.id,
+        ),
+      );
+
+  $$RecExpenseSeriesTableProcessedTableManager? get recurringSeriesId {
+    final $_column = $_itemColumn<String>('recurring_series_id');
+    if ($_column == null) return null;
+    final manager = $$RecExpenseSeriesTableTableManager(
+      $_db,
+      $_db.recExpenseSeries,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_recurringSeriesIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -3026,6 +4937,29 @@ class $$ExpensesTableFilterComposer
           }) => $$SubcategoriesTableFilterComposer(
             $db: $db,
             $table: $db.subcategories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RecExpenseSeriesTableFilterComposer get recurringSeriesId {
+    final $$RecExpenseSeriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.recurringSeriesId,
+      referencedTable: $db.recExpenseSeries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecExpenseSeriesTableFilterComposer(
+            $db: $db,
+            $table: $db.recExpenseSeries,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3135,6 +5069,29 @@ class $$ExpensesTableOrderingComposer
     );
     return composer;
   }
+
+  $$RecExpenseSeriesTableOrderingComposer get recurringSeriesId {
+    final $$RecExpenseSeriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.recurringSeriesId,
+      referencedTable: $db.recExpenseSeries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecExpenseSeriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.recExpenseSeries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$ExpensesTableAnnotationComposer
@@ -3232,6 +5189,29 @@ class $$ExpensesTableAnnotationComposer
     );
     return composer;
   }
+
+  $$RecExpenseSeriesTableAnnotationComposer get recurringSeriesId {
+    final $$RecExpenseSeriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.recurringSeriesId,
+      referencedTable: $db.recExpenseSeries,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RecExpenseSeriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.recExpenseSeries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$ExpensesTableTableManager
@@ -3247,7 +5227,11 @@ class $$ExpensesTableTableManager
           $$ExpensesTableUpdateCompanionBuilder,
           (ExpenseRow, $$ExpensesTableReferences),
           ExpenseRow,
-          PrefetchHooks Function({bool categoryId, bool subcategoryId})
+          PrefetchHooks Function({
+            bool categoryId,
+            bool subcategoryId,
+            bool recurringSeriesId,
+          })
         > {
   $$ExpensesTableTableManager(_$AppDatabase db, $ExpensesTable table)
     : super(
@@ -3273,6 +5257,7 @@ class $$ExpensesTableTableManager
                 Value<bool> paidWithCreditCard = const Value.absent(),
                 Value<String> description = const Value.absent(),
                 Value<String?> paymentInstrumentId = const Value.absent(),
+                Value<String?> recurringSeriesId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpensesCompanion(
                 id: id,
@@ -3286,6 +5271,7 @@ class $$ExpensesTableTableManager
                 paidWithCreditCard: paidWithCreditCard,
                 description: description,
                 paymentInstrumentId: paymentInstrumentId,
+                recurringSeriesId: recurringSeriesId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3301,6 +5287,7 @@ class $$ExpensesTableTableManager
                 Value<bool> paidWithCreditCard = const Value.absent(),
                 Value<String> description = const Value.absent(),
                 Value<String?> paymentInstrumentId = const Value.absent(),
+                Value<String?> recurringSeriesId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpensesCompanion.insert(
                 id: id,
@@ -3314,6 +5301,7 @@ class $$ExpensesTableTableManager
                 paidWithCreditCard: paidWithCreditCard,
                 description: description,
                 paymentInstrumentId: paymentInstrumentId,
+                recurringSeriesId: recurringSeriesId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -3324,60 +5312,78 @@ class $$ExpensesTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({categoryId = false, subcategoryId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (categoryId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.categoryId,
-                                referencedTable: $$ExpensesTableReferences
-                                    ._categoryIdTable(db),
-                                referencedColumn: $$ExpensesTableReferences
-                                    ._categoryIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-                    if (subcategoryId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.subcategoryId,
-                                referencedTable: $$ExpensesTableReferences
-                                    ._subcategoryIdTable(db),
-                                referencedColumn: $$ExpensesTableReferences
-                                    ._subcategoryIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({
+                categoryId = false,
+                subcategoryId = false,
+                recurringSeriesId = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (categoryId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.categoryId,
+                                    referencedTable: $$ExpensesTableReferences
+                                        ._categoryIdTable(db),
+                                    referencedColumn: $$ExpensesTableReferences
+                                        ._categoryIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+                        if (subcategoryId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.subcategoryId,
+                                    referencedTable: $$ExpensesTableReferences
+                                        ._subcategoryIdTable(db),
+                                    referencedColumn: $$ExpensesTableReferences
+                                        ._subcategoryIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+                        if (recurringSeriesId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.recurringSeriesId,
+                                    referencedTable: $$ExpensesTableReferences
+                                        ._recurringSeriesIdTable(db),
+                                    referencedColumn: $$ExpensesTableReferences
+                                        ._recurringSeriesIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -3394,7 +5400,11 @@ typedef $$ExpensesTableProcessedTableManager =
       $$ExpensesTableUpdateCompanionBuilder,
       (ExpenseRow, $$ExpensesTableReferences),
       ExpenseRow,
-      PrefetchHooks Function({bool categoryId, bool subcategoryId})
+      PrefetchHooks Function({
+        bool categoryId,
+        bool subcategoryId,
+        bool recurringSeriesId,
+      })
     >;
 typedef $$PaymentInstrumentsTableCreateCompanionBuilder =
     PaymentInstrumentsCompanion Function({
@@ -3663,6 +5673,8 @@ class $AppDatabaseManager {
       $$CategoriesTableTableManager(_db, _db.categories);
   $$SubcategoriesTableTableManager get subcategories =>
       $$SubcategoriesTableTableManager(_db, _db.subcategories);
+  $$RecExpenseSeriesTableTableManager get recExpenseSeries =>
+      $$RecExpenseSeriesTableTableManager(_db, _db.recExpenseSeries);
   $$ExpensesTableTableManager get expenses =>
       $$ExpensesTableTableManager(_db, _db.expenses);
   $$PaymentInstrumentsTableTableManager get paymentInstruments =>

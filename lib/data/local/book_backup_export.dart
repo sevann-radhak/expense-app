@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import 'package:expense_app/application/book_backup_snapshot.dart';
 import 'package:expense_app/data/local/app_database.dart';
+import 'package:expense_app/data/local/expense_recurring_series_drift_mapper.dart';
 import 'package:expense_app/domain/domain.dart';
 
 /// Reads the full Drift book into a [BookBackupSnapshot].
@@ -17,6 +18,9 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
       .get();
   final piRows = await (db.select(db.paymentInstruments)
         ..orderBy([(t) => OrderingTerm.asc(t.label)]))
+      .get();
+  final seriesRows = await (db.select(db.recExpenseSeries)
+        ..orderBy([(t) => OrderingTerm.asc(t.id)]))
       .get();
   final expRows = await (db.select(db.expenses)
         ..orderBy([
@@ -64,6 +68,10 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
       )
       .toList();
 
+  final expenseRecurringSeriesRaw = seriesRows
+      .map(expenseRecurringSeriesFromDriftRow)
+      .toList();
+
   final expensesRaw = expRows
       .map(
         (r) => Expense(
@@ -78,6 +86,7 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
           paidWithCreditCard: r.paidWithCreditCard,
           description: r.description,
           paymentInstrumentId: r.paymentInstrumentId,
+          recurringSeriesId: r.recurringSeriesId,
         ),
       )
       .toList();
@@ -85,6 +94,24 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
   final catIds = categories.map((c) => c.id).toSet();
   final subIds = subcategories.map((s) => s.id).toSet();
   final piIds = paymentInstruments.map((p) => p.id).toSet();
+
+  final expenseRecurringSeries = <ExpenseRecurringSeries>[];
+  for (final s in expenseRecurringSeriesRaw) {
+    if (!catIds.contains(s.categoryId)) {
+      continue;
+    }
+    if (!subIds.contains(s.subcategoryId)) {
+      continue;
+    }
+    final pi = s.paymentInstrumentId;
+    if (pi != null && pi.isNotEmpty && !piIds.contains(pi)) {
+      expenseRecurringSeries.add(s.copyWith(clearPaymentInstrumentId: true));
+    } else {
+      expenseRecurringSeries.add(s);
+    }
+  }
+
+  final seriesIds = expenseRecurringSeries.map((s) => s.id).toSet();
 
   final expenses = <Expense>[];
   for (final e in expensesRaw) {
@@ -97,12 +124,16 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
     if (e.manualFxRateToUsd <= 0) {
       continue;
     }
+    var next = e;
     final pi = e.paymentInstrumentId;
     if (pi != null && pi.isNotEmpty && !piIds.contains(pi)) {
-      expenses.add(e.copyWith(clearPaymentInstrumentId: true));
-    } else {
-      expenses.add(e);
+      next = next.copyWith(clearPaymentInstrumentId: true);
     }
+    final rs = next.recurringSeriesId;
+    if (rs != null && rs.isNotEmpty && !seriesIds.contains(rs)) {
+      next = next.copyWith(clearRecurringSeriesId: true);
+    }
+    expenses.add(next);
   }
 
   return BookBackupSnapshot(
@@ -111,6 +142,7 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
     categories: categories,
     subcategories: subcategories,
     paymentInstruments: paymentInstruments,
+    expenseRecurringSeries: expenseRecurringSeries,
     expenses: expenses,
   );
 }

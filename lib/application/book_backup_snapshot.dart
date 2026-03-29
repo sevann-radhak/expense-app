@@ -1,6 +1,6 @@
 import 'package:expense_app/domain/domain.dart';
 
-/// Full local book export (categories, subcategories, instruments, expenses).
+/// Full local book export (categories, subcategories, instruments, series, expenses).
 ///
 /// [schemaVersion] is bumped when the JSON shape changes.
 final class BookBackupSnapshot {
@@ -10,15 +10,17 @@ final class BookBackupSnapshot {
     required this.categories,
     required this.subcategories,
     required this.paymentInstruments,
+    required this.expenseRecurringSeries,
     required this.expenses,
   });
 
-  static const int currentSchemaVersion = 1;
+  static const int currentSchemaVersion = 2;
 
   final int schemaVersion;
   final DateTime exportedAt;
   final List<Category> categories;
   final List<Subcategory> subcategories;
   final List<PaymentInstrument> paymentInstruments;
+  final List<ExpenseRecurringSeries> expenseRecurringSeries;
   final List<Expense> expenses;
 }

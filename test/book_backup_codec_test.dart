@@ -24,6 +24,7 @@ void main() {
       paymentInstruments: const [
         PaymentInstrument(id: 'pi1', label: 'Card'),
       ],
+      expenseRecurringSeries: const [],
       expenses: [
         Expense(
           id: 'e1',
@@ -54,5 +55,16 @@ void main() {
       () => decodeBookBackup('{"schemaVersion":999,"exportedAt":"2026-01-01T00:00:00.000Z","categories":[],"subcategories":[],"paymentInstruments":[],"expenses":[]}'),
       throwsA(isA<FormatException>()),
     );
+  });
+
+  test('decodeBookBackup accepts v1 without expenseRecurringSeries key', () {
+    const json = '{"schemaVersion":1,"exportedAt":"2026-01-01T00:00:00.000Z",'
+        '"categories":[{"id":"c1","name":"A","sortOrder":0}],'
+        '"subcategories":[{"id":"s1","categoryId":"c1","name":"O","slug":"other",'
+        '"isSystemReserved":true,"sortOrder":0}],'
+        '"paymentInstruments":[],"expenses":[]}';
+    final s = decodeBookBackup(json);
+    expect(s.schemaVersion, 1);
+    expect(s.expenseRecurringSeries, isEmpty);
   });
 }

@@ -7,6 +7,7 @@ import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/data/local/drift_category_repository.dart';
 import 'package:expense_app/data/local/drift_expense_repository.dart';
 import 'package:expense_app/data/local/drift_payment_instrument_repository.dart';
+import 'package:expense_app/data/local/drift_recurring_expense_series_repository.dart';
 import 'package:expense_app/domain/domain.dart';
 
 export 'app_user_settings_provider.dart';
@@ -21,6 +22,11 @@ final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
 
 final expenseRepositoryProvider = Provider<ExpenseRepository>((ref) {
   return DriftExpenseRepository(ref.watch(appDatabaseProvider));
+});
+
+final recurringExpenseSeriesRepositoryProvider =
+    Provider<RecurringExpenseSeriesRepository>((ref) {
+  return DriftRecurringExpenseSeriesRepository(ref.watch(appDatabaseProvider));
 });
 
 final paymentInstrumentRepositoryProvider =

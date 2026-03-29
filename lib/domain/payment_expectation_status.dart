@@ -6,10 +6,10 @@ enum PaymentExpectationStatus {
   /// User marked the obligation as paid (on schedule or early; see [Expense.paymentExpectationConfirmedOn]).
   confirmedPaid,
 
-  /// User skipped this occurrence.
+  /// This occurrence does not happen; excluded from cashflow totals and report stacks.
   skipped,
 
-  /// User waived this occurrence (e.g. not charging).
+  /// Obligation removed (e.g. not charging); excluded from cashflow totals and report stacks.
   waived,
 }
 

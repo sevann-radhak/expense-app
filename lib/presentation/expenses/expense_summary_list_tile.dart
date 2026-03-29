@@ -66,6 +66,9 @@ class ExpenseSummaryListTile extends StatelessWidget {
     final expectationChip =
         expenseExpectationChipLabel(expense, l10n, today);
 
+    final isSkipped = expense.effectivePaymentExpectationStatus ==
+        PaymentExpectationStatus.skipped;
+
     final menu = showRecurringOverflowMenu && onRecurringMenuAction != null
         ? PopupMenuButton<RecurringExpenseTileAction>(
             tooltip: l10n.recurringMenuTooltip,
@@ -75,10 +78,16 @@ class ExpenseSummaryListTile extends StatelessWidget {
                 value: RecurringExpenseTileAction.update,
                 child: Text(l10n.recurringTileActionUpdate),
               ),
-              PopupMenuItem(
-                value: RecurringExpenseTileAction.skip,
-                child: Text(l10n.recurringActionSkip),
-              ),
+              if (isSkipped)
+                PopupMenuItem(
+                  value: RecurringExpenseTileAction.restoreSkipped,
+                  child: Text(l10n.recurringActionRestoreOccurrence),
+                )
+              else
+                PopupMenuItem(
+                  value: RecurringExpenseTileAction.skip,
+                  child: Text(l10n.recurringActionSkip),
+                ),
               PopupMenuItem(
                 value: RecurringExpenseTileAction.delete,
                 child: Text(l10n.recurringTileActionDelete),

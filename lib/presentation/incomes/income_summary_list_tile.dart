@@ -55,6 +55,8 @@ class IncomeSummaryListTile extends StatelessWidget {
 
     final hasRecurring = entry.recurringSeriesId != null &&
         entry.recurringSeriesId!.isNotEmpty;
+    final isSkipped =
+        entry.effectiveExpectationStatus == PaymentExpectationStatus.skipped;
 
     final menu = onMenuAction != null
         ? PopupMenuButton<IncomeSummaryTileMenuAction>(
@@ -66,10 +68,16 @@ class IncomeSummaryListTile extends StatelessWidget {
                 child: Text(l10n.recurringSeriesEdit),
               ),
               if (hasRecurring) ...[
-                PopupMenuItem(
-                  value: IncomeSummaryTileMenuAction.skip,
-                  child: Text(l10n.recurringActionSkip),
-                ),
+                if (isSkipped)
+                  PopupMenuItem(
+                    value: IncomeSummaryTileMenuAction.restoreSkipped,
+                    child: Text(l10n.recurringActionRestoreOccurrence),
+                  )
+                else
+                  PopupMenuItem(
+                    value: IncomeSummaryTileMenuAction.skip,
+                    child: Text(l10n.recurringActionSkip),
+                  ),
                 PopupMenuItem(
                   value: IncomeSummaryTileMenuAction.delete,
                   child: Text(l10n.recurringTileActionDelete),

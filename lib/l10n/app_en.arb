@@ -594,6 +594,10 @@
   "recurringActionConfirmPaid": "Mark paid (on schedule)",
   "recurringActionPaidEarly": "Mark paid early…",
   "recurringActionSkip": "Skip occurrence",
+  "recurringActionRestoreOccurrence": "Restore occurrence",
+  "@recurringActionRestoreOccurrence": {
+    "description": "Row menu: bring a skipped recurring occurrence back to expected."
+  },
   "recurringActionWaive": "Waive",
   "paymentExpectationExpectedShort": "Expected",
   "paymentExpectationConfirmedShort": "Paid",

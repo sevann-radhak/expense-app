@@ -727,6 +727,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringActionSkip => 'Skip occurrence';
 
   @override
+  String get recurringActionRestoreOccurrence => 'Restore occurrence';
+
+  @override
   String get recurringActionWaive => 'Waive';
 
   @override

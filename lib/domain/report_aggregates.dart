@@ -6,6 +6,9 @@ import 'package:expense_app/domain/payment_settlement.dart';
 List<double> monthlyUsdTotalsByCalendarMonth(Iterable<Expense> expenses) {
   final list = List<double>.filled(12, 0);
   for (final e in expenses) {
+    if (isExpenseExcludedFromCashflowTotals(e)) {
+      continue;
+    }
     final m = e.occurredOn.month;
     if (m >= 1 && m <= 12) {
       list[m - 1] += e.amountUsd;
@@ -18,6 +21,9 @@ List<double> monthlyUsdTotalsByCalendarMonth(Iterable<Expense> expenses) {
 List<double> monthlyUsdTotalsByCalendarMonthForIncome(Iterable<IncomeEntry> incomes) {
   final list = List<double>.filled(12, 0);
   for (final e in incomes) {
+    if (isIncomeExcludedFromCashflowTotals(e)) {
+      continue;
+    }
     final m = e.receivedOn.month;
     if (m >= 1 && m <= 12) {
       list[m - 1] += e.amountUsd;
@@ -41,6 +47,9 @@ void monthlyExpenseSettledPendingForYear(
   }
   for (final e in expenses) {
     if (e.occurredOn.year != year) {
+      continue;
+    }
+    if (isExpenseExcludedFromCashflowTotals(e)) {
       continue;
     }
     final m = e.occurredOn.month;
@@ -73,6 +82,9 @@ void monthlyIncomeSettledPendingForYear(
     if (e.receivedOn.year != year) {
       continue;
     }
+    if (isIncomeExcludedFromCashflowTotals(e)) {
+      continue;
+    }
     final m = e.receivedOn.month;
     if (m < 1 || m > 12) {
       continue;
@@ -93,6 +105,9 @@ void monthlyIncomeSettledPendingForYear(
   var settled = 0.0;
   var pending = 0.0;
   for (final e in expenses) {
+    if (isExpenseExcludedFromCashflowTotals(e)) {
+      continue;
+    }
     if (isEconomicallySettledExpense(e, todayDateOnly)) {
       settled += e.amountUsd;
     } else {
@@ -109,6 +124,9 @@ void monthlyIncomeSettledPendingForYear(
   var settled = 0.0;
   var pending = 0.0;
   for (final e in incomes) {
+    if (isIncomeExcludedFromCashflowTotals(e)) {
+      continue;
+    }
     if (isEconomicallySettledIncome(e, todayDateOnly)) {
       settled += e.amountUsd;
     } else {
@@ -122,6 +140,9 @@ void monthlyIncomeSettledPendingForYear(
 double totalUsd(Iterable<Expense> expenses) {
   var s = 0.0;
   for (final e in expenses) {
+    if (isExpenseExcludedFromCashflowTotals(e)) {
+      continue;
+    }
     s += e.amountUsd;
   }
   return s;
@@ -130,6 +151,9 @@ double totalUsd(Iterable<Expense> expenses) {
 double totalIncomeUsd(Iterable<IncomeEntry> incomes) {
   var s = 0.0;
   for (final e in incomes) {
+    if (isIncomeExcludedFromCashflowTotals(e)) {
+      continue;
+    }
     s += e.amountUsd;
   }
   return s;
@@ -147,6 +171,9 @@ double percentOfTotal(double part, double whole) {
 List<CategoryUsdAggregate> aggregateUsdByCategory(Iterable<Expense> expenses) {
   final map = <String, double>{};
   for (final e in expenses) {
+    if (isExpenseExcludedFromCashflowTotals(e)) {
+      continue;
+    }
     map[e.categoryId] = (map[e.categoryId] ?? 0) + e.amountUsd;
   }
   final list =
@@ -165,6 +192,9 @@ List<CategoryUsdAggregate> aggregateUsdByIncomeCategory(
 ) {
   final map = <String, double>{};
   for (final e in incomes) {
+    if (isIncomeExcludedFromCashflowTotals(e)) {
+      continue;
+    }
     map[e.incomeCategoryId] = (map[e.incomeCategoryId] ?? 0) + e.amountUsd;
   }
   final list =
@@ -184,6 +214,9 @@ List<SubcategoryUsdAggregate> aggregateUsdByIncomeSubcategoryForCategory(
 ) {
   final map = <String, double>{};
   for (final e in incomes) {
+    if (isIncomeExcludedFromCashflowTotals(e)) {
+      continue;
+    }
     if (e.incomeCategoryId == categoryId) {
       map[e.incomeSubcategoryId] =
           (map[e.incomeSubcategoryId] ?? 0) + e.amountUsd;
@@ -209,6 +242,9 @@ List<SubcategoryUsdAggregate> aggregateUsdBySubcategoryForCategory(
 ) {
   final map = <String, double>{};
   for (final e in expenses) {
+    if (isExpenseExcludedFromCashflowTotals(e)) {
+      continue;
+    }
     if (e.categoryId == categoryId) {
       map[e.subcategoryId] = (map[e.subcategoryId] ?? 0) + e.amountUsd;
     }

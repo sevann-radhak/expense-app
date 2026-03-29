@@ -34,6 +34,14 @@ Future<void> handleRecurringExpenseTileAction(
         ),
       );
       break;
+    case RecurringExpenseTileAction.restoreSkipped:
+      await repo.update(
+        expense.copyWith(
+          paymentExpectationStatus: PaymentExpectationStatus.expected,
+          clearPaymentExpectationConfirmedOn: true,
+        ),
+      );
+      break;
     case RecurringExpenseTileAction.delete:
       if (!context.mounted) {
         return;

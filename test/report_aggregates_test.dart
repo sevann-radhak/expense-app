@@ -79,6 +79,34 @@ void main() {
     expect(rows.map((r) => r.subcategoryId).toList(), ['s2', 's1']);
   });
 
+  test('totalIncomeUsd excludes skipped and waived', () {
+    final skipped = IncomeEntry(
+      id: 's',
+      receivedOn: DateTime(2025, 5, 1),
+      incomeCategoryId: 'c',
+      incomeSubcategoryId: 'sub',
+      amountOriginal: 1250,
+      currencyCode: 'USD',
+      manualFxRateToUsd: 1,
+      amountUsd: 1250,
+      recurringSeriesId: 'r',
+      expectationStatus: PaymentExpectationStatus.skipped,
+    );
+    final expected = IncomeEntry(
+      id: 'e',
+      receivedOn: DateTime(2025, 5, 2),
+      incomeCategoryId: 'c',
+      incomeSubcategoryId: 'sub',
+      amountOriginal: 4000,
+      currencyCode: 'USD',
+      manualFxRateToUsd: 1,
+      amountUsd: 4000,
+      recurringSeriesId: 'r2',
+      expectationStatus: PaymentExpectationStatus.expected,
+    );
+    expect(totalIncomeUsd([skipped, expected]), 4000);
+  });
+
   test('aggregateUsdByIncomeCategory and subcategory helpers', () {
     final inc = IncomeEntry(
       id: 'i1',

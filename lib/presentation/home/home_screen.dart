@@ -188,14 +188,17 @@ class _MonthSpendSummary extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
+    final included = expenses
+        .where((e) => !isExpenseExcludedFromCashflowTotals(e))
+        .toList();
     final byCurrency = <String, double>{};
-    for (final e in expenses) {
+    for (final e in included) {
       final c = e.currencyCode.toUpperCase();
       byCurrency[c] = (byCurrency[c] ?? 0) + e.amountOriginal;
     }
     final leftCodes = byCurrency.keys.where((c) => c != 'USD').toList()..sort();
 
-    final usdTotal = expenses.fold<double>(0, (s, e) => s + e.amountUsd);
+    final usdTotal = included.fold<double>(0, (s, e) => s + e.amountUsd);
     final usdLine = formatDisplayCurrencyLine(
       'USD',
       usdTotal,

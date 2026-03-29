@@ -5,6 +5,8 @@ enum IncomeSummaryTileMenuAction {
   /// Opens the income form (this occurrence).
   edit,
   skip,
+  /// Clears [PaymentExpectationStatus.skipped] back to expected.
+  restoreSkipped,
   delete,
 }
 

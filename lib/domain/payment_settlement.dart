@@ -5,8 +5,11 @@ import 'package:expense_app/domain/income_entry.dart';
 import 'package:expense_app/domain/income_expectation.dart';
 import 'package:expense_app/domain/payment_expectation_status.dart';
 
-/// True when the line should be treated as paid/received (or otherwise closed),
-/// as opposed to still scheduled and awaiting confirmation.
+/// True when the line counts as paid (expense) for settlement UI and for
+/// report “confirmed” stacks — not the same as [isExpenseExcludedFromCashflowTotals].
+///
+/// Skipped/waived rows return false here so they are not shown as “paid” in charts;
+/// they are omitted from totals via [isExpenseExcludedFromCashflowTotals].
 ///
 /// [todayDateOnly] must be calendar date-only (local).
 bool isEconomicallySettledExpense(Expense expense, DateTime todayDateOnly) {
@@ -15,10 +18,12 @@ bool isEconomicallySettledExpense(Expense expense, DateTime todayDateOnly) {
   final recurring = expense.recurringSeriesId != null &&
       expense.recurringSeriesId!.isNotEmpty;
   final st = expense.effectivePaymentExpectationStatus;
-  if (st == PaymentExpectationStatus.confirmedPaid ||
-      st == PaymentExpectationStatus.skipped ||
-      st == PaymentExpectationStatus.waived) {
+  if (st == PaymentExpectationStatus.confirmedPaid) {
     return true;
+  }
+  if (st == PaymentExpectationStatus.skipped ||
+      st == PaymentExpectationStatus.waived) {
+    return false;
   }
   if (!recurring) {
     if (expense.paymentExpectationStatus ==
@@ -30,17 +35,19 @@ bool isEconomicallySettledExpense(Expense expense, DateTime todayDateOnly) {
   return false;
 }
 
-/// Same semantics as [isEconomicallySettledExpense] for income lines.
+/// Same as [isEconomicallySettledExpense] for income (received vs still expected).
 bool isEconomicallySettledIncome(IncomeEntry entry, DateTime todayDateOnly) {
   final d = calendarDateOnly(entry.receivedOn);
   final t = calendarDateOnly(todayDateOnly);
   final recurring =
       entry.recurringSeriesId != null && entry.recurringSeriesId!.isNotEmpty;
   final st = entry.effectiveExpectationStatus;
-  if (st == PaymentExpectationStatus.confirmedPaid ||
-      st == PaymentExpectationStatus.skipped ||
-      st == PaymentExpectationStatus.waived) {
+  if (st == PaymentExpectationStatus.confirmedPaid) {
     return true;
+  }
+  if (st == PaymentExpectationStatus.skipped ||
+      st == PaymentExpectationStatus.waived) {
+    return false;
   }
   if (!recurring) {
     if (entry.expectationStatus == PaymentExpectationStatus.expected) {
@@ -83,6 +90,21 @@ Expense withExpenseSettlementChoice(
     paymentExpectationStatus: PaymentExpectationStatus.expected,
     clearPaymentExpectationConfirmedOn: true,
   );
+}
+
+/// Skipped or waived materialized occurrences do not count toward cashflow totals
+/// or annual/monthly report stacks (treated as annulled for money; row kept for history).
+bool isExpenseExcludedFromCashflowTotals(Expense expense) {
+  final s = expense.effectivePaymentExpectationStatus;
+  return s == PaymentExpectationStatus.skipped ||
+      s == PaymentExpectationStatus.waived;
+}
+
+/// Same as [isExpenseExcludedFromCashflowTotals] for income.
+bool isIncomeExcludedFromCashflowTotals(IncomeEntry entry) {
+  final s = entry.effectiveExpectationStatus;
+  return s == PaymentExpectationStatus.skipped ||
+      s == PaymentExpectationStatus.waived;
 }
 
 IncomeEntry withIncomeSettlementChoice(

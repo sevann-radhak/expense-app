@@ -70,6 +70,56 @@ void main() {
     expect(isEconomicallySettledExpense(e, today), isFalse);
   });
 
+  test('recurring income skipped is not economically settled', () {
+    final entry = IncomeEntry(
+      id: '1',
+      receivedOn: DateTime(2025, 7, 1),
+      incomeCategoryId: 'c',
+      incomeSubcategoryId: 's',
+      amountOriginal: 100,
+      currencyCode: 'USD',
+      manualFxRateToUsd: 1,
+      amountUsd: 100,
+      recurringSeriesId: 'series',
+      expectationStatus: PaymentExpectationStatus.skipped,
+    );
+    expect(isEconomicallySettledIncome(entry, today), isFalse);
+    expect(isIncomeExcludedFromCashflowTotals(entry), isTrue);
+  });
+
+  test('splitIncomeUsdSettledPending ignores skipped and waived', () {
+    final todayInc = DateTime(2025, 6, 15);
+    final incomes = [
+      IncomeEntry(
+        id: 'a',
+        receivedOn: DateTime(2025, 3, 1),
+        incomeCategoryId: 'c',
+        incomeSubcategoryId: 's',
+        amountOriginal: 100,
+        currencyCode: 'USD',
+        manualFxRateToUsd: 1,
+        amountUsd: 100,
+        recurringSeriesId: 'r',
+        expectationStatus: PaymentExpectationStatus.skipped,
+      ),
+      IncomeEntry(
+        id: 'b',
+        receivedOn: DateTime(2025, 3, 2),
+        incomeCategoryId: 'c',
+        incomeSubcategoryId: 's',
+        amountOriginal: 40,
+        currencyCode: 'USD',
+        manualFxRateToUsd: 1,
+        amountUsd: 40,
+        recurringSeriesId: 'r',
+        expectationStatus: PaymentExpectationStatus.expected,
+      ),
+    ];
+    final r = splitIncomeUsdSettledPending(incomes, todayInc);
+    expect(r.settled, 0);
+    expect(r.pending, 40);
+  });
+
   test('splitExpenseUsdSettledPending buckets amounts', () {
     final expenses = [
       Expense(

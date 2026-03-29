@@ -34,6 +34,14 @@ Future<void> handleIncomeSummaryTileMenuAction(
         ),
       );
       break;
+    case IncomeSummaryTileMenuAction.restoreSkipped:
+      await repo.update(
+        entry.copyWith(
+          expectationStatus: PaymentExpectationStatus.expected,
+          clearExpectationConfirmedOn: true,
+        ),
+      );
+      break;
     case IncomeSummaryTileMenuAction.delete:
       if (!context.mounted) {
         return;

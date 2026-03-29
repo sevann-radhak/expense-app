@@ -137,7 +137,9 @@ final incomeUsdTotalSelectedMonthProvider = Provider<AsyncValue<double>>((ref) {
   final async = ref.watch(incomeForSelectedMonthProvider);
   return async.when(
     data: (list) => AsyncValue.data(
-      list.fold<double>(0, (sum, e) => sum + e.amountUsd),
+      list
+          .where((e) => !isIncomeExcludedFromCashflowTotals(e))
+          .fold<double>(0, (sum, e) => sum + e.amountUsd),
     ),
     loading: () => const AsyncValue.loading(),
     error: (e, st) => AsyncValue.error(e, st),

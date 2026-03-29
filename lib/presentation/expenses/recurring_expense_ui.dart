@@ -5,6 +5,7 @@ import 'package:expense_app/l10n/app_localizations.dart';
 enum RecurringExpenseTileAction {
   update,
   skip,
+  restoreSkipped,
   delete,
 }
 

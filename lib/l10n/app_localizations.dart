@@ -1388,6 +1388,12 @@ abstract class AppLocalizations {
   /// **'Skip occurrence'**
   String get recurringActionSkip;
 
+  /// Row menu: bring a skipped recurring occurrence back to expected.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore occurrence'**
+  String get recurringActionRestoreOccurrence;
+
   /// No description provided for @recurringActionWaive.
   ///
   /// In en, this message translates to:

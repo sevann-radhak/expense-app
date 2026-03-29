@@ -14,13 +14,25 @@ class ReportsCategoryPieChart extends StatelessWidget {
     required this.categoryName,
     required this.localeName,
     required this.l10n,
+    this.chartTitle,
+    this.semanticLabel,
+    this.cardKey,
   });
+
+  /// Distinguishes multiple pies on one screen (e.g. expenses vs income).
+  final Key? cardKey;
 
   final List<CategoryUsdAggregate> aggregates;
   final double periodTotalUsd;
   final Map<String, String> categoryName;
   final String localeName;
   final AppLocalizations l10n;
+
+  /// When null, uses [AppLocalizations.reportsChartCategoryTitle].
+  final String? chartTitle;
+
+  /// When null, uses [AppLocalizations.reportsChartCategorySemanticLabel].
+  final String? semanticLabel;
 
   static String _pct(double part, double whole) {
     if (whole <= 0) {
@@ -110,11 +122,14 @@ class ReportsCategoryPieChart extends StatelessWidget {
       ],
     );
 
+    final title = chartTitle ?? l10n.reportsChartCategoryTitle;
+    final a11y = semanticLabel ?? l10n.reportsChartCategorySemanticLabel;
+
     return Semantics(
-      label: l10n.reportsChartCategorySemanticLabel,
+      label: a11y,
       container: true,
       child: Card(
-        key: const ValueKey<String>('reports-category-pie-chart'),
+        key: cardKey ?? const ValueKey<String>('reports-category-pie-chart'),
         elevation: 0,
         color: scheme.surfaceContainerLow,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -126,7 +141,7 @@ class ReportsCategoryPieChart extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                l10n.reportsChartCategoryTitle,
+                title,
                 style: textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),

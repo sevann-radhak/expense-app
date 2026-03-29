@@ -144,6 +144,23 @@ class IncomeSummaryListTile extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(usdLabel, style: theme.textTheme.titleSmall),
+              if (onTap != null) ...[
+                const SizedBox(width: 4),
+                IconButton(
+                  tooltip: l10n.recurringSeriesEdit,
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    color: theme.colorScheme.primary,
+                  ),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
+                  onPressed: onTap,
+                ),
+              ],
             ],
           ),
         ],

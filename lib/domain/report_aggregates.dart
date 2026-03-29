@@ -66,6 +66,49 @@ List<CategoryUsdAggregate> aggregateUsdByCategory(Iterable<Expense> expenses) {
   return list;
 }
 
+/// Income categories (uses [IncomeEntry.incomeCategoryId]), sorted by total descending.
+List<CategoryUsdAggregate> aggregateUsdByIncomeCategory(
+  Iterable<IncomeEntry> incomes,
+) {
+  final map = <String, double>{};
+  for (final e in incomes) {
+    map[e.incomeCategoryId] = (map[e.incomeCategoryId] ?? 0) + e.amountUsd;
+  }
+  final list =
+      map.entries
+          .map(
+            (e) => CategoryUsdAggregate(categoryId: e.key, totalUsd: e.value),
+          )
+          .toList()
+        ..sort((a, b) => b.totalUsd.compareTo(a.totalUsd));
+  return list;
+}
+
+/// Income subcategories under [categoryId], sorted by [totalUsd] descending.
+List<SubcategoryUsdAggregate> aggregateUsdByIncomeSubcategoryForCategory(
+  Iterable<IncomeEntry> incomes,
+  String categoryId,
+) {
+  final map = <String, double>{};
+  for (final e in incomes) {
+    if (e.incomeCategoryId == categoryId) {
+      map[e.incomeSubcategoryId] =
+          (map[e.incomeSubcategoryId] ?? 0) + e.amountUsd;
+    }
+  }
+  final list =
+      map.entries
+          .map(
+            (e) => SubcategoryUsdAggregate(
+              subcategoryId: e.key,
+              totalUsd: e.value,
+            ),
+          )
+          .toList()
+        ..sort((a, b) => b.totalUsd.compareTo(a.totalUsd));
+  return list;
+}
+
 /// Subcategories under [categoryId], sorted by [totalUsd] descending.
 List<SubcategoryUsdAggregate> aggregateUsdBySubcategoryForCategory(
   Iterable<Expense> expenses,

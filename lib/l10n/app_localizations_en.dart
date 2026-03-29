@@ -87,6 +87,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsByCategoryEmpty => 'No expenses in this period.';
 
   @override
+  String get reportsByCategoryNoExpensesOrIncome =>
+      'No expenses or income in this period for the selected filter.';
+
+  @override
   String get reportsCategoryColumnCategory => 'Category';
 
   @override
@@ -109,6 +113,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsChartCategoryTitle => 'Spend by category (chart)';
 
   @override
+  String get reportsChartIncomeCategoryTitle => 'Income by category (chart)';
+
+  @override
   String get reportsChartMonthlySemanticLabel =>
       'Bar chart of total USD spent per calendar month for the selected year.';
 
@@ -128,6 +135,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reportsChartCategorySemanticLabel =>
       'Doughnut chart of USD share by category for the selected period, with a text legend.';
+
+  @override
+  String get reportsChartIncomeCategorySemanticLabel =>
+      'Doughnut chart of income USD share by income category for the selected period, with a text legend.';
 
   @override
   String get reportsExpenseInclusionAll => 'All';

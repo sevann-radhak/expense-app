@@ -19,4 +19,5 @@ Future<void> resetLocalDatabaseToInitialState(AppDatabase db) async {
   await CategorySeeder.ensureSeedData(db);
   await IncomeCategorySeeder.ensureSeedData(db);
   await PaymentInstrumentSeeder.ensureSeedData(db);
+  await db.backfillRecurringPastExpectationsSettled();
 }

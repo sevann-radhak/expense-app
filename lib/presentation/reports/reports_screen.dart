@@ -699,10 +699,19 @@ class _ReportsByCategoryTabBody extends ConsumerWidget {
     final month = ref.watch(selectedReportDetailMonthProvider);
     final scope = ref.watch(reportCategoryPeriodScopeProvider);
     final expensesAsync = ref.watch(expensesForReportCategoryScopeProvider);
+    final incomeAsync = ref.watch(incomeForReportCategoryScopeProvider);
     final categories = ref.watch(categoriesStreamProvider).valueOrNull ?? [];
     final allSubs = ref.watch(allSubcategoriesStreamProvider).valueOrNull ?? [];
+    final incomeCats =
+        ref.watch(incomeCategoriesStreamProvider).valueOrNull ?? [];
+    final allIncomeSubs =
+        ref.watch(allIncomeSubcategoriesStreamProvider).valueOrNull ?? [];
     final categoryName = {for (final c in categories) c.id: c.name};
     final subcategoryName = {for (final s in allSubs) s.id: s.name};
+    final incomeCategoryName = {for (final c in incomeCats) c.id: c.name};
+    final incomeSubcategoryName = {
+      for (final s in allIncomeSubs) s.id: s.name,
+    };
 
     return ListView(
       padding: const EdgeInsets.all(24),
@@ -759,45 +768,96 @@ class _ReportsByCategoryTabBody extends ConsumerWidget {
         const SizedBox(height: 16),
         expensesAsync.when(
           data: (expenses) {
-            final periodTotal = totalUsd(expenses);
-            if (expenses.isEmpty || periodTotal <= 0) {
-              return Text(
-                l10n.reportsByCategoryEmpty,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              );
-            }
-            final aggregates = aggregateUsdByCategory(expenses);
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  l10n.reportsPercentFootnote,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+            return incomeAsync.when(
+              data: (incomes) {
+                final expenseTotal = totalUsd(expenses);
+                final incomeTotal = totalIncomeUsd(incomes);
+                if (expenseTotal <= 0 && incomeTotal <= 0) {
+                  return Text(
+                    l10n.reportsByCategoryNoExpensesOrIncome,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant,
+                        ),
+                  );
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.reportsPercentFootnote,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (incomeTotal > 0) ...[
+                      ReportsCategoryPieChart(
+                        cardKey: const ValueKey<String>(
+                          'reports-income-category-pie-chart',
+                        ),
+                        aggregates: aggregateUsdByIncomeCategory(incomes),
+                        periodTotalUsd: incomeTotal,
+                        categoryName: incomeCategoryName,
+                        localeName: localeName,
+                        l10n: l10n,
+                        chartTitle: l10n.reportsChartIncomeCategoryTitle,
+                        semanticLabel:
+                            l10n.reportsChartIncomeCategorySemanticLabel,
                       ),
-                ),
-                const SizedBox(height: 12),
-                ReportsCategoryPieChart(
-                  aggregates: aggregates,
-                  periodTotalUsd: periodTotal,
-                  categoryName: categoryName,
-                  localeName: localeName,
-                  l10n: l10n,
-                ),
-                const SizedBox(height: 16),
-                _CategoryBreakdownTable(
-                  expenses: expenses,
-                  aggregates: aggregates,
-                  periodTotalUsd: periodTotal,
-                  categoryName: categoryName,
-                  subcategoryName: subcategoryName,
-                  localeName: localeName,
-                  l10n: l10n,
-                ),
-              ],
+                      const SizedBox(height: 16),
+                      _IncomeCategoryBreakdownTable(
+                        incomes: incomes,
+                        aggregates: aggregateUsdByIncomeCategory(incomes),
+                        periodTotalUsd: incomeTotal,
+                        categoryName: incomeCategoryName,
+                        subcategoryName: incomeSubcategoryName,
+                        localeName: localeName,
+                        l10n: l10n,
+                      ),
+                    ],
+                    if (incomeTotal > 0 && expenseTotal > 0) ...[
+                      const SizedBox(height: 28),
+                      Divider(
+                        height: 1,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .outlineVariant
+                            .withValues(alpha: 0.5),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                    if (expenseTotal > 0) ...[
+                      ReportsCategoryPieChart(
+                        cardKey: const ValueKey<String>(
+                          'reports-expense-category-pie-chart',
+                        ),
+                        aggregates: aggregateUsdByCategory(expenses),
+                        periodTotalUsd: expenseTotal,
+                        categoryName: categoryName,
+                        localeName: localeName,
+                        l10n: l10n,
+                      ),
+                      const SizedBox(height: 16),
+                      _CategoryBreakdownTable(
+                        expenses: expenses,
+                        aggregates: aggregateUsdByCategory(expenses),
+                        periodTotalUsd: expenseTotal,
+                        categoryName: categoryName,
+                        subcategoryName: subcategoryName,
+                        localeName: localeName,
+                        l10n: l10n,
+                      ),
+                    ],
+                  ],
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Text('$e'),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -889,6 +949,159 @@ class _CategoryBreakdownTable extends StatelessWidget {
             );
             return ExpansionTile(
               key: PageStorageKey<String>('cat-${row.categoryId}'),
+              title: Text(name),
+              subtitle: Text(
+                '${formatDisplayCurrencyLine('USD', row.totalUsd, localeName)} · ${_pct(share)}',
+                style: theme.textTheme.bodySmall,
+              ),
+              children: [
+                if (subRows.isEmpty)
+                  const SizedBox.shrink()
+                else
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          l10n.reportsSubcategoryColumnShare,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        ...subRows.map((s) {
+                          final subShare = percentOfTotal(
+                            s.totalUsd,
+                            row.totalUsd,
+                          );
+                          final subLabel = subcategoryName[s.subcategoryId] ??
+                              l10n.taxonomyUnknownLabel;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    subLabel,
+                                    style: theme.textTheme.bodyMedium,
+                                  ),
+                                ),
+                                Text(
+                                  formatDisplayCurrencyLine(
+                                    'USD',
+                                    s.totalUsd,
+                                    localeName,
+                                  ),
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 72,
+                                  child: Text(
+                                    _pct(subShare),
+                                    textAlign: TextAlign.end,
+                                    style: theme.textTheme.bodySmall,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+class _IncomeCategoryBreakdownTable extends StatelessWidget {
+  const _IncomeCategoryBreakdownTable({
+    required this.incomes,
+    required this.aggregates,
+    required this.periodTotalUsd,
+    required this.categoryName,
+    required this.subcategoryName,
+    required this.localeName,
+    required this.l10n,
+  });
+
+  final List<IncomeEntry> incomes;
+  final List<CategoryUsdAggregate> aggregates;
+  final double periodTotalUsd;
+  final Map<String, String> categoryName;
+  final Map<String, String> subcategoryName;
+  final String localeName;
+  final AppLocalizations l10n;
+
+  static String _pct(double value) => '${value.toStringAsFixed(1)}%';
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Card(
+      elevation: 0,
+      color: scheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    l10n.reportsCategoryColumnCategory,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    l10n.reportsCategoryColumnUsd,
+                    textAlign: TextAlign.end,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 88,
+                  child: Text(
+                    l10n.reportsCategoryColumnShare,
+                    textAlign: TextAlign.end,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          ...aggregates.map((row) {
+            final name =
+                categoryName[row.categoryId] ?? l10n.taxonomyUnknownLabel;
+            final share = percentOfTotal(row.totalUsd, periodTotalUsd);
+            final subRows = aggregateUsdByIncomeSubcategoryForCategory(
+              incomes,
+              row.categoryId,
+            );
+            return ExpansionTile(
+              key: PageStorageKey<String>('inc-cat-${row.categoryId}'),
               title: Text(name),
               subtitle: Text(
                 '${formatDisplayCurrencyLine('USD', row.totalUsd, localeName)} · ${_pct(share)}',

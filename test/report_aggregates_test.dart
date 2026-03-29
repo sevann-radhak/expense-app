@@ -78,4 +78,41 @@ void main() {
     ], 'c');
     expect(rows.map((r) => r.subcategoryId).toList(), ['s2', 's1']);
   });
+
+  test('aggregateUsdByIncomeCategory and subcategory helpers', () {
+    final inc = IncomeEntry(
+      id: 'i1',
+      receivedOn: DateTime(2025, 3, 1),
+      incomeCategoryId: 'cat_a',
+      incomeSubcategoryId: 'sub_1',
+      amountOriginal: 100,
+      currencyCode: 'USD',
+      manualFxRateToUsd: 1,
+      amountUsd: 100,
+    );
+    final inc2 = IncomeEntry(
+      id: 'i2',
+      receivedOn: DateTime(2025, 3, 2),
+      incomeCategoryId: 'cat_b',
+      incomeSubcategoryId: 'sub_x',
+      amountOriginal: 50,
+      currencyCode: 'USD',
+      manualFxRateToUsd: 1,
+      amountUsd: 50,
+    );
+    final inc3 = inc.copyWith(
+      id: 'i3',
+      incomeSubcategoryId: 'sub_2',
+      amountOriginal: 30,
+      amountUsd: 30,
+    );
+    final byCat = aggregateUsdByIncomeCategory([inc, inc2, inc3]);
+    expect(byCat.map((r) => r.categoryId).toList(), ['cat_a', 'cat_b']);
+    expect(byCat.first.totalUsd, 130);
+    final subs = aggregateUsdByIncomeSubcategoryForCategory(
+      [inc, inc2, inc3],
+      'cat_a',
+    );
+    expect(subs.map((r) => r.subcategoryId).toList(), ['sub_1', 'sub_2']);
+  });
 }

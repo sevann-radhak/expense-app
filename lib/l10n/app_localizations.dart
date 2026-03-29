@@ -244,6 +244,12 @@ abstract class AppLocalizations {
   /// **'No expenses in this period.'**
   String get reportsByCategoryEmpty;
 
+  /// Empty state when both expense and income totals are zero on By category.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses or income in this period for the selected filter.'**
+  String get reportsByCategoryNoExpensesOrIncome;
+
   /// No description provided for @reportsCategoryColumnCategory.
   ///
   /// In en, this message translates to:
@@ -286,6 +292,12 @@ abstract class AppLocalizations {
   /// **'Spend by category (chart)'**
   String get reportsChartCategoryTitle;
 
+  /// Heading above the income category doughnut on Reports By category.
+  ///
+  /// In en, this message translates to:
+  /// **'Income by category (chart)'**
+  String get reportsChartIncomeCategoryTitle;
+
   /// Screen reader summary for the monthly bar chart.
   ///
   /// In en, this message translates to:
@@ -321,6 +333,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Doughnut chart of USD share by category for the selected period, with a text legend.'**
   String get reportsChartCategorySemanticLabel;
+
+  /// Accessibility label for the income category doughnut chart.
+  ///
+  /// In en, this message translates to:
+  /// **'Doughnut chart of income USD share by income category for the selected period, with a text legend.'**
+  String get reportsChartIncomeCategorySemanticLabel;
 
   /// Reports filter: include every expense in the period.
   ///

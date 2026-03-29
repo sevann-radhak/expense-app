@@ -217,6 +217,22 @@ final expensesForReportCategoryScopeProvider = StreamProvider<List<Expense>>((
   );
 });
 
+/// Income for the same year/month scope as [expensesForReportCategoryScopeProvider].
+final incomeForReportCategoryScopeProvider =
+    StreamProvider<List<IncomeEntry>>((ref) {
+  final inc = ref.watch(reportExpenseInclusionProvider);
+  final scope = ref.watch(reportCategoryPeriodScopeProvider);
+  final year = ref.watch(selectedReportYearProvider);
+  final repo = ref.watch(incomeRepositoryProvider);
+  final Stream<List<IncomeEntry>> base =
+      scope == ReportCategoryPeriodScope.fullYear
+          ? repo.watchForYear(year)
+          : repo.watchForMonth(year, ref.watch(selectedReportDetailMonthProvider));
+  return base.map(
+    (list) => applyIncomeInclusion(list, inc, calendarTodayLocal()),
+  );
+});
+
 final categoriesStreamProvider = StreamProvider<List<Category>>((ref) {
   return ref.watch(categoryRepositoryProvider).watchCategories();
 });

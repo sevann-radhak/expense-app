@@ -4,6 +4,9 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:expense_app/data/local/category_seed.dart';
 import 'package:expense_app/data/local/income_category_seed.dart';
 import 'package:expense_app/data/local/payment_instrument_seed.dart';
+import 'package:expense_app/domain/expense.dart';
+import 'package:expense_app/domain/expense_inclusion.dart';
+import 'package:expense_app/domain/payment_expectation_status.dart';
 
 part 'app_database.g.dart';
 
@@ -739,6 +742,36 @@ class AppDatabase extends _$AppDatabase {
   }
 
   /// Ensures exactly one [PaymentInstruments.isDefault] when any row exists and none set.
+  /// Recurring rows dated on or before local today that are still [expected] are
+  /// marked confirmed (paid/received) with confirmation date = occurrence date.
+  /// Idempotent; repairs books created before materialization defaulted past rows.
+  Future<void> backfillRecurringPastExpectationsSettled() async {
+    final todayIso = ExpenseDates.toStorageDate(calendarTodayLocal());
+    final confirmed = PaymentExpectationStatus.confirmedPaid.storageName;
+    try {
+      await customStatement(
+        'UPDATE income_entries SET expectation_status = \'$confirmed\', '
+        'expectation_confirmed_on = received_on '
+        'WHERE recurring_series_id IS NOT NULL AND TRIM(recurring_series_id) != \'\' '
+        'AND (expectation_status IS NULL OR expectation_status = \'expected\') '
+        'AND received_on <= \'$todayIso\'',
+      );
+      await customStatement(
+        'UPDATE expenses SET payment_expectation_status = \'$confirmed\', '
+        'payment_expectation_confirmed_on = occurred_on '
+        'WHERE recurring_series_id IS NOT NULL AND TRIM(recurring_series_id) != \'\' '
+        'AND (payment_expectation_status IS NULL OR payment_expectation_status = \'expected\') '
+        'AND occurred_on <= \'$todayIso\'',
+      );
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('no such table') || msg.contains('no such column')) {
+        return;
+      }
+      rethrow;
+    }
+  }
+
   Future<void> backfillPaymentInstrumentDefaultsIfNeeded() async {
     try {
       final rows = await select(paymentInstruments).get();
@@ -806,6 +839,7 @@ Future<AppDatabase> initializeAppDatabase() async {
   await db.ensureIncomeTaxonomyDescriptionColumns();
   await db.ensureIncomeRecurringSeriesColumns();
   await db.ensureIncomeSeriesReceivedUniqueIndex();
+  await db.backfillRecurringPastExpectationsSettled();
   await IncomeCategorySeeder.ensureSeedData(db);
   _appDatabase = db;
   return db;

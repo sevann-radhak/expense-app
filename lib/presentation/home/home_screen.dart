@@ -110,10 +110,8 @@ class HomeScreen extends ConsumerWidget {
                         paymentInstrumentLabel: e.paymentInstrumentId != null
                             ? instrumentLabel[e.paymentInstrumentId!]
                             : null,
-                        emphasizeAsScheduled: !isRealizedOnLocalCalendar(
-                          e.occurredOn,
-                          today,
-                        ),
+                        emphasizeAsScheduled:
+                            !isEconomicallySettledExpense(e, today),
                         showRecurringOverflowMenu:
                             e.recurringSeriesId != null &&
                                 !isRealizedOnLocalCalendar(
@@ -129,6 +127,23 @@ class HomeScreen extends ConsumerWidget {
                             e,
                             action,
                           );
+                        },
+                        onSettlementToggle: (settled) async {
+                          try {
+                            await ref.read(expenseRepositoryProvider).update(
+                                  withExpenseSettlementChoice(
+                                    e,
+                                    settled,
+                                    calendarTodayLocal(),
+                                  ),
+                                );
+                          } on Object catch (err) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('$err')),
+                              );
+                            }
+                          }
                         },
                         onTap: () {
                           showDialog<void>(

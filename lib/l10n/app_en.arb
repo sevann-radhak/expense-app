@@ -104,6 +104,16 @@
   "reportsChartMonthlyCashflowTitle": "Income vs expenses (chart)",
   "reportsChartLegendIncome": "Income",
   "reportsChartLegendExpenses": "Expenses",
+  "reportsChartLegendIncomeSettled": "Income — paid/received",
+  "reportsChartLegendIncomePending": "Income — scheduled",
+  "reportsChartLegendExpenseSettled": "Expenses — paid",
+  "reportsChartLegendExpensePending": "Expenses — scheduled",
+  "reportsChartCashflowStackFootnote": "Bars are stacked: lower segment = paid or received (confirmed); upper = still scheduled (not yet confirmed).",
+  "@reportsChartCashflowStackFootnote": {
+    "description": "Explains stacked cashflow bars on Reports."
+  },
+  "reportsChartTooltipPaidReceived": "Paid/received",
+  "reportsChartTooltipStillScheduled": "Still scheduled",
   "reportsChartCashflowSemanticLabel": "Grouped bar chart of monthly income and expenses in U.S. dollars for the selected year.",
   "@reportsChartCashflowSemanticLabel": {
     "description": "Accessibility label for the annual cashflow bar chart."
@@ -659,6 +669,12 @@
   "expenseFormInstallmentCountInvalid": "Enter a number between 2 and 60.",
   "expenseFormInstallmentNeedsCard": "Choose a card profile to use installments.",
   "expenseFormInstallmentConflictRecurring": "Turn off repeating expense to use installments.",
+  "expenseFormSettlementSectionTitle": "Payment status",
+  "expenseFormSettlementPaid": "Paid",
+  "expenseFormSettlementUnpaid": "Not paid yet",
+  "incomeFormSettlementSectionTitle": "Receipt status",
+  "incomeFormSettlementReceived": "Received",
+  "incomeFormSettlementNotReceived": "Not received yet",
   "reportsYearCashflowTitle": "Cash flow (USD)",
   "@reportsYearCashflowTitle": {
     "description": "Heading for annual income vs expense summary."

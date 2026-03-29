@@ -344,6 +344,25 @@ class _ReportsAnnualTabBody extends ConsumerWidget {
                     monthlyUsdTotalsByCalendarMonth(expenses);
                 final monthlyIncomeUsd =
                     monthlyUsdTotalsByCalendarMonthForIncome(incomes);
+                final todayAnnual = calendarTodayLocal();
+                final monthlyIncomeSettled = List<double>.filled(12, 0);
+                final monthlyIncomePending = List<double>.filled(12, 0);
+                final monthlyExpenseSettled = List<double>.filled(12, 0);
+                final monthlyExpensePending = List<double>.filled(12, 0);
+                monthlyIncomeSettledPendingForYear(
+                  incomes,
+                  year,
+                  todayAnnual,
+                  monthlyIncomeSettled,
+                  monthlyIncomePending,
+                );
+                monthlyExpenseSettledPendingForYear(
+                  expenses,
+                  year,
+                  todayAnnual,
+                  monthlyExpenseSettled,
+                  monthlyExpensePending,
+                );
                 final incomeTotal = totalIncomeUsd(incomes);
                 final expenseTotal = totalUsd(expenses);
                 final net = incomeTotal - expenseTotal;
@@ -401,8 +420,10 @@ class _ReportsAnnualTabBody extends ConsumerWidget {
                       const SizedBox(height: 16),
                       ReportsMonthlyCashflowBarChart(
                         year: year,
-                        monthlyIncomeUsd: monthlyIncomeUsd,
-                        monthlyExpenseUsd: monthlyExpenseUsd,
+                        monthlyIncomeSettledUsd: monthlyIncomeSettled,
+                        monthlyIncomePendingUsd: monthlyIncomePending,
+                        monthlyExpenseSettledUsd: monthlyExpenseSettled,
+                        monthlyExpensePendingUsd: monthlyExpensePending,
                         localeName: locale,
                         l10n: l10n,
                       ),
@@ -567,6 +588,8 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                   incomeList.fold<double>(0, (sum, e) => sum + e.amountUsd);
               final expenseUsd =
                   expenses.fold<double>(0, (sum, e) => sum + e.amountUsd);
+              final incSp = splitIncomeUsdSettledPending(incomeList, today);
+              final expSp = splitExpenseUsdSettledPending(expenses, today);
               if (expenses.isEmpty && incomeUsd <= 0) {
                 return Text(
                   l10n.reportsByMonthEmpty,
@@ -582,8 +605,10 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                   if (incomeUsd > 0 || expenseUsd > 0) ...[
                     ReportsPeriodCashflowBarChart(
                       periodLabel: monthLabel,
-                      incomeUsd: incomeUsd,
-                      expenseUsd: expenseUsd,
+                      incomeSettledUsd: incSp.settled,
+                      incomePendingUsd: incSp.pending,
+                      expenseSettledUsd: expSp.settled,
+                      expensePendingUsd: expSp.pending,
                       localeName: localeName,
                       l10n: l10n,
                     ),
@@ -611,10 +636,8 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                         subcategoryName:
                             incomeSubcategoryName[e.incomeSubcategoryId] ??
                                 l10n.taxonomyUnknownLabel,
-                        emphasizeAsScheduled: !isRealizedOnLocalCalendar(
-                          e.receivedOn,
-                          today,
-                        ),
+                        emphasizeAsScheduled:
+                            !isEconomicallySettledIncome(e, today),
                         showRecurringOverflowMenu:
                             e.recurringSeriesId != null &&
                                 e.recurringSeriesId!.isNotEmpty &&
@@ -631,6 +654,23 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                             e,
                             action,
                           );
+                        },
+                        onSettlementToggle: (settled) async {
+                          try {
+                            await ref.read(incomeRepositoryProvider).update(
+                                  withIncomeSettlementChoice(
+                                    e,
+                                    settled,
+                                    calendarTodayLocal(),
+                                  ),
+                                );
+                          } on Object catch (err) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('$err')),
+                              );
+                            }
+                          }
                         },
                         onTap: () {
                           showDialog<void>(
@@ -659,10 +699,25 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                         paymentInstrumentLabel: e.paymentInstrumentId != null
                             ? instrumentLabel[e.paymentInstrumentId!]
                             : null,
-                        emphasizeAsScheduled: !isRealizedOnLocalCalendar(
-                          e.occurredOn,
-                          today,
-                        ),
+                        emphasizeAsScheduled:
+                            !isEconomicallySettledExpense(e, today),
+                        onSettlementToggle: (settled) async {
+                          try {
+                            await ref.read(expenseRepositoryProvider).update(
+                                  withExpenseSettlementChoice(
+                                    e,
+                                    settled,
+                                    calendarTodayLocal(),
+                                  ),
+                                );
+                          } on Object catch (err) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('$err')),
+                              );
+                            }
+                          }
+                        },
                         onTap: () {
                           showDialog<void>(
                             context: context,
@@ -787,6 +842,11 @@ class _ReportsByCategoryTabBody extends ConsumerWidget {
               data: (incomes) {
                 final expenseTotal = totalUsd(expenses);
                 final incomeTotal = totalIncomeUsd(incomes);
+                final todayScope = calendarTodayLocal();
+                final incScopeSplit =
+                    splitIncomeUsdSettledPending(incomes, todayScope);
+                final expScopeSplit =
+                    splitExpenseUsdSettledPending(expenses, todayScope);
                 if (expenseTotal <= 0 && incomeTotal <= 0) {
                   return Text(
                     l10n.reportsByCategoryNoExpensesOrIncome,
@@ -820,8 +880,10 @@ class _ReportsByCategoryTabBody extends ConsumerWidget {
                             : DateFormat.yMMMM(
                                 localeName,
                               ).format(DateTime(year, month)),
-                        incomeUsd: incomeTotal,
-                        expenseUsd: expenseTotal,
+                        incomeSettledUsd: incScopeSplit.settled,
+                        incomePendingUsd: incScopeSplit.pending,
+                        expenseSettledUsd: expScopeSplit.settled,
+                        expensePendingUsd: expScopeSplit.pending,
                         localeName: localeName,
                         l10n: l10n,
                       ),

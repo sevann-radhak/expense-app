@@ -1,5 +1,6 @@
 import 'package:expense_app/domain/expense.dart';
 import 'package:expense_app/domain/income_entry.dart';
+import 'package:expense_app/domain/payment_settlement.dart';
 
 /// January at index `0`, December at index `11`.
 List<double> monthlyUsdTotalsByCalendarMonth(Iterable<Expense> expenses) {
@@ -23,6 +24,98 @@ List<double> monthlyUsdTotalsByCalendarMonthForIncome(Iterable<IncomeEntry> inco
     }
   }
   return list;
+}
+
+/// January at index `0`. Only rows with [Expense.occurredOn] in [year].
+void monthlyExpenseSettledPendingForYear(
+  Iterable<Expense> expenses,
+  int year,
+  DateTime todayDateOnly,
+  List<double> settledOut,
+  List<double> pendingOut,
+) {
+  assert(settledOut.length == 12 && pendingOut.length == 12);
+  for (var i = 0; i < 12; i++) {
+    settledOut[i] = 0;
+    pendingOut[i] = 0;
+  }
+  for (final e in expenses) {
+    if (e.occurredOn.year != year) {
+      continue;
+    }
+    final m = e.occurredOn.month;
+    if (m < 1 || m > 12) {
+      continue;
+    }
+    final idx = m - 1;
+    if (isEconomicallySettledExpense(e, todayDateOnly)) {
+      settledOut[idx] += e.amountUsd;
+    } else {
+      pendingOut[idx] += e.amountUsd;
+    }
+  }
+}
+
+/// Same as [monthlyExpenseSettledPendingForYear] for [IncomeEntry.receivedOn].
+void monthlyIncomeSettledPendingForYear(
+  Iterable<IncomeEntry> incomes,
+  int year,
+  DateTime todayDateOnly,
+  List<double> settledOut,
+  List<double> pendingOut,
+) {
+  assert(settledOut.length == 12 && pendingOut.length == 12);
+  for (var i = 0; i < 12; i++) {
+    settledOut[i] = 0;
+    pendingOut[i] = 0;
+  }
+  for (final e in incomes) {
+    if (e.receivedOn.year != year) {
+      continue;
+    }
+    final m = e.receivedOn.month;
+    if (m < 1 || m > 12) {
+      continue;
+    }
+    final idx = m - 1;
+    if (isEconomicallySettledIncome(e, todayDateOnly)) {
+      settledOut[idx] += e.amountUsd;
+    } else {
+      pendingOut[idx] += e.amountUsd;
+    }
+  }
+}
+
+({double settled, double pending}) splitExpenseUsdSettledPending(
+  Iterable<Expense> expenses,
+  DateTime todayDateOnly,
+) {
+  var settled = 0.0;
+  var pending = 0.0;
+  for (final e in expenses) {
+    if (isEconomicallySettledExpense(e, todayDateOnly)) {
+      settled += e.amountUsd;
+    } else {
+      pending += e.amountUsd;
+    }
+  }
+  return (settled: settled, pending: pending);
+}
+
+({double settled, double pending}) splitIncomeUsdSettledPending(
+  Iterable<IncomeEntry> incomes,
+  DateTime todayDateOnly,
+) {
+  var settled = 0.0;
+  var pending = 0.0;
+  for (final e in incomes) {
+    if (isEconomicallySettledIncome(e, todayDateOnly)) {
+      settled += e.amountUsd;
+    } else {
+      pending += e.amountUsd;
+    }
+  }
+  return (settled: settled, pending: pending);
 }
 
 /// Sum of [Expense.amountUsd] (already FX-converted at save time).

@@ -129,6 +129,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsChartLegendExpenses => 'Expenses';
 
   @override
+  String get reportsChartLegendIncomeSettled => 'Income — paid/received';
+
+  @override
+  String get reportsChartLegendIncomePending => 'Income — scheduled';
+
+  @override
+  String get reportsChartLegendExpenseSettled => 'Expenses — paid';
+
+  @override
+  String get reportsChartLegendExpensePending => 'Expenses — scheduled';
+
+  @override
+  String get reportsChartCashflowStackFootnote =>
+      'Bars are stacked: lower segment = paid or received (confirmed); upper = still scheduled (not yet confirmed).';
+
+  @override
+  String get reportsChartTooltipPaidReceived => 'Paid/received';
+
+  @override
+  String get reportsChartTooltipStillScheduled => 'Still scheduled';
+
+  @override
   String get reportsChartCashflowSemanticLabel =>
       'Grouped bar chart of monthly income and expenses in U.S. dollars for the selected year.';
 
@@ -808,6 +830,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get expenseFormInstallmentConflictRecurring =>
       'Turn off repeating expense to use installments.';
+
+  @override
+  String get expenseFormSettlementSectionTitle => 'Payment status';
+
+  @override
+  String get expenseFormSettlementPaid => 'Paid';
+
+  @override
+  String get expenseFormSettlementUnpaid => 'Not paid yet';
+
+  @override
+  String get incomeFormSettlementSectionTitle => 'Receipt status';
+
+  @override
+  String get incomeFormSettlementReceived => 'Received';
+
+  @override
+  String get incomeFormSettlementNotReceived => 'Not received yet';
 
   @override
   String get reportsYearCashflowTitle => 'Cash flow (USD)';

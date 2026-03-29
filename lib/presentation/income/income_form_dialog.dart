@@ -267,6 +267,63 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
     final recvDay = calendarDateOnly(_receivedOn);
     final firstOccurrenceSettled =
         makeRecurring && !recvDay.isAfter(calendarDateOnly(today));
+    final editingRecurringRow =
+        widget.initial?.recurringSeriesId?.isNotEmpty == true;
+
+    PaymentExpectationStatus resolvedExpectationStatus;
+    DateTime? resolvedExpectationConfirmedOn;
+    if (editingRecurringRow) {
+      resolvedExpectationStatus = widget.initial!.expectationStatus ??
+          PaymentExpectationStatus.expected;
+      resolvedExpectationConfirmedOn =
+          widget.initial!.expectationConfirmedOn;
+    } else if (makeRecurring) {
+      resolvedExpectationStatus = firstOccurrenceSettled
+          ? PaymentExpectationStatus.confirmedPaid
+          : PaymentExpectationStatus.expected;
+      resolvedExpectationConfirmedOn =
+          firstOccurrenceSettled ? recvDay : null;
+    } else {
+      final initialSt = widget.initial?.expectationStatus;
+      if (initialSt == PaymentExpectationStatus.skipped ||
+          initialSt == PaymentExpectationStatus.waived) {
+        resolvedExpectationStatus = initialSt!;
+        resolvedExpectationConfirmedOn =
+            widget.initial?.expectationConfirmedOn;
+      } else {
+        final editingOneOff = widget.initial != null &&
+            (widget.initial!.recurringSeriesId == null ||
+                widget.initial!.recurringSeriesId!.isEmpty);
+        if (editingOneOff) {
+          resolvedExpectationStatus =
+              widget.initial!.expectationStatus ??
+                  (!recvDay.isAfter(calendarDateOnly(today))
+                      ? PaymentExpectationStatus.confirmedPaid
+                      : PaymentExpectationStatus.expected);
+          if (resolvedExpectationStatus ==
+              PaymentExpectationStatus.expected) {
+            resolvedExpectationConfirmedOn = null;
+          } else {
+            resolvedExpectationConfirmedOn =
+                widget.initial!.expectationConfirmedOn ??
+                    (recvDay.isAfter(calendarDateOnly(today))
+                        ? calendarDateOnly(today)
+                        : recvDay);
+          }
+        } else {
+          final standaloneSettled =
+              !recvDay.isAfter(calendarDateOnly(today));
+          resolvedExpectationStatus = standaloneSettled
+              ? PaymentExpectationStatus.confirmedPaid
+              : PaymentExpectationStatus.expected;
+          resolvedExpectationConfirmedOn = standaloneSettled
+              ? (recvDay.isAfter(calendarDateOnly(today))
+                  ? calendarDateOnly(today)
+                  : recvDay)
+              : null;
+        }
+      }
+    }
 
     final entry = IncomeEntry(
       id: incomeId,
@@ -280,14 +337,8 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
       description: _descriptionController.text.trim(),
       recurringSeriesId: widget.initial?.recurringSeriesId ??
           (makeRecurring ? seriesId : null),
-      expectationStatus: widget.initial?.expectationStatus ??
-          (makeRecurring
-              ? (firstOccurrenceSettled
-                  ? PaymentExpectationStatus.confirmedPaid
-                  : PaymentExpectationStatus.expected)
-              : null),
-      expectationConfirmedOn: widget.initial?.expectationConfirmedOn ??
-          (firstOccurrenceSettled ? recvDay : null),
+      expectationStatus: resolvedExpectationStatus,
+      expectationConfirmedOn: resolvedExpectationConfirmedOn,
     );
 
     try {

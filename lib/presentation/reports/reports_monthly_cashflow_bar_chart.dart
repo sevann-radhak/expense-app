@@ -6,20 +6,67 @@ import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/reports/report_chart_colors.dart';
 
-/// Grouped bars per month: income vs expenses (USD), same inclusion filter as the table.
+BarChartRodData _cashflowStackedRod({
+  required double settled,
+  required double pending,
+  required double maxYTrack,
+  required double width,
+  required double topRadius,
+  required Color settledColor,
+  required Color pendingColor,
+  required Color trackColor,
+}) {
+  final back = BackgroundBarChartRodData(
+    show: true,
+    toY: maxYTrack,
+    color: trackColor,
+  );
+  final total = settled + pending;
+  if (total <= 0) {
+    return BarChartRodData(
+      toY: 0,
+      width: width,
+      color: Colors.transparent,
+      borderSide: BorderSide.none,
+      backDrawRodData: back,
+    );
+  }
+  final items = <BarChartRodStackItem>[];
+  if (settled > 0) {
+    items.add(BarChartRodStackItem(0, settled, settledColor));
+  }
+  if (pending > 0) {
+    items.add(BarChartRodStackItem(settled, total, pendingColor));
+  }
+  return BarChartRodData(
+    toY: total,
+    width: width,
+    color: Colors.transparent,
+    borderRadius: BorderRadius.vertical(top: Radius.circular(topRadius)),
+    borderSide: BorderSide.none,
+    rodStackItems: items,
+    backDrawRodData: back,
+  );
+}
+
+/// Grouped stacked bars per month: income vs expenses (USD), settled vs still scheduled.
 class ReportsMonthlyCashflowBarChart extends StatelessWidget {
   const ReportsMonthlyCashflowBarChart({
     super.key,
     required this.year,
-    required this.monthlyIncomeUsd,
-    required this.monthlyExpenseUsd,
+    required this.monthlyIncomeSettledUsd,
+    required this.monthlyIncomePendingUsd,
+    required this.monthlyExpenseSettledUsd,
+    required this.monthlyExpensePendingUsd,
     required this.localeName,
     required this.l10n,
   });
 
   final int year;
-  final List<double> monthlyIncomeUsd;
-  final List<double> monthlyExpenseUsd;
+  final List<double> monthlyIncomeSettledUsd;
+  final List<double> monthlyIncomePendingUsd;
+  final List<double> monthlyExpenseSettledUsd;
+  final List<double> monthlyExpensePendingUsd;
   final String localeName;
   final AppLocalizations l10n;
 
@@ -30,20 +77,20 @@ class ReportsMonthlyCashflowBarChart extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final incomeGradient = reportChartIncomeBarGradient(scheme);
-    final expenseGradient = reportChartExpenseBarGradient(scheme);
-    final incomeColor = reportChartIncomeBarColor(scheme);
-    final expenseColor = reportChartExpenseBarColor(scheme);
+    final incomeSettled = reportChartIncomeBarColor(scheme);
+    final incomePending = incomeSettled.withValues(alpha: 0.38);
+    final expenseSettled = reportChartExpenseBarColor(scheme);
+    final expensePending = expenseSettled.withValues(alpha: 0.38);
 
     var maxVal = 0.0;
     for (var i = 0; i < 12; i++) {
-      final a = monthlyIncomeUsd[i];
-      final b = monthlyExpenseUsd[i];
-      if (a > maxVal) {
-        maxVal = a;
+      final inc = monthlyIncomeSettledUsd[i] + monthlyIncomePendingUsd[i];
+      final exp = monthlyExpenseSettledUsd[i] + monthlyExpensePendingUsd[i];
+      if (inc > maxVal) {
+        maxVal = inc;
       }
-      if (b > maxVal) {
-        maxVal = b;
+      if (exp > maxVal) {
+        maxVal = exp;
       }
     }
     final maxY = maxVal <= 0 ? 1.0 : maxVal * 1.2;
@@ -89,33 +136,44 @@ class ReportsMonthlyCashflowBarChart extends StatelessWidget {
                   children: [
                     _LegendChip(
                       indicator: BoxDecoration(
-                        gradient: incomeGradient,
+                        color: incomeSettled,
                         borderRadius: BorderRadius.circular(5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: incomeColor.withValues(alpha: 0.22),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
-                      label: l10n.reportsChartLegendIncome,
+                      label: l10n.reportsChartLegendIncomeSettled,
                     ),
                     _LegendChip(
                       indicator: BoxDecoration(
-                        gradient: expenseGradient,
+                        color: incomePending,
                         borderRadius: BorderRadius.circular(5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: expenseColor.withValues(alpha: 0.2),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
-                      label: l10n.reportsChartLegendExpenses,
+                      label: l10n.reportsChartLegendIncomePending,
+                    ),
+                    _LegendChip(
+                      indicator: BoxDecoration(
+                        color: expenseSettled,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      label: l10n.reportsChartLegendExpenseSettled,
+                    ),
+                    _LegendChip(
+                      indicator: BoxDecoration(
+                        color: expensePending,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      label: l10n.reportsChartLegendExpensePending,
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  l10n.reportsChartCashflowStackFootnote,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    height: 1.35,
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
@@ -136,24 +194,52 @@ class ReportsMonthlyCashflowBarChart extends StatelessWidget {
                           if (i < 0 || i > 11) {
                             return null;
                           }
-                          final inc = monthlyIncomeUsd[i];
-                          final exp = monthlyExpenseUsd[i];
                           final m = DateFormat.MMM(
                             localeName,
                           ).format(DateTime(year, i + 1));
-                          final incLine = formatDisplayCurrencyLine(
+                          if (rodIndex == 0) {
+                            final s = monthlyIncomeSettledUsd[i];
+                            final p = monthlyIncomePendingUsd[i];
+                            final sLine = formatDisplayCurrencyLine(
+                              'USD',
+                              s,
+                              localeName,
+                            );
+                            final pLine = formatDisplayCurrencyLine(
+                              'USD',
+                              p,
+                              localeName,
+                            );
+                            final body =
+                                '$m\n${l10n.reportsChartLegendIncome}\n'
+                                '${l10n.reportsChartTooltipPaidReceived}: $sLine\n'
+                                '${l10n.reportsChartTooltipStillScheduled}: $pLine';
+                            return BarTooltipItem(
+                              body,
+                              (textTheme.bodySmall ?? const TextStyle())
+                                  .copyWith(
+                                color: scheme.onInverseSurface,
+                                fontSize: 11,
+                                height: 1.25,
+                              ),
+                            );
+                          }
+                          final s = monthlyExpenseSettledUsd[i];
+                          final p = monthlyExpensePendingUsd[i];
+                          final sLine = formatDisplayCurrencyLine(
                             'USD',
-                            inc,
+                            s,
                             localeName,
                           );
-                          final expLine = formatDisplayCurrencyLine(
+                          final pLine = formatDisplayCurrencyLine(
                             'USD',
-                            exp,
+                            p,
                             localeName,
                           );
                           final body =
-                              '$m\n${l10n.reportsChartLegendIncome}: $incLine\n'
-                              '${l10n.reportsChartLegendExpenses}: $expLine';
+                              '$m\n${l10n.reportsChartLegendExpenses}\n'
+                              '${l10n.reportsChartTooltipPaidReceived}: $sLine\n'
+                              '${l10n.reportsChartTooltipStillScheduled}: $pLine';
                           return BarTooltipItem(
                             body,
                             (textTheme.bodySmall ?? const TextStyle()).copyWith(
@@ -229,31 +315,25 @@ class ReportsMonthlyCashflowBarChart extends StatelessWidget {
                         x: i,
                         barsSpace: 5,
                         barRods: [
-                          BarChartRodData(
-                            toY: monthlyIncomeUsd[i],
-                            gradient: incomeGradient,
+                          _cashflowStackedRod(
+                            settled: monthlyIncomeSettledUsd[i],
+                            pending: monthlyIncomePendingUsd[i],
+                            maxYTrack: maxY,
                             width: 11,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(8),
-                            ),
-                            backDrawRodData: BackgroundBarChartRodData(
-                              show: true,
-                              toY: maxY,
-                              color: trackColor,
-                            ),
+                            topRadius: 8,
+                            settledColor: incomeSettled,
+                            pendingColor: incomePending,
+                            trackColor: trackColor,
                           ),
-                          BarChartRodData(
-                            toY: monthlyExpenseUsd[i],
-                            gradient: expenseGradient,
+                          _cashflowStackedRod(
+                            settled: monthlyExpenseSettledUsd[i],
+                            pending: monthlyExpensePendingUsd[i],
+                            maxYTrack: maxY,
                             width: 11,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(8),
-                            ),
-                            backDrawRodData: BackgroundBarChartRodData(
-                              show: true,
-                              toY: maxY,
-                              color: trackColor,
-                            ),
+                            topRadius: 8,
+                            settledColor: expenseSettled,
+                            pendingColor: expensePending,
+                            trackColor: trackColor,
                           ),
                         ],
                       );
@@ -269,20 +349,24 @@ class ReportsMonthlyCashflowBarChart extends StatelessWidget {
   }
 }
 
-/// Two tall bars: total income vs total expenses for one period (e.g. a month or full year).
+/// Two stacked tall bars: income vs expenses for one period.
 class ReportsPeriodCashflowBarChart extends StatelessWidget {
   const ReportsPeriodCashflowBarChart({
     super.key,
     required this.periodLabel,
-    required this.incomeUsd,
-    required this.expenseUsd,
+    required this.incomeSettledUsd,
+    required this.incomePendingUsd,
+    required this.expenseSettledUsd,
+    required this.expensePendingUsd,
     required this.localeName,
     required this.l10n,
   });
 
   final String periodLabel;
-  final double incomeUsd;
-  final double expenseUsd;
+  final double incomeSettledUsd;
+  final double incomePendingUsd;
+  final double expenseSettledUsd;
+  final double expensePendingUsd;
   final String localeName;
   final AppLocalizations l10n;
 
@@ -293,12 +377,14 @@ class ReportsPeriodCashflowBarChart extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    final incomeGradient = reportChartIncomeBarGradient(scheme);
-    final expenseGradient = reportChartExpenseBarGradient(scheme);
-    final incomeColor = reportChartIncomeBarColor(scheme);
-    final expenseColor = reportChartExpenseBarColor(scheme);
+    final incomeSettled = reportChartIncomeBarColor(scheme);
+    final incomePending = incomeSettled.withValues(alpha: 0.38);
+    final expenseSettled = reportChartExpenseBarColor(scheme);
+    final expensePending = expenseSettled.withValues(alpha: 0.38);
 
-    final maxVal = incomeUsd > expenseUsd ? incomeUsd : expenseUsd;
+    final incomeTotal = incomeSettledUsd + incomePendingUsd;
+    final expenseTotal = expenseSettledUsd + expensePendingUsd;
+    final maxVal = incomeTotal > expenseTotal ? incomeTotal : expenseTotal;
     final maxY = maxVal <= 0 ? 1.0 : maxVal * 1.15;
     final trackColor = scheme.surfaceContainerHighest.withValues(alpha: 0.55);
 
@@ -353,33 +439,44 @@ class ReportsPeriodCashflowBarChart extends StatelessWidget {
                   children: [
                     _LegendChip(
                       indicator: BoxDecoration(
-                        gradient: incomeGradient,
+                        color: incomeSettled,
                         borderRadius: BorderRadius.circular(5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: incomeColor.withValues(alpha: 0.22),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
-                      label: l10n.reportsChartLegendIncome,
+                      label: l10n.reportsChartLegendIncomeSettled,
                     ),
                     _LegendChip(
                       indicator: BoxDecoration(
-                        gradient: expenseGradient,
+                        color: incomePending,
                         borderRadius: BorderRadius.circular(5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: expenseColor.withValues(alpha: 0.2),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
-                      label: l10n.reportsChartLegendExpenses,
+                      label: l10n.reportsChartLegendIncomePending,
+                    ),
+                    _LegendChip(
+                      indicator: BoxDecoration(
+                        color: expenseSettled,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      label: l10n.reportsChartLegendExpenseSettled,
+                    ),
+                    _LegendChip(
+                      indicator: BoxDecoration(
+                        color: expensePending,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      label: l10n.reportsChartLegendExpensePending,
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  l10n.reportsChartCashflowStackFootnote,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    height: 1.35,
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
@@ -397,17 +494,25 @@ class ReportsPeriodCashflowBarChart extends StatelessWidget {
                         getTooltipColor: (_) => scheme.inverseSurface,
                         getTooltipItem: (group, groupIndex, rod, rodIndex) {
                           final isIncome = group.x == 0;
-                          final v = isIncome ? incomeUsd : expenseUsd;
+                          final s = isIncome ? incomeSettledUsd : expenseSettledUsd;
+                          final p = isIncome ? incomePendingUsd : expensePendingUsd;
                           final title = isIncome
                               ? l10n.reportsChartLegendIncome
                               : l10n.reportsChartLegendExpenses;
-                          final line = formatDisplayCurrencyLine(
+                          final sLine = formatDisplayCurrencyLine(
                             'USD',
-                            v,
+                            s,
+                            localeName,
+                          );
+                          final pLine = formatDisplayCurrencyLine(
+                            'USD',
+                            p,
                             localeName,
                           );
                           return BarTooltipItem(
-                            '$title\n$line',
+                            '$title\n'
+                            '${l10n.reportsChartTooltipPaidReceived}: $sLine\n'
+                            '${l10n.reportsChartTooltipStillScheduled}: $pLine',
                             (textTheme.bodySmall ?? const TextStyle()).copyWith(
                               color: scheme.onInverseSurface,
                               fontSize: 12,
@@ -492,36 +597,30 @@ class ReportsPeriodCashflowBarChart extends StatelessWidget {
                       BarChartGroupData(
                         x: 0,
                         barRods: [
-                          BarChartRodData(
-                            toY: incomeUsd,
-                            gradient: incomeGradient,
+                          _cashflowStackedRod(
+                            settled: incomeSettledUsd,
+                            pending: incomePendingUsd,
+                            maxYTrack: maxY,
                             width: 36,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(12),
-                            ),
-                            backDrawRodData: BackgroundBarChartRodData(
-                              show: true,
-                              toY: maxY,
-                              color: trackColor,
-                            ),
+                            topRadius: 12,
+                            settledColor: incomeSettled,
+                            pendingColor: incomePending,
+                            trackColor: trackColor,
                           ),
                         ],
                       ),
                       BarChartGroupData(
                         x: 1,
                         barRods: [
-                          BarChartRodData(
-                            toY: expenseUsd,
-                            gradient: expenseGradient,
+                          _cashflowStackedRod(
+                            settled: expenseSettledUsd,
+                            pending: expensePendingUsd,
+                            maxYTrack: maxY,
                             width: 36,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(12),
-                            ),
-                            backDrawRodData: BackgroundBarChartRodData(
-                              show: true,
-                              toY: maxY,
-                              color: trackColor,
-                            ),
+                            topRadius: 12,
+                            settledColor: expenseSettled,
+                            pendingColor: expensePending,
+                            trackColor: trackColor,
                           ),
                         ],
                       ),

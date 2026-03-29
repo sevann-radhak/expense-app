@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
+import 'package:expense_app/presentation/formatting/payment_expectation_display.dart';
 import 'package:expense_app/presentation/incomes/recurring_income_ui.dart';
 import 'package:expense_app/presentation/theme/category_accent_colors.dart';
+import 'package:expense_app/presentation/widgets/list_row_settlement_segmented.dart';
 
 class IncomeSummaryListTile extends StatelessWidget {
   const IncomeSummaryListTile({
@@ -17,6 +19,7 @@ class IncomeSummaryListTile extends StatelessWidget {
     this.showRecurringOverflowMenu = false,
     this.onRecurringMenuAction,
     this.emphasizeAsScheduled = false,
+    this.onSettlementToggle,
   });
 
   final IncomeEntry entry;
@@ -27,6 +30,9 @@ class IncomeSummaryListTile extends StatelessWidget {
   final bool showRecurringOverflowMenu;
   final void Function(RecurringIncomeTileAction action)? onRecurringMenuAction;
   final bool emphasizeAsScheduled;
+
+  /// Paid/received vs expected; shown on the row when non-null and line is not skipped/waived.
+  final Future<void> Function(bool settled)? onSettlementToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -45,10 +51,8 @@ class IncomeSummaryListTile extends StatelessWidget {
       localeName,
     );
     final note = entry.description.trim();
-    final recurring = entry.recurringSeriesId != null &&
-        entry.recurringSeriesId!.isNotEmpty;
-    final expectationChip =
-        recurring ? recurringIncomeExpectationChipLabel(entry, l10n) : null;
+    final today = calendarTodayLocal();
+    final expectationChip = incomeExpectationChipLabel(entry, l10n, today);
 
     final menu = showRecurringOverflowMenu && onRecurringMenuAction != null
         ? PopupMenuButton<RecurringIncomeTileAction>(
@@ -74,6 +78,12 @@ class IncomeSummaryListTile extends StatelessWidget {
             ],
           )
         : null;
+
+    final showSettlementControl = onSettlementToggle != null &&
+        showInlineSettlementToggleForIncome(entry);
+    final settlementSelected =
+        entry.effectiveExpectationStatus ==
+            PaymentExpectationStatus.confirmedPaid;
 
     final inner = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -130,6 +140,16 @@ class IncomeSummaryListTile extends StatelessWidget {
               ],
             ),
           ),
+          if (showSettlementControl)
+            Padding(
+              padding: const EdgeInsets.only(left: 8, right: 2),
+              child: ListRowSettlementSegmented(
+                settled: settlementSelected,
+                settledLabel: l10n.incomeFormSettlementReceived,
+                unsettledLabel: l10n.paymentExpectationExpectedShort,
+                onChanged: (v) => onSettlementToggle!(v),
+              ),
+            ),
           ?menu,
           const SizedBox(width: 4),
           Row(

@@ -4,7 +4,7 @@
 import 'package:drift/drift.dart';
 
 import 'package:expense_app/data/local/app_database.dart';
-import 'package:expense_app/domain/expense.dart';
+import 'package:expense_app/domain/domain.dart';
 
 /// Calendar year used for all demo expense dates (stable for tests and reports).
 const int kExampleDemoExpenseYear = 2025;
@@ -22,6 +22,33 @@ Future<void> populateExampleExpenses(AppDatabase db) async {
       await db.into(db.expenses).insert(companion);
     }
   });
+  await syncDemoExpectationsWithLocalToday(db);
+}
+
+/// Marks demo income/expense rows on or before local today as confirmed paid/received.
+/// Idempotent; run after demo inserts so materialized series and rows stay consistent.
+Future<void> syncDemoExpectationsWithLocalToday(AppDatabase db) async {
+  final todayIso = ExpenseDates.toStorageDate(calendarTodayLocal());
+  final confirmed = PaymentExpectationStatus.confirmedPaid.storageName;
+  try {
+    await db.customStatement(
+      'UPDATE expenses SET payment_expectation_status = \'$confirmed\', '
+      'payment_expectation_confirmed_on = occurred_on '
+      'WHERE id LIKE \'exp_demo%\' AND occurred_on <= \'$todayIso\'',
+    );
+    await db.customStatement(
+      'UPDATE income_entries SET expectation_status = \'$confirmed\', '
+      'expectation_confirmed_on = received_on '
+      'WHERE (id LIKE \'inc_demo%\' OR id LIKE \'sir_inc_demo%\') '
+      'AND received_on <= \'$todayIso\'',
+    );
+  } catch (e) {
+    final msg = e.toString().toLowerCase();
+    if (msg.contains('no such table') || msg.contains('no such column')) {
+      return;
+    }
+    rethrow;
+  }
 }
 
 List<ExpensesCompanion> _buildExampleExpenseRows() {
@@ -42,12 +69,14 @@ List<ExpensesCompanion> _buildExampleExpenseRows() {
     seq++;
     final id = 'exp_demo_${seq.toString().padLeft(3, '0')}';
     final usd = amountOriginal * manualFxRateToUsd;
+    final rowDate = DateTime(kExampleDemoExpenseYear, month, day);
+    final today = calendarTodayLocal();
+    final settled =
+        !calendarDateOnly(rowDate).isAfter(calendarDateOnly(today));
     out.add(
       ExpensesCompanion.insert(
         id: id,
-        occurredOn: ExpenseDates.toStorageDate(
-          DateTime(kExampleDemoExpenseYear, month, day),
-        ),
+        occurredOn: ExpenseDates.toStorageDate(rowDate),
         categoryId: categoryId,
         subcategoryId: subcategoryId,
         amountOriginal: amountOriginal,
@@ -56,6 +85,14 @@ List<ExpensesCompanion> _buildExampleExpenseRows() {
         amountUsd: usd,
         paidWithCreditCard: Value(paidWithCreditCard),
         description: Value(description),
+        paymentExpectationStatus: Value(
+          settled
+              ? PaymentExpectationStatus.confirmedPaid.storageName
+              : PaymentExpectationStatus.expected.storageName,
+        ),
+        paymentExpectationConfirmedOn: settled
+            ? Value(ExpenseDates.toStorageDate(calendarDateOnly(rowDate)))
+            : const Value.absent(),
       ),
     );
   }

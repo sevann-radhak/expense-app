@@ -21,6 +21,7 @@ export 'materialized_recurrence_expectation.dart';
 export 'installment_plan_repository.dart';
 export 'partial_payment.dart';
 export 'payment_expectation_status.dart';
+export 'payment_settlement.dart';
 export 'payment_instrument.dart';
 export 'recurrence_expansion.dart';
 export 'recurrence_rule.dart';

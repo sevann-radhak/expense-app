@@ -743,6 +743,8 @@ class AppDatabase extends _$AppDatabase {
   /// Ensures exactly one [PaymentInstruments.isDefault] when any row exists and none set.
   /// Recurring rows dated on or before local today that are still [expected] are
   /// marked confirmed (paid/received) with confirmation date = occurrence date.
+  /// Standalone rows (no series) with null status and date on or before today are
+  /// marked confirmed the same way (legacy one-off rows).
   /// Idempotent; repairs books created before materialization defaulted past rows.
   Future<void> backfillRecurringPastExpectationsSettled() async {
     final todayIso = ExpenseDates.toStorageDate(calendarTodayLocal());
@@ -760,6 +762,20 @@ class AppDatabase extends _$AppDatabase {
         'payment_expectation_confirmed_on = occurred_on '
         'WHERE recurring_series_id IS NOT NULL AND TRIM(recurring_series_id) != \'\' '
         'AND (payment_expectation_status IS NULL OR payment_expectation_status = \'expected\') '
+        'AND occurred_on <= \'$todayIso\'',
+      );
+      await customStatement(
+        'UPDATE income_entries SET expectation_status = \'$confirmed\', '
+        'expectation_confirmed_on = received_on '
+        'WHERE (recurring_series_id IS NULL OR TRIM(recurring_series_id) = \'\') '
+        'AND expectation_status IS NULL '
+        'AND received_on <= \'$todayIso\'',
+      );
+      await customStatement(
+        'UPDATE expenses SET payment_expectation_status = \'$confirmed\', '
+        'payment_expectation_confirmed_on = occurred_on '
+        'WHERE (recurring_series_id IS NULL OR TRIM(recurring_series_id) = \'\') '
+        'AND payment_expectation_status IS NULL '
         'AND occurred_on <= \'$todayIso\'',
       );
     } catch (e) {

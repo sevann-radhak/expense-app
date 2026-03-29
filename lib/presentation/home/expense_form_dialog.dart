@@ -308,8 +308,12 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
       final perUsd = Expense.computeUsd(amount, manualFx);
       const intervalMonths = 1;
       final legs = <Expense>[];
+      final todayLeg = calendarTodayLocal();
       for (var i = 0; i < n; i++) {
         final d = ExpenseDates.addCalendarMonths(_occurredOn, i * intervalMonths);
+        final dOnly = calendarDateOnly(d);
+        final legSettled =
+            !dOnly.isAfter(calendarDateOnly(todayLeg));
         final suffix = ' (${i + 1}/$n)';
         final desc = baseDesc.isEmpty ? suffix.trim() : '$baseDesc$suffix';
         legs.add(
@@ -327,6 +331,11 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
             paymentInstrumentId: _paymentInstrumentId,
             installmentPlanId: planId,
             installmentIndex: i + 1,
+            paymentExpectationStatus: legSettled
+                ? PaymentExpectationStatus.confirmedPaid
+                : PaymentExpectationStatus.expected,
+            paymentExpectationConfirmedOn:
+                legSettled ? dOnly : null,
           ),
         );
       }
@@ -389,6 +398,64 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
     final occDay = calendarDateOnly(_occurredOn);
     final firstOccurrenceSettled =
         makeRecurring && !occDay.isAfter(calendarDateOnly(today));
+    final editingRecurringRow =
+        widget.initial?.recurringSeriesId?.isNotEmpty == true;
+
+    PaymentExpectationStatus resolvedExpectationStatus;
+    DateTime? resolvedExpectationConfirmedOn;
+    if (editingRecurringRow) {
+      resolvedExpectationStatus =
+          widget.initial!.paymentExpectationStatus ??
+              PaymentExpectationStatus.expected;
+      resolvedExpectationConfirmedOn =
+          widget.initial!.paymentExpectationConfirmedOn;
+    } else if (makeRecurring) {
+      resolvedExpectationStatus = firstOccurrenceSettled
+          ? PaymentExpectationStatus.confirmedPaid
+          : PaymentExpectationStatus.expected;
+      resolvedExpectationConfirmedOn =
+          firstOccurrenceSettled ? occDay : null;
+    } else {
+      final initialSt = widget.initial?.paymentExpectationStatus;
+      if (initialSt == PaymentExpectationStatus.skipped ||
+          initialSt == PaymentExpectationStatus.waived) {
+        resolvedExpectationStatus = initialSt!;
+        resolvedExpectationConfirmedOn =
+            widget.initial?.paymentExpectationConfirmedOn;
+      } else {
+        final editingOneOff = widget.initial != null &&
+            (widget.initial!.recurringSeriesId == null ||
+                widget.initial!.recurringSeriesId!.isEmpty);
+        if (editingOneOff) {
+          resolvedExpectationStatus =
+              widget.initial!.paymentExpectationStatus ??
+                  (!occDay.isAfter(calendarDateOnly(today))
+                      ? PaymentExpectationStatus.confirmedPaid
+                      : PaymentExpectationStatus.expected);
+          if (resolvedExpectationStatus ==
+              PaymentExpectationStatus.expected) {
+            resolvedExpectationConfirmedOn = null;
+          } else {
+            resolvedExpectationConfirmedOn =
+                widget.initial!.paymentExpectationConfirmedOn ??
+                    (occDay.isAfter(calendarDateOnly(today))
+                        ? calendarDateOnly(today)
+                        : occDay);
+          }
+        } else {
+          final standaloneSettled =
+              !occDay.isAfter(calendarDateOnly(today));
+          resolvedExpectationStatus = standaloneSettled
+              ? PaymentExpectationStatus.confirmedPaid
+              : PaymentExpectationStatus.expected;
+          resolvedExpectationConfirmedOn = standaloneSettled
+              ? (occDay.isAfter(calendarDateOnly(today))
+                  ? calendarDateOnly(today)
+                  : occDay)
+              : null;
+        }
+      }
+    }
 
     final expense = Expense(
       id: expenseId,
@@ -405,15 +472,8 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
           _paidWithCreditCard ? _paymentInstrumentId : null,
       recurringSeriesId: widget.initial?.recurringSeriesId ??
           (makeRecurring ? seriesId : null),
-      paymentExpectationStatus: widget.initial?.paymentExpectationStatus ??
-          (makeRecurring
-              ? (firstOccurrenceSettled
-                  ? PaymentExpectationStatus.confirmedPaid
-                  : PaymentExpectationStatus.expected)
-              : null),
-      paymentExpectationConfirmedOn:
-          widget.initial?.paymentExpectationConfirmedOn ??
-              (firstOccurrenceSettled ? occDay : null),
+      paymentExpectationStatus: resolvedExpectationStatus,
+      paymentExpectationConfirmedOn: resolvedExpectationConfirmedOn,
     );
 
     try {

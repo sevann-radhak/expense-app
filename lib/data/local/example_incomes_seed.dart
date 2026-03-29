@@ -49,8 +49,9 @@ Future<void> populateExampleIncomes(AppDatabase db) async {
   );
   await recurringRepo.upsertAndRematerialize(
     series,
-    DateTime(kExampleDemoExpenseYear, 10, 1),
+    calendarTodayLocal(),
   );
+  await syncDemoExpectationsWithLocalToday(db);
 }
 
 List<IncomeEntriesCompanion> _standaloneRows() {
@@ -67,9 +68,13 @@ List<IncomeEntriesCompanion> _standaloneRows() {
     String description,
   ) {
     final usd = amountOriginal * fx;
+    final rowDate = DateTime(y, month, day);
+    final today = calendarTodayLocal();
+    final settled =
+        !calendarDateOnly(rowDate).isAfter(calendarDateOnly(today));
     return IncomeEntriesCompanion.insert(
       id: id,
-      receivedOn: ExpenseDates.toStorageDate(DateTime(y, month, day)),
+      receivedOn: ExpenseDates.toStorageDate(rowDate),
       incomeCategoryId: categoryId,
       incomeSubcategoryId: subId,
       amountOriginal: amountOriginal,
@@ -77,6 +82,14 @@ List<IncomeEntriesCompanion> _standaloneRows() {
       manualFxRateToUsd: Value(fx),
       amountUsd: usd,
       description: Value(description),
+      expectationStatus: Value(
+        settled
+            ? PaymentExpectationStatus.confirmedPaid.storageName
+            : PaymentExpectationStatus.expected.storageName,
+      ),
+      expectationConfirmedOn: settled
+          ? Value(ExpenseDates.toStorageDate(calendarDateOnly(rowDate)))
+          : const Value.absent(),
     );
   }
 

@@ -130,10 +130,8 @@ class IncomeScreen extends ConsumerWidget {
                           categoryName[e.incomeCategoryId] ?? l10n.taxonomyUnknownLabel,
                       subcategoryName: subcategoryName[e.incomeSubcategoryId] ??
                           l10n.taxonomyUnknownLabel,
-                      emphasizeAsScheduled: !isRealizedOnLocalCalendar(
-                        e.receivedOn,
-                        today,
-                      ),
+                      emphasizeAsScheduled:
+                          !isEconomicallySettledIncome(e, today),
                       showRecurringOverflowMenu:
                           e.recurringSeriesId != null &&
                               e.recurringSeriesId!.isNotEmpty &&
@@ -150,6 +148,23 @@ class IncomeScreen extends ConsumerWidget {
                           e,
                           action,
                         );
+                      },
+                      onSettlementToggle: (settled) async {
+                        try {
+                          await ref.read(incomeRepositoryProvider).update(
+                                withIncomeSettlementChoice(
+                                  e,
+                                  settled,
+                                  calendarTodayLocal(),
+                                ),
+                              );
+                        } on Object catch (err) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('$err')),
+                            );
+                          }
+                        }
                       },
                       onTap: () {
                         showDialog<void>(

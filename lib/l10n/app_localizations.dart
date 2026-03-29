@@ -322,6 +322,48 @@ abstract class AppLocalizations {
   /// **'Expenses'**
   String get reportsChartLegendExpenses;
 
+  /// No description provided for @reportsChartLegendIncomeSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Income — paid/received'**
+  String get reportsChartLegendIncomeSettled;
+
+  /// No description provided for @reportsChartLegendIncomePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Income — scheduled'**
+  String get reportsChartLegendIncomePending;
+
+  /// No description provided for @reportsChartLegendExpenseSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses — paid'**
+  String get reportsChartLegendExpenseSettled;
+
+  /// No description provided for @reportsChartLegendExpensePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses — scheduled'**
+  String get reportsChartLegendExpensePending;
+
+  /// Explains stacked cashflow bars on Reports.
+  ///
+  /// In en, this message translates to:
+  /// **'Bars are stacked: lower segment = paid or received (confirmed); upper = still scheduled (not yet confirmed).'**
+  String get reportsChartCashflowStackFootnote;
+
+  /// No description provided for @reportsChartTooltipPaidReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid/received'**
+  String get reportsChartTooltipPaidReceived;
+
+  /// No description provided for @reportsChartTooltipStillScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Still scheduled'**
+  String get reportsChartTooltipStillScheduled;
+
   /// Accessibility label for the annual cashflow bar chart.
   ///
   /// In en, this message translates to:
@@ -1525,6 +1567,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Turn off repeating expense to use installments.'**
   String get expenseFormInstallmentConflictRecurring;
+
+  /// No description provided for @expenseFormSettlementSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment status'**
+  String get expenseFormSettlementSectionTitle;
+
+  /// No description provided for @expenseFormSettlementPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get expenseFormSettlementPaid;
+
+  /// No description provided for @expenseFormSettlementUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Not paid yet'**
+  String get expenseFormSettlementUnpaid;
+
+  /// No description provided for @incomeFormSettlementSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt status'**
+  String get incomeFormSettlementSectionTitle;
+
+  /// No description provided for @incomeFormSettlementReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get incomeFormSettlementReceived;
+
+  /// No description provided for @incomeFormSettlementNotReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Not received yet'**
+  String get incomeFormSettlementNotReceived;
 
   /// Heading for annual income vs expense summary.
   ///

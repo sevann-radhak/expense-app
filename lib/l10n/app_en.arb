@@ -567,7 +567,10 @@
   "recurringIncomeSeriesEditTitle": "Edit recurring income",
   "incomeFormMakeRecurringLabel": "Make repeating income",
   "incomeFromRecurringBanner": "This line is from a repeating income series. Choose whether amount, categories, FX, and notes apply to this date only or to this date and all later materialized rows (earlier rows and the series default note in Settings stay unchanged for notes). Use the row menu to skip or delete.",
-  "incomeRecurringMenuTooltip": "More actions for this scheduled income",
+  "incomeListTileMenuTooltip": "More options for this income",
+  "@incomeListTileMenuTooltip": {
+    "description": "Tooltip on the income row overflow (three-dot) menu."
+  },
   "recurringTileActionUpdate": "Update…",
   "recurringTileActionDelete": "Delete…",
   "recurringDeleteScopeTitle": "Delete scheduled occurrence",

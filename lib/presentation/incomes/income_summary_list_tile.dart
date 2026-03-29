@@ -15,9 +15,7 @@ class IncomeSummaryListTile extends StatelessWidget {
     required this.subcategoryName,
     super.key,
     this.categoryId,
-    this.onTap,
-    this.showRecurringOverflowMenu = false,
-    this.onRecurringMenuAction,
+    this.onMenuAction,
     this.emphasizeAsScheduled = false,
     this.onSettlementToggle,
   });
@@ -26,9 +24,10 @@ class IncomeSummaryListTile extends StatelessWidget {
   final String categoryName;
   final String subcategoryName;
   final String? categoryId;
-  final VoidCallback? onTap;
-  final bool showRecurringOverflowMenu;
-  final void Function(RecurringIncomeTileAction action)? onRecurringMenuAction;
+
+  /// Edit (always); skip/delete when the row is part of a recurring series.
+  final void Function(IncomeSummaryTileMenuAction action)? onMenuAction;
+
   final bool emphasizeAsScheduled;
 
   /// Paid/received vs expected; shown on the row when non-null and line is not skipped/waived.
@@ -54,23 +53,28 @@ class IncomeSummaryListTile extends StatelessWidget {
     final today = calendarTodayLocal();
     final expectationChip = incomeExpectationChipLabel(entry, l10n, today);
 
-    final menu = showRecurringOverflowMenu && onRecurringMenuAction != null
-        ? PopupMenuButton<RecurringIncomeTileAction>(
-            tooltip: l10n.incomeRecurringMenuTooltip,
-            onSelected: onRecurringMenuAction,
+    final hasRecurring = entry.recurringSeriesId != null &&
+        entry.recurringSeriesId!.isNotEmpty;
+
+    final menu = onMenuAction != null
+        ? PopupMenuButton<IncomeSummaryTileMenuAction>(
+            tooltip: l10n.incomeListTileMenuTooltip,
+            onSelected: onMenuAction,
             itemBuilder: (ctx) => [
               PopupMenuItem(
-                value: RecurringIncomeTileAction.update,
-                child: Text(l10n.recurringTileActionUpdate),
+                value: IncomeSummaryTileMenuAction.edit,
+                child: Text(l10n.recurringSeriesEdit),
               ),
-              PopupMenuItem(
-                value: RecurringIncomeTileAction.skip,
-                child: Text(l10n.recurringActionSkip),
-              ),
-              PopupMenuItem(
-                value: RecurringIncomeTileAction.delete,
-                child: Text(l10n.recurringTileActionDelete),
-              ),
+              if (hasRecurring) ...[
+                PopupMenuItem(
+                  value: IncomeSummaryTileMenuAction.skip,
+                  child: Text(l10n.recurringActionSkip),
+                ),
+                PopupMenuItem(
+                  value: IncomeSummaryTileMenuAction.delete,
+                  child: Text(l10n.recurringTileActionDelete),
+                ),
+              ],
             ],
           )
         : null;
@@ -158,23 +162,6 @@ class IncomeSummaryListTile extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(usdLabel, style: theme.textTheme.titleSmall),
-              if (onTap != null) ...[
-                const SizedBox(width: 4),
-                IconButton(
-                  tooltip: l10n.recurringSeriesEdit,
-                  icon: Icon(
-                    Icons.edit_outlined,
-                    color: theme.colorScheme.primary,
-                  ),
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
-                    minWidth: 36,
-                    minHeight: 36,
-                  ),
-                  onPressed: onTap,
-                ),
-              ],
               if (menu != null) ...[
                 const SizedBox(width: 2),
                 menu,
@@ -185,20 +172,12 @@ class IncomeSummaryListTile extends StatelessWidget {
       ),
     );
 
-    final child = Opacity(
-      opacity: emphasizeAsScheduled ? 0.82 : 1,
-      child: inner,
-    );
-
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      child: onTap == null
-          ? child
-          : InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(12),
-              child: child,
-            ),
+      child: Opacity(
+        opacity: emphasizeAsScheduled ? 0.82 : 1,
+        child: inner,
+      ),
     );
   }
 }

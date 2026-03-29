@@ -1244,11 +1244,11 @@ abstract class AppLocalizations {
   /// **'This line is from a repeating income series. Choose whether amount, categories, FX, and notes apply to this date only or to this date and all later materialized rows (earlier rows and the series default note in Settings stay unchanged for notes). Use the row menu to skip or delete.'**
   String get incomeFromRecurringBanner;
 
-  /// No description provided for @incomeRecurringMenuTooltip.
+  /// Tooltip on the income row overflow (three-dot) menu.
   ///
   /// In en, this message translates to:
-  /// **'More actions for this scheduled income'**
-  String get incomeRecurringMenuTooltip;
+  /// **'More options for this income'**
+  String get incomeListTileMenuTooltip;
 
   /// No description provided for @recurringTileActionUpdate.
   ///

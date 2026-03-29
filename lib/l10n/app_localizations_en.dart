@@ -650,8 +650,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'This line is from a repeating income series. Choose whether amount, categories, FX, and notes apply to this date only or to this date and all later materialized rows (earlier rows and the series default note in Settings stay unchanged for notes). Use the row menu to skip or delete.';
 
   @override
-  String get incomeRecurringMenuTooltip =>
-      'More actions for this scheduled income';
+  String get incomeListTileMenuTooltip => 'More options for this income';
 
   @override
   String get recurringTileActionUpdate => 'Update…';

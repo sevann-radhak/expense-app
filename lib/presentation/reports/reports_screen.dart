@@ -11,7 +11,6 @@ import 'package:expense_app/presentation/expenses/expense_summary_list_tile.dart
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/home/expense_form_dialog.dart';
 import 'package:expense_app/presentation/home/recurring_expense_menu_handler.dart';
-import 'package:expense_app/presentation/income/income_form_dialog.dart';
 import 'package:expense_app/presentation/incomes/income_summary_list_tile.dart';
 import 'package:expense_app/presentation/incomes/recurring_income_menu_handler.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
@@ -639,10 +638,8 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                                 l10n.taxonomyUnknownLabel,
                         emphasizeAsScheduled:
                             !isEconomicallySettledIncome(e, today),
-                        showRecurringOverflowMenu: e.recurringSeriesId != null &&
-                            e.recurringSeriesId!.isNotEmpty,
-                        onRecurringMenuAction: (action) {
-                          handleRecurringIncomeTileAction(
+                        onMenuAction: (action) {
+                          handleIncomeSummaryTileMenuAction(
                             context,
                             ref,
                             e,
@@ -665,12 +662,6 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                               );
                             }
                           }
-                        },
-                        onTap: () {
-                          showDialog<void>(
-                            context: context,
-                            builder: (ctx) => IncomeFormDialog(initial: e),
-                          );
                         },
                       ),
                     ),

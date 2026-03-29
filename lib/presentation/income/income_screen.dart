@@ -132,10 +132,8 @@ class IncomeScreen extends ConsumerWidget {
                           l10n.taxonomyUnknownLabel,
                       emphasizeAsScheduled:
                           !isEconomicallySettledIncome(e, today),
-                      showRecurringOverflowMenu: e.recurringSeriesId != null &&
-                          e.recurringSeriesId!.isNotEmpty,
-                      onRecurringMenuAction: (action) {
-                        handleRecurringIncomeTileAction(
+                      onMenuAction: (action) {
+                        handleIncomeSummaryTileMenuAction(
                           context,
                           ref,
                           e,
@@ -158,12 +156,6 @@ class IncomeScreen extends ConsumerWidget {
                             );
                           }
                         }
-                      },
-                      onTap: () {
-                        showDialog<void>(
-                          context: context,
-                          builder: (ctx) => IncomeFormDialog(initial: e),
-                        );
                       },
                     ),
                   ),

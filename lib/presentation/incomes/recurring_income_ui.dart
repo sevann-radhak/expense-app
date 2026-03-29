@@ -1,9 +1,9 @@
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 
-enum RecurringIncomeTileAction {
-  /// Opens the same editor as tapping the row (paid/received uses the row control).
-  update,
+enum IncomeSummaryTileMenuAction {
+  /// Opens the income form (this occurrence).
+  edit,
   skip,
   delete,
 }

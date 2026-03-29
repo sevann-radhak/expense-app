@@ -7,17 +7,17 @@ import 'package:expense_app/presentation/incomes/recurring_income_ui.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 import 'package:expense_app/presentation/recurring/recurring_occurrence_scope_dialogs.dart';
 
-Future<void> handleRecurringIncomeTileAction(
+Future<void> handleIncomeSummaryTileMenuAction(
   BuildContext context,
   WidgetRef ref,
   IncomeEntry entry,
-  RecurringIncomeTileAction action,
+  IncomeSummaryTileMenuAction action,
 ) async {
   final repo = ref.read(incomeRepositoryProvider);
   final seriesRepo = ref.read(recurringIncomeSeriesRepositoryProvider);
   final today = calendarTodayLocal();
   switch (action) {
-    case RecurringIncomeTileAction.update:
+    case IncomeSummaryTileMenuAction.edit:
       if (!context.mounted) {
         return;
       }
@@ -26,7 +26,7 @@ Future<void> handleRecurringIncomeTileAction(
         builder: (ctx) => IncomeFormDialog(initial: entry),
       );
       break;
-    case RecurringIncomeTileAction.skip:
+    case IncomeSummaryTileMenuAction.skip:
       await repo.update(
         entry.copyWith(
           expectationStatus: PaymentExpectationStatus.skipped,
@@ -34,7 +34,7 @@ Future<void> handleRecurringIncomeTileAction(
         ),
       );
       break;
-    case RecurringIncomeTileAction.delete:
+    case IncomeSummaryTileMenuAction.delete:
       if (!context.mounted) {
         return;
       }

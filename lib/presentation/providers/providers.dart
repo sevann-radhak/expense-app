@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:expense_app/data/local/app_database.dart';
 import 'package:expense_app/data/local/app_database_reset.dart';
+import 'package:expense_app/data/local/example_expenses_seed.dart';
 import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/data/local/drift_category_repository.dart';
 import 'package:expense_app/data/local/drift_expense_repository.dart';
@@ -28,6 +29,11 @@ final defaultFxCatalogProvider = FutureProvider<DefaultFxCatalog>((ref) {
 Future<void> resetLocalAppDatabase(WidgetRef ref) async {
   final db = ref.read(appDatabaseProvider);
   await resetLocalDatabaseToInitialState(db);
+}
+
+/// Development / QA: insert removable demo expenses ([populateExampleExpenses]).
+Future<void> populateExampleDemoData(WidgetRef ref) async {
+  await populateExampleExpenses(ref.read(appDatabaseProvider));
 }
 
 /// First day of the currently selected calendar month (local).

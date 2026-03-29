@@ -303,4 +303,27 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsResetDataSuccess =>
       'Local database reset to initial seed.';
+
+  @override
+  String get settingsPopulateExampleDataSectionTitle => 'Demo data';
+
+  @override
+  String get settingsPopulateExampleDataDescription =>
+      'Adds about one year of sample expenses (mixed currencies) for testing reports. Removes any previous demo rows (ids starting with exp_demo). Your categories are not changed.';
+
+  @override
+  String get settingsPopulateExampleDataButton => 'Populate example data';
+
+  @override
+  String get settingsPopulateExampleDataTitle => 'Add example expenses?';
+
+  @override
+  String get settingsPopulateExampleDataMessage =>
+      'This inserts demo transactions for reports QA. Existing demo rows are replaced; other expenses are kept.';
+
+  @override
+  String get settingsPopulateExampleDataConfirm => 'Populate';
+
+  @override
+  String get settingsPopulateExampleDataSuccess => 'Example data loaded.';
 }

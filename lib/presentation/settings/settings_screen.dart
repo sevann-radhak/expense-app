@@ -62,6 +62,60 @@ class SettingsScreen extends ConsumerWidget {
                   icon: const Icon(Icons.delete_forever_outlined),
                   label: Text(l10n.settingsResetDataButton),
                 ),
+                const SizedBox(height: 24),
+                Text(
+                  l10n.settingsPopulateExampleDataSectionTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.settingsPopulateExampleDataDescription,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final ok = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(l10n.settingsPopulateExampleDataTitle),
+                        content: Text(l10n.settingsPopulateExampleDataMessage),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: Text(l10n.cancel),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: Text(l10n.settingsPopulateExampleDataConfirm),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (ok == true && context.mounted) {
+                      try {
+                        await populateExampleDemoData(ref);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.settingsPopulateExampleDataSuccess),
+                            ),
+                          );
+                        }
+                      } on Object catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('$e')),
+                          );
+                        }
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.playlist_add_outlined),
+                  label: Text(l10n.settingsPopulateExampleDataButton),
+                ),
               ],
             ),
           ),

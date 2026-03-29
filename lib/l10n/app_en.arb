@@ -248,5 +248,33 @@
   "settingsResetDataMessage": "This deletes every expense and resets categories to the built-in list (including Other). This cannot be undone.",
   "settingsResetDataButton": "Reset database (dev)",
   "settingsResetDataConfirm": "Reset everything",
-  "settingsResetDataSuccess": "Local database reset to initial seed."
+  "settingsResetDataSuccess": "Local database reset to initial seed.",
+  "settingsPopulateExampleDataSectionTitle": "Demo data",
+  "@settingsPopulateExampleDataSectionTitle": {
+    "description": "Heading above the optional demo expense loader in Settings."
+  },
+  "settingsPopulateExampleDataDescription": "Adds about one year of sample expenses (mixed currencies) for testing reports. Removes any previous demo rows (ids starting with exp_demo). Your categories are not changed.",
+  "@settingsPopulateExampleDataDescription": {
+    "description": "Explains demo populate behavior in Settings."
+  },
+  "settingsPopulateExampleDataButton": "Populate example data",
+  "@settingsPopulateExampleDataButton": {
+    "description": "Settings button to insert demo expenses."
+  },
+  "settingsPopulateExampleDataTitle": "Add example expenses?",
+  "@settingsPopulateExampleDataTitle": {
+    "description": "Confirm dialog title for demo data."
+  },
+  "settingsPopulateExampleDataMessage": "This inserts demo transactions for reports QA. Existing demo rows are replaced; other expenses are kept.",
+  "@settingsPopulateExampleDataMessage": {
+    "description": "Confirm dialog body for demo data."
+  },
+  "settingsPopulateExampleDataConfirm": "Populate",
+  "@settingsPopulateExampleDataConfirm": {
+    "description": "Confirm action for demo populate."
+  },
+  "settingsPopulateExampleDataSuccess": "Example data loaded.",
+  "@settingsPopulateExampleDataSuccess": {
+    "description": "Snackbar after demo populate succeeds."
+  }
 }

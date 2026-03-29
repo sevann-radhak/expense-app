@@ -639,6 +639,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Local database reset to initial seed.'**
   String get settingsResetDataSuccess;
+
+  /// Heading above the optional demo expense loader in Settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo data'**
+  String get settingsPopulateExampleDataSectionTitle;
+
+  /// Explains demo populate behavior in Settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds about one year of sample expenses (mixed currencies) for testing reports. Removes any previous demo rows (ids starting with exp_demo). Your categories are not changed.'**
+  String get settingsPopulateExampleDataDescription;
+
+  /// Settings button to insert demo expenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Populate example data'**
+  String get settingsPopulateExampleDataButton;
+
+  /// Confirm dialog title for demo data.
+  ///
+  /// In en, this message translates to:
+  /// **'Add example expenses?'**
+  String get settingsPopulateExampleDataTitle;
+
+  /// Confirm dialog body for demo data.
+  ///
+  /// In en, this message translates to:
+  /// **'This inserts demo transactions for reports QA. Existing demo rows are replaced; other expenses are kept.'**
+  String get settingsPopulateExampleDataMessage;
+
+  /// Confirm action for demo populate.
+  ///
+  /// In en, this message translates to:
+  /// **'Populate'**
+  String get settingsPopulateExampleDataConfirm;
+
+  /// Snackbar after demo populate succeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Example data loaded.'**
+  String get settingsPopulateExampleDataSuccess;
 }
 
 class _AppLocalizationsDelegate

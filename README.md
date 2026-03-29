@@ -116,6 +116,8 @@ Stop ignoring those paths in `.gitignore` when you want to **commit** platform p
 
 Keep `.cursor/rules/` aligned with the codebase.
 
+**Implementation trackers:** Phase 2 [`docs/02-implementation-phase-2-plan.md`](docs/02-implementation-phase-2-plan.md); Phase 3 [`docs/03-implementation-phase-3-plan.md`](docs/03-implementation-phase-3-plan.md). Product source: [`docs/PROJECT_MASTER_PLAN.md`](docs/PROJECT_MASTER_PLAN.md).
+
 ---
 
 ## Rules index

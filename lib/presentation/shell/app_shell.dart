@@ -4,6 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/router/app_router.dart';
 
+void _onShellBranchSelected(
+  StatefulNavigationShell navigationShell,
+  int index,
+) {
+  if (index != navigationShell.currentIndex) {
+    popShellBranchOverlayRoutes();
+  }
+  navigationShell.goBranch(index);
+}
+
 class AppShell extends StatelessWidget {
   const AppShell({required this.navigationShell, super.key});
 
@@ -23,7 +33,10 @@ class AppShell extends StatelessWidget {
             NavigationRail(
               extended: extendedRail,
               selectedIndex: navigationShell.currentIndex,
-              onDestinationSelected: navigationShell.goBranch,
+              onDestinationSelected: (index) => _onShellBranchSelected(
+                navigationShell,
+                index,
+              ),
               labelType: extendedRail
                   ? null
                   : NavigationRailLabelType.selected,
@@ -66,7 +79,10 @@ class AppShell extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: navigationShell.goBranch,
+        onDestinationSelected: (index) => _onShellBranchSelected(
+          navigationShell,
+          index,
+        ),
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.receipt_long_outlined),

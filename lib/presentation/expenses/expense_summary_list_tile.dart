@@ -73,7 +73,6 @@ class ExpenseSummaryListTile extends StatelessWidget {
         ? PopupMenuButton<RecurringExpenseTileAction>(
             tooltip: l10n.recurringMenuTooltip,
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(width: 36, height: 36),
             onSelected: onRecurringMenuAction,
             itemBuilder: (ctx) => [
               PopupMenuItem(
@@ -95,6 +94,14 @@ class ExpenseSummaryListTile extends StatelessWidget {
                 child: Text(l10n.recurringTileActionDelete),
               ),
             ],
+            // Compact icon; do not use [constraints] — it limits the *menu* panel.
+            child: const SizedBox(
+              width: 36,
+              height: 36,
+              child: Center(
+                child: Icon(Icons.more_vert, size: 22),
+              ),
+            ),
           )
         : null;
 

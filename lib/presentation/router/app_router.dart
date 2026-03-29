@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:expense_app/presentation/categories/categories_screen.dart';
@@ -9,6 +10,25 @@ import 'package:expense_app/presentation/shell/app_shell.dart';
 
 /// Narrow layouts use a bottom [NavigationBar]; wider layouts use [NavigationRail].
 const double kNavigationRailBreakpointWidth = 720;
+
+/// One key per [StatefulShellBranch] (same order as [appRouter] branches).
+final List<GlobalKey<NavigatorState>> kShellBranchNavigatorKeys = [
+  GlobalKey<NavigatorState>(debugLabel: 'shellBranchExpenses'),
+  GlobalKey<NavigatorState>(debugLabel: 'shellBranchIncome'),
+  GlobalKey<NavigatorState>(debugLabel: 'shellBranchReports'),
+  GlobalKey<NavigatorState>(debugLabel: 'shellBranchCategories'),
+  GlobalKey<NavigatorState>(debugLabel: 'shellBranchSettings'),
+];
+
+/// Pops popup menus and other branch-local overlay routes so they do not survive tab switches.
+void popShellBranchOverlayRoutes() {
+  for (final key in kShellBranchNavigatorKeys) {
+    final nav = key.currentState;
+    if (nav != null && nav.canPop()) {
+      nav.popUntil((route) => route.isFirst);
+    }
+  }
+}
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/expenses',
@@ -23,6 +43,7 @@ final GoRouter appRouter = GoRouter(
       },
       branches: [
         StatefulShellBranch(
+          navigatorKey: kShellBranchNavigatorKeys[0],
           routes: [
             GoRoute(
               path: '/expenses',
@@ -32,6 +53,7 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
         StatefulShellBranch(
+          navigatorKey: kShellBranchNavigatorKeys[1],
           routes: [
             GoRoute(
               path: '/income',
@@ -41,6 +63,7 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
         StatefulShellBranch(
+          navigatorKey: kShellBranchNavigatorKeys[2],
           routes: [
             GoRoute(
               path: '/reports',
@@ -50,6 +73,7 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
         StatefulShellBranch(
+          navigatorKey: kShellBranchNavigatorKeys[3],
           routes: [
             GoRoute(
               path: '/categories',
@@ -59,6 +83,7 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
         StatefulShellBranch(
+          navigatorKey: kShellBranchNavigatorKeys[4],
           routes: [
             GoRoute(
               path: '/settings',

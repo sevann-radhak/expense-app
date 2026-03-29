@@ -62,7 +62,6 @@ class IncomeSummaryListTile extends StatelessWidget {
         ? PopupMenuButton<IncomeSummaryTileMenuAction>(
             tooltip: l10n.incomeListTileMenuTooltip,
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(width: 36, height: 36),
             onSelected: onMenuAction,
             itemBuilder: (ctx) => [
               PopupMenuItem(
@@ -86,6 +85,13 @@ class IncomeSummaryListTile extends StatelessWidget {
                 ),
               ],
             ],
+            child: const SizedBox(
+              width: 36,
+              height: 36,
+              child: Center(
+                child: Icon(Icons.more_vert, size: 22),
+              ),
+            ),
           )
         : null;
 

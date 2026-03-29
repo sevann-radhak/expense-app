@@ -299,6 +299,14 @@ Map<String, dynamic> _expenseToMap(Expense x) {
   if (rs != null && rs.isNotEmpty) {
     m['recurringSeriesId'] = rs;
   }
+  final ps = x.paymentExpectationStatus;
+  if (ps != null) {
+    m['paymentExpectationStatus'] = ps.storageName;
+  }
+  final pc = x.paymentExpectationConfirmedOn;
+  if (pc != null) {
+    m['paymentExpectationConfirmedOn'] = ExpenseDates.toStorageDate(pc);
+  }
   return m;
 }
 
@@ -329,6 +337,8 @@ Expense _expenseFromJson(dynamic e) {
   final desc = e['description'];
   final pi = e['paymentInstrumentId'];
   final rs = e['recurringSeriesId'];
+  final pxs = e['paymentExpectationStatus'];
+  final pxc = e['paymentExpectationConfirmedOn'];
   return Expense(
     id: id,
     occurredOn: ExpenseDates.fromStorageDate(occurredOn),
@@ -342,5 +352,11 @@ Expense _expenseFromJson(dynamic e) {
     description: desc is String ? desc : '',
     paymentInstrumentId: pi is String ? pi : null,
     recurringSeriesId: rs is String && rs.isNotEmpty ? rs : null,
+    paymentExpectationStatus: pxs is String
+        ? paymentExpectationStatusFromStorage(pxs)
+        : null,
+    paymentExpectationConfirmedOn: pxc is String && pxc.isNotEmpty
+        ? ExpenseDates.fromStorageDate(pxc)
+        : null,
   );
 }

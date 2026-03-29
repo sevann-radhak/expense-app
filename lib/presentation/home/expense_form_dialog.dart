@@ -10,6 +10,8 @@ import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 
+enum _RecurrenceFormKind { monthly, weekly }
+
 class ExpenseFormDialog extends ConsumerWidget {
   const ExpenseFormDialog({super.key, this.initial});
 
@@ -68,6 +70,9 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
   bool _paidWithCreditCard = false;
   String? _paymentInstrumentId;
   bool _appliedInitialAmountMask = false;
+  bool _makeRecurring = false;
+  _RecurrenceFormKind _recurrenceKind = _RecurrenceFormKind.monthly;
+  final _horizonMonthsController = TextEditingController(text: '12');
 
   @override
   void initState() {
@@ -169,6 +174,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
     _descriptionController.dispose();
     _amountController.dispose();
     _fxController.dispose();
+    _horizonMonthsController.dispose();
     super.dispose();
   }
 
@@ -256,10 +262,29 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
       return;
     }
 
+    if (widget.initial == null && _makeRecurring) {
+      final h = int.tryParse(_horizonMonthsController.text.trim());
+      if (h == null || h < 1 || h > 120) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.expenseFormHorizonMonthsInvalid)),
+        );
+        return;
+      }
+    }
+
     final manualFx = 1.0 / localPerUsd;
     final repo = ref.read(expenseRepositoryProvider);
+    final seriesId = const Uuid().v4();
+    final makeRecurring = widget.initial == null && _makeRecurring;
+    final expenseId = makeRecurring
+        ? materializedExpenseIdForSeriesDate(
+            seriesId: seriesId,
+            occurredOn: _occurredOn,
+          )
+        : (widget.initial?.id ?? Uuid().v4());
+
     final expense = Expense(
-      id: widget.initial?.id ?? Uuid().v4(),
+      id: expenseId,
       occurredOn: _occurredOn,
       categoryId: _categoryId!,
       subcategoryId: _subcategoryId!,
@@ -271,11 +296,46 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
       description: _descriptionController.text.trim(),
       paymentInstrumentId:
           _paidWithCreditCard ? _paymentInstrumentId : null,
+      recurringSeriesId: widget.initial?.recurringSeriesId ??
+          (makeRecurring ? seriesId : null),
+      paymentExpectationStatus: widget.initial?.paymentExpectationStatus ??
+          (makeRecurring ? PaymentExpectationStatus.expected : null),
+      paymentExpectationConfirmedOn:
+          widget.initial?.paymentExpectationConfirmedOn,
     );
 
     try {
       if (widget.initial == null) {
         await repo.create(expense);
+        if (makeRecurring) {
+          final h = int.parse(_horizonMonthsController.text.trim());
+          final rule = _recurrenceKind == _RecurrenceFormKind.monthly
+              ? RecurrenceMonthlyByCalendarDay(calendarDay: _occurredOn.day)
+              : RecurrenceWeekly(
+                  intervalWeeks: 1,
+                  weekdays: {_occurredOn.weekday},
+                );
+          final series = ExpenseRecurringSeries(
+            id: seriesId,
+            anchorOccurredOn: _occurredOn,
+            rule: rule,
+            endCondition: const RecurrenceEndNever(),
+            horizonMonths: h,
+            active: true,
+            categoryId: expense.categoryId,
+            subcategoryId: expense.subcategoryId,
+            amountOriginal: expense.amountOriginal,
+            currencyCode: expense.currencyCode,
+            manualFxRateToUsd: expense.manualFxRateToUsd,
+            amountUsd: expense.amountUsd,
+            paidWithCreditCard: expense.paidWithCreditCard,
+            description: expense.description,
+            paymentInstrumentId: expense.paymentInstrumentId,
+          );
+          await ref
+              .read(recurringExpenseSeriesRepositoryProvider)
+              .upsertAndRematerialize(series, calendarTodayLocal());
+        }
       } else {
         await repo.update(expense);
       }
@@ -391,6 +451,30 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (widget.initial?.recurringSeriesId != null &&
+                    widget.initial!.recurringSeriesId!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          l10n.expenseFromRecurringBanner,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ),
                 if (widget.initial != null)
                   Align(
                     alignment: Alignment.centerRight,
@@ -560,6 +644,49 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                   ),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
+                if (widget.initial == null) ...[
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.expenseFormMakeRecurringLabel),
+                    value: _makeRecurring,
+                    onChanged: (v) => setState(() => _makeRecurring = v),
+                  ),
+                  if (_makeRecurring) ...[
+                    DropdownButtonFormField<_RecurrenceFormKind>(
+                      // ignore: deprecated_member_use
+                      value: _recurrenceKind,
+                      decoration: InputDecoration(
+                        labelText: l10n.expenseFormRecurrenceLabel,
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: _RecurrenceFormKind.monthly,
+                          child: Text(l10n.expenseFormRecurrenceMonthly),
+                        ),
+                        DropdownMenuItem(
+                          value: _RecurrenceFormKind.weekly,
+                          child: Text(l10n.expenseFormRecurrenceWeekly),
+                        ),
+                      ],
+                      onChanged: (v) => setState(
+                        () => _recurrenceKind =
+                            v ?? _RecurrenceFormKind.monthly,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _horizonMonthsController,
+                      decoration: InputDecoration(
+                        labelText: l10n.expenseFormHorizonMonthsLabel,
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                    ),
+                  ],
+                ],
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(l10n.expensePaidWithCardLabel),

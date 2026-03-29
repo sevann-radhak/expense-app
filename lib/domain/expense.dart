@@ -1,3 +1,5 @@
+import 'package:expense_app/domain/payment_expectation_status.dart';
+
 /// Calendar date for an expense (no time-of-day). Persisted as `YYYY-MM-DD`.
 abstract final class ExpenseDates {
   static String toStorageDate(DateTime dateOnly) {
@@ -35,6 +37,8 @@ class Expense {
     this.description = '',
     this.paymentInstrumentId,
     this.recurringSeriesId,
+    this.paymentExpectationStatus,
+    this.paymentExpectationConfirmedOn,
   });
 
   final String id;
@@ -65,6 +69,12 @@ class Expense {
   /// When set, this row was generated from a recurring series (Phase 4.1).
   final String? recurringSeriesId;
 
+  /// User disposition for a recurring-generated row (Phase 4.2).
+  final PaymentExpectationStatus? paymentExpectationStatus;
+
+  /// Date-only: when the user marked [PaymentExpectationStatus.confirmedPaid].
+  final DateTime? paymentExpectationConfirmedOn;
+
   static double computeUsd(double amountOriginal, double manualFxRateToUsd) {
     return amountOriginal * manualFxRateToUsd;
   }
@@ -82,9 +92,20 @@ class Expense {
     String? description,
     String? paymentInstrumentId,
     String? recurringSeriesId,
+    PaymentExpectationStatus? paymentExpectationStatus,
+    DateTime? paymentExpectationConfirmedOn,
     bool clearPaymentInstrumentId = false,
     bool clearRecurringSeriesId = false,
+    bool clearPaymentExpectation = false,
+    bool clearPaymentExpectationConfirmedOn = false,
   }) {
+    final nextStatus = clearPaymentExpectation
+        ? null
+        : (paymentExpectationStatus ?? this.paymentExpectationStatus);
+    final nextConfirmed = clearPaymentExpectation ||
+            clearPaymentExpectationConfirmedOn
+        ? null
+        : (paymentExpectationConfirmedOn ?? this.paymentExpectationConfirmedOn);
     return Expense(
       id: id ?? this.id,
       occurredOn: occurredOn ?? this.occurredOn,
@@ -102,6 +123,8 @@ class Expense {
       recurringSeriesId: clearRecurringSeriesId
           ? null
           : (recurringSeriesId ?? this.recurringSeriesId),
+      paymentExpectationStatus: nextStatus,
+      paymentExpectationConfirmedOn: nextConfirmed,
     );
   }
 }

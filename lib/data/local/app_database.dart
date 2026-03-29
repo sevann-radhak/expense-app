@@ -130,6 +130,10 @@ class Expenses extends Table {
         onDelete: KeyAction.cascade,
       )();
 
+  TextColumn get paymentExpectationStatus => text().nullable()();
+
+  TextColumn get paymentExpectationConfirmedOn => text().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -180,7 +184,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -219,6 +223,10 @@ class AppDatabase extends _$AppDatabase {
               'WHERE recurring_series_id IS NOT NULL',
             );
           }
+          if (from < 10) {
+            await m.addColumn(expenses, expenses.paymentExpectationStatus);
+            await m.addColumn(expenses, expenses.paymentExpectationConfirmedOn);
+          }
         },
         beforeOpen: (OpeningDetails details) async {
           await ensureExpenseDescriptionColumn();
@@ -226,6 +234,7 @@ class AppDatabase extends _$AppDatabase {
           await ensureExpensePaymentInstrumentIdColumn();
           await ensureExpenseRecurringSeriesIdColumn();
           await ensureExpenseSeriesOccurredUniqueIndex();
+          await ensureExpensePaymentExpectationColumns();
         },
       );
 
@@ -277,6 +286,37 @@ class AppDatabase extends _$AppDatabase {
     } catch (e) {
       final msg = e.toString().toLowerCase();
       if (msg.contains('no such column')) {
+        return;
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> ensureExpensePaymentExpectationColumns() async {
+    try {
+      await customStatement(
+        'ALTER TABLE expenses ADD COLUMN payment_expectation_status TEXT',
+      );
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('duplicate column') || msg.contains('already exists')) {
+        return;
+      }
+      if (msg.contains('no such table')) {
+        return;
+      }
+      rethrow;
+    }
+    try {
+      await customStatement(
+        'ALTER TABLE expenses ADD COLUMN payment_expectation_confirmed_on TEXT',
+      );
+    } catch (e) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('duplicate column') || msg.contains('already exists')) {
+        return;
+      }
+      if (msg.contains('no such table')) {
         return;
       }
       rethrow;
@@ -337,6 +377,7 @@ Future<AppDatabase> initializeAppDatabase() async {
   await db.ensureExpensePaymentInstrumentIdColumn();
   await db.ensureExpenseRecurringSeriesIdColumn();
   await db.ensureExpenseSeriesOccurredUniqueIndex();
+  await db.ensureExpensePaymentExpectationColumns();
   _appDatabase = db;
   return db;
 }

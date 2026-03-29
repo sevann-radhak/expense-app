@@ -475,4 +475,173 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPopulateExampleDataSuccess => 'Example data loaded.';
+
+  @override
+  String get settingsRecurringSeriesTileTitle => 'Recurring expenses';
+
+  @override
+  String get settingsRecurringSeriesTileSubtitle =>
+      'Manage scheduled series and horizon';
+
+  @override
+  String get recurringSeriesScreenTitle => 'Recurring expenses';
+
+  @override
+  String get recurringSeriesEmpty =>
+      'No recurring series yet. Add an expense and turn on “Make repeating”.';
+
+  @override
+  String get recurringSeriesActive => 'Active';
+
+  @override
+  String get recurringSeriesInactive => 'Stopped';
+
+  @override
+  String recurringSeriesHorizonMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# months ahead',
+      one: '# month ahead',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurringSeriesEdit => 'Edit';
+
+  @override
+  String get recurringSeriesStop => 'Stop series';
+
+  @override
+  String get recurringSeriesStopTitle => 'Stop this series?';
+
+  @override
+  String get recurringSeriesStopBody =>
+      'Future scheduled expenses after today will be removed. Past and today’s rows stay in the book.';
+
+  @override
+  String get recurringSeriesStoppedSnackbar => 'Series stopped.';
+
+  @override
+  String get recurringSeriesEditTitle => 'Edit recurring series';
+
+  @override
+  String get recurringSeriesAmountLabel => 'Amount';
+
+  @override
+  String get recurringSeriesHorizonLabel => 'Horizon (months)';
+
+  @override
+  String get recurringSeriesDescriptionLabel => 'Note';
+
+  @override
+  String get recurringSeriesSave => 'Save';
+
+  @override
+  String get recurringSeriesReadOnlyRule => 'Repeat pattern';
+
+  @override
+  String get recurringSeriesDefaultTitle => 'Recurring expense';
+
+  @override
+  String get expenseFormMakeRecurringLabel => 'Make repeating expense';
+
+  @override
+  String get expenseFormRecurrenceLabel => 'Repeat';
+
+  @override
+  String get expenseFormRecurrenceMonthly => 'Monthly (same calendar day)';
+
+  @override
+  String get expenseFormRecurrenceWeekly => 'Weekly (same weekday)';
+
+  @override
+  String get expenseFormHorizonMonthsLabel => 'Generate months ahead';
+
+  @override
+  String get expenseFormHorizonMonthsInvalid =>
+      'Enter a horizon between 1 and 120 months.';
+
+  @override
+  String get expenseFromRecurringBanner =>
+      'This line comes from a recurring series. Edits here apply only to this row. Change the series in Settings → Recurring expenses.';
+
+  @override
+  String get recurringMenuTooltip => 'Scheduled expense actions';
+
+  @override
+  String get recurringActionConfirmPaid => 'Mark paid (on schedule)';
+
+  @override
+  String get recurringActionPaidEarly => 'Mark paid early…';
+
+  @override
+  String get recurringActionSkip => 'Skip occurrence';
+
+  @override
+  String get recurringActionWaive => 'Waive';
+
+  @override
+  String get paymentExpectationExpectedShort => 'Expected';
+
+  @override
+  String get paymentExpectationConfirmedShort => 'Paid';
+
+  @override
+  String get paymentExpectationSkippedShort => 'Skipped';
+
+  @override
+  String get paymentExpectationWaivedShort => 'Waived';
+
+  @override
+  String recurrenceRuleDaily(int interval) {
+    return 'Every $interval days';
+  }
+
+  @override
+  String recurrenceRuleMonthlyDay(int day) {
+    return 'Monthly on day $day';
+  }
+
+  @override
+  String recurrenceRuleWeeklySimple(String weekday) {
+    return 'Weekly on $weekday';
+  }
+
+  @override
+  String recurrenceRuleWeeklyGeneric(int weeks) {
+    return 'Every $weeks weeks on selected weekdays';
+  }
+
+  @override
+  String recurrenceRuleYearly(int month, int day) {
+    return 'Yearly on $month/$day';
+  }
+
+  @override
+  String recurrenceRuleOrdinal(String ordinal, String weekday) {
+    return '$ordinal $weekday each month';
+  }
+
+  @override
+  String get recurrenceOrdinalFirst => 'First';
+
+  @override
+  String get recurrenceOrdinalSecond => 'Second';
+
+  @override
+  String get recurrenceOrdinalThird => 'Third';
+
+  @override
+  String get recurrenceOrdinalFourth => 'Fourth';
+
+  @override
+  String get recurrenceOrdinalLast => 'Last';
+
+  @override
+  String get recurringPaidEarlyTitle => 'Date paid';
+
+  @override
+  String get recurringPaidEarlySave => 'Save';
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
+import 'package:expense_app/presentation/settings/recurring_series_list_screen.dart';
 import 'package:expense_app/presentation/settings/settings_backup_section.dart';
 import 'package:expense_app/presentation/settings/settings_card_profiles_section.dart';
 
@@ -111,6 +112,21 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 32),
                 const SettingsCardProfilesSection(),
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.repeat_outlined),
+                  title: Text(l10n.settingsRecurringSeriesTileTitle),
+                  subtitle: Text(l10n.settingsRecurringSeriesTileSubtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (ctx) => const RecurringSeriesListScreen(),
+                      ),
+                    );
+                  },
+                ),
                 const SizedBox(height: 32),
                 const SettingsBackupSection(),
                 const SizedBox(height: 32),

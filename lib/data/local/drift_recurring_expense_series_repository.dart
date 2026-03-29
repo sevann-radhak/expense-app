@@ -123,10 +123,44 @@ class DriftRecurringExpenseSeriesRepository
               description: Value(series.description),
               paymentInstrumentId: Value(series.paymentInstrumentId),
               recurringSeriesId: Value(seriesId),
+              paymentExpectationStatus:
+                  Value(PaymentExpectationStatus.expected.storageName),
             ),
             mode: InsertMode.insertOrIgnore,
           );
     }
+  }
+
+  @override
+  Stream<List<ExpenseRecurringSeries>> watchAll() {
+    return (_db.select(_db.recExpenseSeries)
+          ..orderBy([
+            (s) => OrderingTerm.desc(s.active),
+            (s) => OrderingTerm.asc(s.description),
+            (s) => OrderingTerm.asc(s.id),
+          ]))
+        .watch()
+        .map((rows) => rows.map(expenseRecurringSeriesFromDriftRow).toList());
+  }
+
+  @override
+  Future<void> deactivateSeries({
+    required String seriesId,
+    required DateTime todayDateOnly,
+  }) async {
+    await (_db.update(_db.recExpenseSeries)
+          ..where((s) => s.id.equals(seriesId)))
+        .write(const RecExpenseSeriesCompanion(active: Value(false)));
+    final todayIso = ExpenseDates.toStorageDate(
+      calendarDateOnly(todayDateOnly),
+    );
+    await (_db.delete(_db.expenses)
+          ..where(
+            (e) =>
+                e.recurringSeriesId.equals(seriesId) &
+                e.occurredOn.isBiggerThanValue(todayIso),
+          ))
+        .go();
   }
 
   Future<void> _assertPaymentInstrumentIfSet(String? id) async {

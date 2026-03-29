@@ -272,6 +272,12 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
             description: Value(e.description),
             paymentInstrumentId: Value(e.paymentInstrumentId),
             recurringSeriesId: Value(e.recurringSeriesId),
+            paymentExpectationStatus: Value(e.paymentExpectationStatus?.storageName),
+            paymentExpectationConfirmedOn: Value(
+              e.paymentExpectationConfirmedOn != null
+                  ? ExpenseDates.toStorageDate(e.paymentExpectationConfirmedOn!)
+                  : null,
+            ),
           ),
         );
       }

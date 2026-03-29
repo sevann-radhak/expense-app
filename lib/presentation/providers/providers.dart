@@ -29,6 +29,11 @@ final recurringExpenseSeriesRepositoryProvider =
   return DriftRecurringExpenseSeriesRepository(ref.watch(appDatabaseProvider));
 });
 
+final recurringExpenseSeriesListProvider =
+    StreamProvider<List<ExpenseRecurringSeries>>((ref) {
+  return ref.watch(recurringExpenseSeriesRepositoryProvider).watchAll();
+});
+
 final paymentInstrumentRepositoryProvider =
     Provider<PaymentInstrumentRepository>((ref) {
   return DriftPaymentInstrumentRepository(ref.watch(appDatabaseProvider));

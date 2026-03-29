@@ -469,5 +469,111 @@
   "settingsPopulateExampleDataSuccess": "Example data loaded.",
   "@settingsPopulateExampleDataSuccess": {
     "description": "Snackbar after demo populate succeeds."
-  }
+  },
+  "settingsRecurringSeriesTileTitle": "Recurring expenses",
+  "@settingsRecurringSeriesTileTitle": {
+    "description": "Settings list tile title linking to recurring series management."
+  },
+  "settingsRecurringSeriesTileSubtitle": "Manage scheduled series and horizon",
+  "recurringSeriesScreenTitle": "Recurring expenses",
+  "recurringSeriesEmpty": "No recurring series yet. Add an expense and turn on “Make repeating”.",
+  "recurringSeriesActive": "Active",
+  "recurringSeriesInactive": "Stopped",
+  "recurringSeriesHorizonMonths": "{count, plural, one{# month ahead} other{# months ahead}}",
+  "@recurringSeriesHorizonMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringSeriesEdit": "Edit",
+  "recurringSeriesStop": "Stop series",
+  "recurringSeriesStopTitle": "Stop this series?",
+  "recurringSeriesStopBody": "Future scheduled expenses after today will be removed. Past and today’s rows stay in the book.",
+  "recurringSeriesStoppedSnackbar": "Series stopped.",
+  "recurringSeriesEditTitle": "Edit recurring series",
+  "recurringSeriesAmountLabel": "Amount",
+  "recurringSeriesHorizonLabel": "Horizon (months)",
+  "recurringSeriesDescriptionLabel": "Note",
+  "recurringSeriesSave": "Save",
+  "recurringSeriesReadOnlyRule": "Repeat pattern",
+  "recurringSeriesDefaultTitle": "Recurring expense",
+  "expenseFormMakeRecurringLabel": "Make repeating expense",
+  "expenseFormRecurrenceLabel": "Repeat",
+  "expenseFormRecurrenceMonthly": "Monthly (same calendar day)",
+  "expenseFormRecurrenceWeekly": "Weekly (same weekday)",
+  "expenseFormHorizonMonthsLabel": "Generate months ahead",
+  "expenseFormHorizonMonthsInvalid": "Enter a horizon between 1 and 120 months.",
+  "expenseFromRecurringBanner": "This line comes from a recurring series. Edits here apply only to this row. Change the series in Settings → Recurring expenses.",
+  "recurringMenuTooltip": "Scheduled expense actions",
+  "recurringActionConfirmPaid": "Mark paid (on schedule)",
+  "recurringActionPaidEarly": "Mark paid early…",
+  "recurringActionSkip": "Skip occurrence",
+  "recurringActionWaive": "Waive",
+  "paymentExpectationExpectedShort": "Expected",
+  "paymentExpectationConfirmedShort": "Paid",
+  "paymentExpectationSkippedShort": "Skipped",
+  "paymentExpectationWaivedShort": "Waived",
+  "recurrenceRuleDaily": "Every {interval} days",
+  "@recurrenceRuleDaily": {
+    "placeholders": {
+      "interval": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceRuleMonthlyDay": "Monthly on day {day}",
+  "@recurrenceRuleMonthlyDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceRuleWeeklySimple": "Weekly on {weekday}",
+  "@recurrenceRuleWeeklySimple": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "recurrenceRuleWeeklyGeneric": "Every {weeks} weeks on selected weekdays",
+  "@recurrenceRuleWeeklyGeneric": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceRuleYearly": "Yearly on {month}/{day}",
+  "@recurrenceRuleYearly": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceRuleOrdinal": "{ordinal} {weekday} each month",
+  "@recurrenceRuleOrdinal": {
+    "placeholders": {
+      "ordinal": {
+        "type": "String"
+      },
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "recurrenceOrdinalFirst": "First",
+  "recurrenceOrdinalSecond": "Second",
+  "recurrenceOrdinalThird": "Third",
+  "recurrenceOrdinalFourth": "Fourth",
+  "recurrenceOrdinalLast": "Last",
+  "recurringPaidEarlyTitle": "Date paid",
+  "recurringPaidEarlySave": "Save"
 }

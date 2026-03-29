@@ -87,6 +87,13 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
           description: r.description,
           paymentInstrumentId: r.paymentInstrumentId,
           recurringSeriesId: r.recurringSeriesId,
+          paymentExpectationStatus:
+              paymentExpectationStatusFromStorage(r.paymentExpectationStatus),
+          paymentExpectationConfirmedOn:
+              r.paymentExpectationConfirmedOn != null &&
+                      r.paymentExpectationConfirmedOn!.isNotEmpty
+                  ? ExpenseDates.fromStorageDate(r.paymentExpectationConfirmedOn!)
+                  : null,
         ),
       )
       .toList();

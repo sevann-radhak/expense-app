@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
+import 'package:expense_app/presentation/expenses/recurring_expense_ui.dart';
 import 'package:expense_app/presentation/theme/category_accent_colors.dart';
 
 /// Compact expense row (category, subcategory, date, amounts) for lists.
@@ -14,6 +15,8 @@ class ExpenseSummaryListTile extends StatelessWidget {
     super.key,
     this.categoryId,
     this.onTap,
+    this.showRecurringOverflowMenu = false,
+    this.onRecurringMenuAction,
   });
 
   final Expense expense;
@@ -23,6 +26,10 @@ class ExpenseSummaryListTile extends StatelessWidget {
   /// When set, shows a left accent bar using the shared category palette.
   final String? categoryId;
   final VoidCallback? onTap;
+
+  /// When true and [onRecurringMenuAction] is set, shows a menu for scheduled recurring rows.
+  final bool showRecurringOverflowMenu;
+  final void Function(RecurringExpenseTileAction action)? onRecurringMenuAction;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +48,35 @@ class ExpenseSummaryListTile extends StatelessWidget {
       localeName,
     );
     final note = expense.description.trim();
+    final recurring = expense.recurringSeriesId != null &&
+        expense.recurringSeriesId!.isNotEmpty;
+    final expectationChip =
+        recurring ? recurringPaymentExpectationChipLabel(expense, l10n) : null;
+
+    final menu = showRecurringOverflowMenu && onRecurringMenuAction != null
+        ? PopupMenuButton<RecurringExpenseTileAction>(
+            tooltip: l10n.recurringMenuTooltip,
+            onSelected: onRecurringMenuAction,
+            itemBuilder: (ctx) => [
+              PopupMenuItem(
+                value: RecurringExpenseTileAction.confirmPaid,
+                child: Text(l10n.recurringActionConfirmPaid),
+              ),
+              PopupMenuItem(
+                value: RecurringExpenseTileAction.paidEarly,
+                child: Text(l10n.recurringActionPaidEarly),
+              ),
+              PopupMenuItem(
+                value: RecurringExpenseTileAction.skip,
+                child: Text(l10n.recurringActionSkip),
+              ),
+              PopupMenuItem(
+                value: RecurringExpenseTileAction.waive,
+                child: Text(l10n.recurringActionWaive),
+              ),
+            ],
+          )
+        : null;
 
     final child = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -80,6 +116,22 @@ class ExpenseSummaryListTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                if (expectationChip != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Semantics(
+                      label: expectationChip,
+                      child: Chip(
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        label: Text(
+                          expectationChip,
+                          style: theme.textTheme.labelSmall,
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                    ),
+                  ),
                 if (note.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
@@ -95,7 +147,8 @@ class ExpenseSummaryListTile extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          ?menu,
+          const SizedBox(width: 4),
           Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,

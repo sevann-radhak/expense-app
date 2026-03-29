@@ -7,6 +7,7 @@ import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/expenses/expense_summary_list_tile.dart';
 import 'package:expense_app/presentation/home/expense_form_dialog.dart';
+import 'package:expense_app/presentation/home/recurring_expense_menu_handler.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 
@@ -78,6 +79,7 @@ class HomeScreen extends ConsumerWidget {
           expensesAsync.when(
             data: (expenses) {
               final locale = Localizations.localeOf(context);
+              final today = calendarTodayLocal();
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
@@ -102,6 +104,22 @@ class HomeScreen extends ConsumerWidget {
                             l10n.taxonomyUnknownLabel,
                         subcategoryName: subcategoryName[e.subcategoryId] ??
                             l10n.taxonomyUnknownLabel,
+                        showRecurringOverflowMenu:
+                            e.recurringSeriesId != null &&
+                                !isRealizedOnLocalCalendar(
+                                  e.occurredOn,
+                                  today,
+                                ) &&
+                                e.effectivePaymentExpectationStatus ==
+                                    PaymentExpectationStatus.expected,
+                        onRecurringMenuAction: (action) {
+                          handleRecurringExpenseTileAction(
+                            context,
+                            ref,
+                            e,
+                            action,
+                          );
+                        },
                         onTap: () {
                           showDialog<void>(
                             context: context,

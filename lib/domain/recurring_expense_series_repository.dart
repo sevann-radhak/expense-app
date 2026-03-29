@@ -14,6 +14,15 @@ abstract class RecurringExpenseSeriesRepository {
     required String seriesId,
     required DateTime todayDateOnly,
   });
+
+  Stream<List<ExpenseRecurringSeries>> watchAll();
+
+  /// Sets [series] inactive and removes materialized expenses with [occurredOn]
+  /// strictly after [todayDateOnly].
+  Future<void> deactivateSeries({
+    required String seriesId,
+    required DateTime todayDateOnly,
+  });
 }
 
 extension RecurringExpenseSeriesRepositoryMaterialize

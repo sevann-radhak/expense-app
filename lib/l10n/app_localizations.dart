@@ -943,6 +943,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Example data loaded.'**
   String get settingsPopulateExampleDataSuccess;
+
+  /// Settings list tile title linking to recurring series management.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring expenses'**
+  String get settingsRecurringSeriesTileTitle;
+
+  /// No description provided for @settingsRecurringSeriesTileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage scheduled series and horizon'**
+  String get settingsRecurringSeriesTileSubtitle;
+
+  /// No description provided for @recurringSeriesScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring expenses'**
+  String get recurringSeriesScreenTitle;
+
+  /// No description provided for @recurringSeriesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring series yet. Add an expense and turn on “Make repeating”.'**
+  String get recurringSeriesEmpty;
+
+  /// No description provided for @recurringSeriesActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get recurringSeriesActive;
+
+  /// No description provided for @recurringSeriesInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped'**
+  String get recurringSeriesInactive;
+
+  /// No description provided for @recurringSeriesHorizonMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{# month ahead} other{# months ahead}}'**
+  String recurringSeriesHorizonMonths(int count);
+
+  /// No description provided for @recurringSeriesEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get recurringSeriesEdit;
+
+  /// No description provided for @recurringSeriesStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop series'**
+  String get recurringSeriesStop;
+
+  /// No description provided for @recurringSeriesStopTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop this series?'**
+  String get recurringSeriesStopTitle;
+
+  /// No description provided for @recurringSeriesStopBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Future scheduled expenses after today will be removed. Past and today’s rows stay in the book.'**
+  String get recurringSeriesStopBody;
+
+  /// No description provided for @recurringSeriesStoppedSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Series stopped.'**
+  String get recurringSeriesStoppedSnackbar;
+
+  /// No description provided for @recurringSeriesEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit recurring series'**
+  String get recurringSeriesEditTitle;
+
+  /// No description provided for @recurringSeriesAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get recurringSeriesAmountLabel;
+
+  /// No description provided for @recurringSeriesHorizonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Horizon (months)'**
+  String get recurringSeriesHorizonLabel;
+
+  /// No description provided for @recurringSeriesDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get recurringSeriesDescriptionLabel;
+
+  /// No description provided for @recurringSeriesSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get recurringSeriesSave;
+
+  /// No description provided for @recurringSeriesReadOnlyRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat pattern'**
+  String get recurringSeriesReadOnlyRule;
+
+  /// No description provided for @recurringSeriesDefaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring expense'**
+  String get recurringSeriesDefaultTitle;
+
+  /// No description provided for @expenseFormMakeRecurringLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Make repeating expense'**
+  String get expenseFormMakeRecurringLabel;
+
+  /// No description provided for @expenseFormRecurrenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get expenseFormRecurrenceLabel;
+
+  /// No description provided for @expenseFormRecurrenceMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly (same calendar day)'**
+  String get expenseFormRecurrenceMonthly;
+
+  /// No description provided for @expenseFormRecurrenceWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly (same weekday)'**
+  String get expenseFormRecurrenceWeekly;
+
+  /// No description provided for @expenseFormHorizonMonthsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate months ahead'**
+  String get expenseFormHorizonMonthsLabel;
+
+  /// No description provided for @expenseFormHorizonMonthsInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a horizon between 1 and 120 months.'**
+  String get expenseFormHorizonMonthsInvalid;
+
+  /// No description provided for @expenseFromRecurringBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This line comes from a recurring series. Edits here apply only to this row. Change the series in Settings → Recurring expenses.'**
+  String get expenseFromRecurringBanner;
+
+  /// No description provided for @recurringMenuTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled expense actions'**
+  String get recurringMenuTooltip;
+
+  /// No description provided for @recurringActionConfirmPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark paid (on schedule)'**
+  String get recurringActionConfirmPaid;
+
+  /// No description provided for @recurringActionPaidEarly.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark paid early…'**
+  String get recurringActionPaidEarly;
+
+  /// No description provided for @recurringActionSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip occurrence'**
+  String get recurringActionSkip;
+
+  /// No description provided for @recurringActionWaive.
+  ///
+  /// In en, this message translates to:
+  /// **'Waive'**
+  String get recurringActionWaive;
+
+  /// No description provided for @paymentExpectationExpectedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected'**
+  String get paymentExpectationExpectedShort;
+
+  /// No description provided for @paymentExpectationConfirmedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get paymentExpectationConfirmedShort;
+
+  /// No description provided for @paymentExpectationSkippedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get paymentExpectationSkippedShort;
+
+  /// No description provided for @paymentExpectationWaivedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Waived'**
+  String get paymentExpectationWaivedShort;
+
+  /// No description provided for @recurrenceRuleDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {interval} days'**
+  String recurrenceRuleDaily(int interval);
+
+  /// No description provided for @recurrenceRuleMonthlyDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly on day {day}'**
+  String recurrenceRuleMonthlyDay(int day);
+
+  /// No description provided for @recurrenceRuleWeeklySimple.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly on {weekday}'**
+  String recurrenceRuleWeeklySimple(String weekday);
+
+  /// No description provided for @recurrenceRuleWeeklyGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {weeks} weeks on selected weekdays'**
+  String recurrenceRuleWeeklyGeneric(int weeks);
+
+  /// No description provided for @recurrenceRuleYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly on {month}/{day}'**
+  String recurrenceRuleYearly(int month, int day);
+
+  /// No description provided for @recurrenceRuleOrdinal.
+  ///
+  /// In en, this message translates to:
+  /// **'{ordinal} {weekday} each month'**
+  String recurrenceRuleOrdinal(String ordinal, String weekday);
+
+  /// No description provided for @recurrenceOrdinalFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First'**
+  String get recurrenceOrdinalFirst;
+
+  /// No description provided for @recurrenceOrdinalSecond.
+  ///
+  /// In en, this message translates to:
+  /// **'Second'**
+  String get recurrenceOrdinalSecond;
+
+  /// No description provided for @recurrenceOrdinalThird.
+  ///
+  /// In en, this message translates to:
+  /// **'Third'**
+  String get recurrenceOrdinalThird;
+
+  /// No description provided for @recurrenceOrdinalFourth.
+  ///
+  /// In en, this message translates to:
+  /// **'Fourth'**
+  String get recurrenceOrdinalFourth;
+
+  /// No description provided for @recurrenceOrdinalLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Last'**
+  String get recurrenceOrdinalLast;
+
+  /// No description provided for @recurringPaidEarlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Date paid'**
+  String get recurringPaidEarlyTitle;
+
+  /// No description provided for @recurringPaidEarlySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get recurringPaidEarlySave;
 }
 
 class _AppLocalizationsDelegate

@@ -14,7 +14,7 @@ final class BookBackupSnapshot {
     required this.expenses,
   });
 
-  static const int currentSchemaVersion = 2;
+  static const int currentSchemaVersion = 3;
 
   final int schemaVersion;
   final DateTime exportedAt;

@@ -1811,6 +1811,28 @@ class $ExpensesTable extends Expenses
           'REFERENCES expense_recurring_series (id) ON DELETE CASCADE',
         ),
       );
+  static const VerificationMeta _paymentExpectationStatusMeta =
+      const VerificationMeta('paymentExpectationStatus');
+  @override
+  late final GeneratedColumn<String> paymentExpectationStatus =
+      GeneratedColumn<String>(
+        'payment_expectation_status',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _paymentExpectationConfirmedOnMeta =
+      const VerificationMeta('paymentExpectationConfirmedOn');
+  @override
+  late final GeneratedColumn<String> paymentExpectationConfirmedOn =
+      GeneratedColumn<String>(
+        'payment_expectation_confirmed_on',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1825,6 +1847,8 @@ class $ExpensesTable extends Expenses
     description,
     paymentInstrumentId,
     recurringSeriesId,
+    paymentExpectationStatus,
+    paymentExpectationConfirmedOn,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1943,6 +1967,24 @@ class $ExpensesTable extends Expenses
         ),
       );
     }
+    if (data.containsKey('payment_expectation_status')) {
+      context.handle(
+        _paymentExpectationStatusMeta,
+        paymentExpectationStatus.isAcceptableOrUnknown(
+          data['payment_expectation_status']!,
+          _paymentExpectationStatusMeta,
+        ),
+      );
+    }
+    if (data.containsKey('payment_expectation_confirmed_on')) {
+      context.handle(
+        _paymentExpectationConfirmedOnMeta,
+        paymentExpectationConfirmedOn.isAcceptableOrUnknown(
+          data['payment_expectation_confirmed_on']!,
+          _paymentExpectationConfirmedOnMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2000,6 +2042,14 @@ class $ExpensesTable extends Expenses
         DriftSqlType.string,
         data['${effectivePrefix}recurring_series_id'],
       ),
+      paymentExpectationStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_expectation_status'],
+      ),
+      paymentExpectationConfirmedOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_expectation_confirmed_on'],
+      ),
     );
   }
 
@@ -2028,6 +2078,8 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
 
   /// Generated from [RecExpenseSeries] when non-null.
   final String? recurringSeriesId;
+  final String? paymentExpectationStatus;
+  final String? paymentExpectationConfirmedOn;
   const ExpenseRow({
     required this.id,
     required this.occurredOn,
@@ -2041,6 +2093,8 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     required this.description,
     this.paymentInstrumentId,
     this.recurringSeriesId,
+    this.paymentExpectationStatus,
+    this.paymentExpectationConfirmedOn,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2060,6 +2114,16 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     }
     if (!nullToAbsent || recurringSeriesId != null) {
       map['recurring_series_id'] = Variable<String>(recurringSeriesId);
+    }
+    if (!nullToAbsent || paymentExpectationStatus != null) {
+      map['payment_expectation_status'] = Variable<String>(
+        paymentExpectationStatus,
+      );
+    }
+    if (!nullToAbsent || paymentExpectationConfirmedOn != null) {
+      map['payment_expectation_confirmed_on'] = Variable<String>(
+        paymentExpectationConfirmedOn,
+      );
     }
     return map;
   }
@@ -2082,6 +2146,13 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       recurringSeriesId: recurringSeriesId == null && nullToAbsent
           ? const Value.absent()
           : Value(recurringSeriesId),
+      paymentExpectationStatus: paymentExpectationStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentExpectationStatus),
+      paymentExpectationConfirmedOn:
+          paymentExpectationConfirmedOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentExpectationConfirmedOn),
     );
   }
 
@@ -2107,6 +2178,12 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       recurringSeriesId: serializer.fromJson<String?>(
         json['recurringSeriesId'],
       ),
+      paymentExpectationStatus: serializer.fromJson<String?>(
+        json['paymentExpectationStatus'],
+      ),
+      paymentExpectationConfirmedOn: serializer.fromJson<String?>(
+        json['paymentExpectationConfirmedOn'],
+      ),
     );
   }
   @override
@@ -2125,6 +2202,12 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       'description': serializer.toJson<String>(description),
       'paymentInstrumentId': serializer.toJson<String?>(paymentInstrumentId),
       'recurringSeriesId': serializer.toJson<String?>(recurringSeriesId),
+      'paymentExpectationStatus': serializer.toJson<String?>(
+        paymentExpectationStatus,
+      ),
+      'paymentExpectationConfirmedOn': serializer.toJson<String?>(
+        paymentExpectationConfirmedOn,
+      ),
     };
   }
 
@@ -2141,6 +2224,8 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     String? description,
     Value<String?> paymentInstrumentId = const Value.absent(),
     Value<String?> recurringSeriesId = const Value.absent(),
+    Value<String?> paymentExpectationStatus = const Value.absent(),
+    Value<String?> paymentExpectationConfirmedOn = const Value.absent(),
   }) => ExpenseRow(
     id: id ?? this.id,
     occurredOn: occurredOn ?? this.occurredOn,
@@ -2158,6 +2243,12 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     recurringSeriesId: recurringSeriesId.present
         ? recurringSeriesId.value
         : this.recurringSeriesId,
+    paymentExpectationStatus: paymentExpectationStatus.present
+        ? paymentExpectationStatus.value
+        : this.paymentExpectationStatus,
+    paymentExpectationConfirmedOn: paymentExpectationConfirmedOn.present
+        ? paymentExpectationConfirmedOn.value
+        : this.paymentExpectationConfirmedOn,
   );
   ExpenseRow copyWithCompanion(ExpensesCompanion data) {
     return ExpenseRow(
@@ -2193,6 +2284,12 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       recurringSeriesId: data.recurringSeriesId.present
           ? data.recurringSeriesId.value
           : this.recurringSeriesId,
+      paymentExpectationStatus: data.paymentExpectationStatus.present
+          ? data.paymentExpectationStatus.value
+          : this.paymentExpectationStatus,
+      paymentExpectationConfirmedOn: data.paymentExpectationConfirmedOn.present
+          ? data.paymentExpectationConfirmedOn.value
+          : this.paymentExpectationConfirmedOn,
     );
   }
 
@@ -2210,7 +2307,11 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
           ..write('paidWithCreditCard: $paidWithCreditCard, ')
           ..write('description: $description, ')
           ..write('paymentInstrumentId: $paymentInstrumentId, ')
-          ..write('recurringSeriesId: $recurringSeriesId')
+          ..write('recurringSeriesId: $recurringSeriesId, ')
+          ..write('paymentExpectationStatus: $paymentExpectationStatus, ')
+          ..write(
+            'paymentExpectationConfirmedOn: $paymentExpectationConfirmedOn',
+          )
           ..write(')'))
         .toString();
   }
@@ -2229,6 +2330,8 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     description,
     paymentInstrumentId,
     recurringSeriesId,
+    paymentExpectationStatus,
+    paymentExpectationConfirmedOn,
   );
   @override
   bool operator ==(Object other) =>
@@ -2245,7 +2348,10 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
           other.paidWithCreditCard == this.paidWithCreditCard &&
           other.description == this.description &&
           other.paymentInstrumentId == this.paymentInstrumentId &&
-          other.recurringSeriesId == this.recurringSeriesId);
+          other.recurringSeriesId == this.recurringSeriesId &&
+          other.paymentExpectationStatus == this.paymentExpectationStatus &&
+          other.paymentExpectationConfirmedOn ==
+              this.paymentExpectationConfirmedOn);
 }
 
 class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
@@ -2261,6 +2367,8 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
   final Value<String> description;
   final Value<String?> paymentInstrumentId;
   final Value<String?> recurringSeriesId;
+  final Value<String?> paymentExpectationStatus;
+  final Value<String?> paymentExpectationConfirmedOn;
   final Value<int> rowid;
   const ExpensesCompanion({
     this.id = const Value.absent(),
@@ -2275,6 +2383,8 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     this.description = const Value.absent(),
     this.paymentInstrumentId = const Value.absent(),
     this.recurringSeriesId = const Value.absent(),
+    this.paymentExpectationStatus = const Value.absent(),
+    this.paymentExpectationConfirmedOn = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ExpensesCompanion.insert({
@@ -2290,6 +2400,8 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     this.description = const Value.absent(),
     this.paymentInstrumentId = const Value.absent(),
     this.recurringSeriesId = const Value.absent(),
+    this.paymentExpectationStatus = const Value.absent(),
+    this.paymentExpectationConfirmedOn = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        occurredOn = Value(occurredOn),
@@ -2310,6 +2422,8 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     Expression<String>? description,
     Expression<String>? paymentInstrumentId,
     Expression<String>? recurringSeriesId,
+    Expression<String>? paymentExpectationStatus,
+    Expression<String>? paymentExpectationConfirmedOn,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2327,6 +2441,10 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
       if (paymentInstrumentId != null)
         'payment_instrument_id': paymentInstrumentId,
       if (recurringSeriesId != null) 'recurring_series_id': recurringSeriesId,
+      if (paymentExpectationStatus != null)
+        'payment_expectation_status': paymentExpectationStatus,
+      if (paymentExpectationConfirmedOn != null)
+        'payment_expectation_confirmed_on': paymentExpectationConfirmedOn,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2344,6 +2462,8 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     Value<String>? description,
     Value<String?>? paymentInstrumentId,
     Value<String?>? recurringSeriesId,
+    Value<String?>? paymentExpectationStatus,
+    Value<String?>? paymentExpectationConfirmedOn,
     Value<int>? rowid,
   }) {
     return ExpensesCompanion(
@@ -2359,6 +2479,10 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
       description: description ?? this.description,
       paymentInstrumentId: paymentInstrumentId ?? this.paymentInstrumentId,
       recurringSeriesId: recurringSeriesId ?? this.recurringSeriesId,
+      paymentExpectationStatus:
+          paymentExpectationStatus ?? this.paymentExpectationStatus,
+      paymentExpectationConfirmedOn:
+          paymentExpectationConfirmedOn ?? this.paymentExpectationConfirmedOn,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2404,6 +2528,16 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     if (recurringSeriesId.present) {
       map['recurring_series_id'] = Variable<String>(recurringSeriesId.value);
     }
+    if (paymentExpectationStatus.present) {
+      map['payment_expectation_status'] = Variable<String>(
+        paymentExpectationStatus.value,
+      );
+    }
+    if (paymentExpectationConfirmedOn.present) {
+      map['payment_expectation_confirmed_on'] = Variable<String>(
+        paymentExpectationConfirmedOn.value,
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2425,6 +2559,10 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
           ..write('description: $description, ')
           ..write('paymentInstrumentId: $paymentInstrumentId, ')
           ..write('recurringSeriesId: $recurringSeriesId, ')
+          ..write('paymentExpectationStatus: $paymentExpectationStatus, ')
+          ..write(
+            'paymentExpectationConfirmedOn: $paymentExpectationConfirmedOn, ',
+          )
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4762,6 +4900,8 @@ typedef $$ExpensesTableCreateCompanionBuilder =
       Value<String> description,
       Value<String?> paymentInstrumentId,
       Value<String?> recurringSeriesId,
+      Value<String?> paymentExpectationStatus,
+      Value<String?> paymentExpectationConfirmedOn,
       Value<int> rowid,
     });
 typedef $$ExpensesTableUpdateCompanionBuilder =
@@ -4778,6 +4918,8 @@ typedef $$ExpensesTableUpdateCompanionBuilder =
       Value<String> description,
       Value<String?> paymentInstrumentId,
       Value<String?> recurringSeriesId,
+      Value<String?> paymentExpectationStatus,
+      Value<String?> paymentExpectationConfirmedOn,
       Value<int> rowid,
     });
 
@@ -4897,6 +5039,16 @@ class $$ExpensesTableFilterComposer
 
   ColumnFilters<String> get paymentInstrumentId => $composableBuilder(
     column: $table.paymentInstrumentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentExpectationStatus => $composableBuilder(
+    column: $table.paymentExpectationStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentExpectationConfirmedOn => $composableBuilder(
+    column: $table.paymentExpectationConfirmedOn,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5024,6 +5176,17 @@ class $$ExpensesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get paymentExpectationStatus => $composableBuilder(
+    column: $table.paymentExpectationStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paymentExpectationConfirmedOn =>
+      $composableBuilder(
+        column: $table.paymentExpectationConfirmedOn,
+        builder: (column) => ColumnOrderings(column),
+      );
+
   $$CategoriesTableOrderingComposer get categoryId {
     final $$CategoriesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5144,6 +5307,17 @@ class $$ExpensesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get paymentExpectationStatus => $composableBuilder(
+    column: $table.paymentExpectationStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get paymentExpectationConfirmedOn =>
+      $composableBuilder(
+        column: $table.paymentExpectationConfirmedOn,
+        builder: (column) => column,
+      );
+
   $$CategoriesTableAnnotationComposer get categoryId {
     final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -5258,6 +5432,9 @@ class $$ExpensesTableTableManager
                 Value<String> description = const Value.absent(),
                 Value<String?> paymentInstrumentId = const Value.absent(),
                 Value<String?> recurringSeriesId = const Value.absent(),
+                Value<String?> paymentExpectationStatus = const Value.absent(),
+                Value<String?> paymentExpectationConfirmedOn =
+                    const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpensesCompanion(
                 id: id,
@@ -5272,6 +5449,8 @@ class $$ExpensesTableTableManager
                 description: description,
                 paymentInstrumentId: paymentInstrumentId,
                 recurringSeriesId: recurringSeriesId,
+                paymentExpectationStatus: paymentExpectationStatus,
+                paymentExpectationConfirmedOn: paymentExpectationConfirmedOn,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5288,6 +5467,9 @@ class $$ExpensesTableTableManager
                 Value<String> description = const Value.absent(),
                 Value<String?> paymentInstrumentId = const Value.absent(),
                 Value<String?> recurringSeriesId = const Value.absent(),
+                Value<String?> paymentExpectationStatus = const Value.absent(),
+                Value<String?> paymentExpectationConfirmedOn =
+                    const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpensesCompanion.insert(
                 id: id,
@@ -5302,6 +5484,8 @@ class $$ExpensesTableTableManager
                 description: description,
                 paymentInstrumentId: paymentInstrumentId,
                 recurringSeriesId: recurringSeriesId,
+                paymentExpectationStatus: paymentExpectationStatus,
+                paymentExpectationConfirmedOn: paymentExpectationConfirmedOn,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

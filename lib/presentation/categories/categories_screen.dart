@@ -14,115 +14,114 @@ class CategoriesScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.navCategories),
-          bottom: TabBar(
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            tabs: [
-              Tab(text: l10n.categoriesTabExpenses),
-              Tab(text: l10n.categoriesTabIncome),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            _ExpenseCategoriesTabBody(),
-            _IncomeCategoriesTabBody(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ExpenseCategoriesTabBody extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final categoriesAsync = ref.watch(categoriesStreamProvider);
-    return categoriesAsync.when(
-      data: (cats) => ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          Text(
-            l10n.categoriesScreenSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+      child: Builder(
+        builder: (ctx) {
+          final tab = DefaultTabController.of(ctx);
+          return ListenableBuilder(
+            listenable: tab,
+            builder: (ctx2, _) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: Text(l10n.navCategories),
+                  bottom: TabBar(
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    tabs: [
+                      Tab(text: l10n.categoriesTabExpenses),
+                      Tab(text: l10n.categoriesTabIncome),
+                    ],
+                  ),
                 ),
-          ),
-          const SizedBox(height: 16),
-          ...cats.map(
-            (c) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _CategoryExpansionTile(category: c),
-            ),
-          ),
-        ],
-      ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
-    );
-  }
-}
-
-class _IncomeCategoriesTabBody extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final categoriesAsync = ref.watch(incomeCategoriesStreamProvider);
-    return categoriesAsync.when(
-      data: (cats) => ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          Text(
-            l10n.categoriesIncomeScreenSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                floatingActionButton: FloatingActionButton.extended(
+                  onPressed: () {
+                    if (tab.index == 0) {
+                      _showNewExpenseCategoryDialog(ctx2, ref);
+                    } else {
+                      _showNewIncomeCategoryDialog(ctx2, ref);
+                    }
+                  },
+                  icon: const Icon(Icons.add),
+                  label: Text(l10n.taxonomyAddCategoryFab),
                 ),
-          ),
-          const SizedBox(height: 16),
-          ...cats.map(
-            (c) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _IncomeCategoryExpansionTile(category: c),
-            ),
-          ),
-        ],
+                body: TabBarView(
+                  children: [
+                    _ExpenseCategoriesTabBody(),
+                    _IncomeCategoriesTabBody(),
+                  ],
+                ),
+              );
+            },
+          );
+        },
       ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
     );
   }
 }
 
-class _DescriptionEditorDialog extends StatefulWidget {
-  const _DescriptionEditorDialog({
+Future<void> _showNewExpenseCategoryDialog(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context)!;
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) => _TaxonomyFieldsDialog(
+      title: l10n.taxonomyNewCategoryTitle,
+      initialName: '',
+      initialDescription: '',
+      onSave: (name, description) async {
+        await ref.read(categoryRepositoryProvider).createCategory(
+              name: name,
+              description: description.isEmpty ? null : description,
+            );
+      },
+    ),
+  );
+}
+
+Future<void> _showNewIncomeCategoryDialog(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context)!;
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) => _TaxonomyFieldsDialog(
+      title: l10n.taxonomyNewCategoryTitle,
+      initialName: '',
+      initialDescription: '',
+      onSave: (name, description) async {
+        await ref.read(incomeTaxonomyRepositoryProvider).createIncomeCategory(
+              name: name,
+              description: description.isEmpty ? null : description,
+            );
+      },
+    ),
+  );
+}
+
+class _TaxonomyFieldsDialog extends StatefulWidget {
+  const _TaxonomyFieldsDialog({
     required this.title,
-    required this.label,
-    required this.initialText,
+    required this.initialName,
+    required this.initialDescription,
     required this.onSave,
   });
 
   final String title;
-  final String label;
-  final String initialText;
-  final Future<void> Function(String text) onSave;
+  final String initialName;
+  final String initialDescription;
+  final Future<void> Function(String name, String description) onSave;
 
   @override
-  State<_DescriptionEditorDialog> createState() =>
-      _DescriptionEditorDialogState();
+  State<_TaxonomyFieldsDialog> createState() => _TaxonomyFieldsDialogState();
 }
 
-class _DescriptionEditorDialogState extends State<_DescriptionEditorDialog> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.initialText);
+class _TaxonomyFieldsDialogState extends State<_TaxonomyFieldsDialog> {
+  late final TextEditingController _name =
+      TextEditingController(text: widget.initialName);
+  late final TextEditingController _desc =
+      TextEditingController(text: widget.initialDescription);
   var _busy = false;
 
   @override
   void dispose() {
-    _controller.dispose();
+    _name.dispose();
+    _desc.dispose();
     super.dispose();
   }
 
@@ -131,11 +130,25 @@ class _DescriptionEditorDialogState extends State<_DescriptionEditorDialog> {
     final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       title: Text(widget.title),
-      content: TextField(
-        controller: _controller,
-        maxLines: 3,
-        enabled: !_busy,
-        decoration: InputDecoration(labelText: widget.label),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _name,
+              enabled: !_busy,
+              decoration: InputDecoration(labelText: l10n.taxonomyNameLabel),
+              textCapitalization: TextCapitalization.sentences,
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _desc,
+              enabled: !_busy,
+              maxLines: 3,
+              decoration: InputDecoration(labelText: l10n.categoryDescriptionLabel),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -146,9 +159,13 @@ class _DescriptionEditorDialogState extends State<_DescriptionEditorDialog> {
           onPressed: _busy
               ? null
               : () async {
+                  final n = _name.text.trim();
+                  if (n.isEmpty) {
+                    return;
+                  }
                   setState(() => _busy = true);
                   try {
-                    await widget.onSave(_controller.text);
+                    await widget.onSave(n, _desc.text.trim());
                     if (context.mounted) {
                       Navigator.pop(context);
                     }
@@ -165,12 +182,103 @@ class _DescriptionEditorDialogState extends State<_DescriptionEditorDialog> {
   }
 }
 
-class _CategoryExpansionTile extends ConsumerWidget {
-  const _CategoryExpansionTile({required this.category});
+int _cmpTaxonomyActive<T>(T a, T b, bool Function(T) isActive, int Function(T) sort) {
+  final aa = isActive(a);
+  final ba = isActive(b);
+  if (aa != ba) {
+    return aa ? -1 : 1;
+  }
+  return sort(a).compareTo(sort(b));
+}
+
+class _ExpenseCategoriesTabBody extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final categoriesAsync = ref.watch(categoriesStreamProvider);
+    return categoriesAsync.when(
+      data: (cats) {
+        final sorted = [...cats]
+          ..sort(
+            (a, b) => _cmpTaxonomyActive(
+              a,
+              b,
+              (c) => c.isActive,
+              (c) => c.sortOrder,
+            ),
+          );
+        return ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            Text(
+              l10n.categoriesScreenSubtitle,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            ...sorted.map(
+              (c) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _ExpenseCategoryExpansionTile(category: c),
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('$e')),
+    );
+  }
+}
+
+class _IncomeCategoriesTabBody extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final categoriesAsync = ref.watch(incomeCategoriesStreamProvider);
+    return categoriesAsync.when(
+      data: (cats) {
+        final sorted = [...cats]
+          ..sort(
+            (a, b) => _cmpTaxonomyActive(
+              a,
+              b,
+              (c) => c.isActive,
+              (c) => c.sortOrder,
+            ),
+          );
+        return ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            Text(
+              l10n.categoriesIncomeScreenSubtitle,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            ...sorted.map(
+              (c) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _IncomeCategoryExpansionTile(category: c),
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('$e')),
+    );
+  }
+}
+
+class _ExpenseCategoryExpansionTile extends ConsumerWidget {
+  const _ExpenseCategoryExpansionTile({required this.category});
 
   final Category category;
 
-  static Future<void> _openCategoryEditor(
+  static Future<void> _openEditor(
     BuildContext context,
     WidgetRef ref,
     Category category,
@@ -178,18 +286,74 @@ class _CategoryExpansionTile extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     await showDialog<void>(
       context: context,
-      builder: (ctx) => _DescriptionEditorDialog(
-        title: l10n.categoryEditDescriptionTitle,
-        label: l10n.categoryDescriptionLabel,
-        initialText: category.description ?? '',
-        onSave: (text) => ref
-            .read(categoryRepositoryProvider)
-            .setCategoryDescription(category.id, text),
+      builder: (ctx) => _TaxonomyFieldsDialog(
+        title: l10n.taxonomyEditCategoryTitle,
+        initialName: category.name,
+        initialDescription: category.description ?? '',
+        onSave: (name, description) async {
+          final repo = ref.read(categoryRepositoryProvider);
+          await repo.setCategoryName(category.id, name);
+          await repo.setCategoryDescription(
+            category.id,
+            description.isEmpty ? null : description,
+          );
+        },
       ),
     );
   }
 
-  static Future<void> _openSubcategoryEditor(
+  static Future<void> _confirmDeactivateCategory(
+    BuildContext context,
+    WidgetRef ref,
+    Category category,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.taxonomyDeactivateCategoryTitle),
+        content: Text(l10n.taxonomyDeactivateCategoryMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.confirmDelete),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) {
+      await ref.read(categoryRepositoryProvider).deactivateCategory(category.id);
+    }
+  }
+
+  static Future<void> _showNewSubcategory(
+    BuildContext context,
+    WidgetRef ref,
+    String categoryId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => _TaxonomyFieldsDialog(
+        title: l10n.taxonomyNewSubcategoryTitle,
+        initialName: '',
+        initialDescription: '',
+        onSave: (name, description) async {
+          await ref.read(categoryRepositoryProvider).createSubcategory(
+                categoryId: categoryId,
+                name: name,
+                description: description.isEmpty ? null : description,
+              );
+        },
+      ),
+    );
+  }
+
+  static Future<void> _openSubEditor(
     BuildContext context,
     WidgetRef ref,
     Subcategory sub,
@@ -197,15 +361,56 @@ class _CategoryExpansionTile extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     await showDialog<void>(
       context: context,
-      builder: (ctx) => _DescriptionEditorDialog(
-        title: l10n.subcategoryEditDescriptionTitle,
-        label: l10n.categoryDescriptionLabel,
-        initialText: sub.description ?? '',
-        onSave: (text) => ref
-            .read(categoryRepositoryProvider)
-            .setSubcategoryDescription(sub.id, text),
+      builder: (ctx) => _TaxonomyFieldsDialog(
+        title: l10n.taxonomyEditSubcategoryTitle,
+        initialName: sub.name,
+        initialDescription: sub.description ?? '',
+        onSave: (name, description) async {
+          final repo = ref.read(categoryRepositoryProvider);
+          await repo.setSubcategoryName(sub.id, name);
+          await repo.setSubcategoryDescription(
+            sub.id,
+            description.isEmpty ? null : description,
+          );
+        },
       ),
     );
+  }
+
+  static Future<void> _confirmDeactivateSub(
+    BuildContext context,
+    WidgetRef ref,
+    Subcategory sub,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.taxonomyDeactivateSubcategoryTitle),
+        content: Text(l10n.taxonomyDeactivateSubcategoryMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.confirmDelete),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) {
+      try {
+        await ref.read(categoryRepositoryProvider).deleteSubcategory(sub.id);
+      } on ReservedSubcategoryException {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.cannotDeleteReservedSubcategory)),
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -217,110 +422,156 @@ class _CategoryExpansionTile extends ConsumerWidget {
     final catDesc = category.description?.trim();
     final parentColor = categoryAccentColor(category.id);
 
-    return Card(
-      margin: EdgeInsets.zero,
-      child: ExpansionTile(
-        leading: Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: parentColor,
-            shape: BoxShape.circle,
+    return Opacity(
+      opacity: category.isActive ? 1 : 0.72,
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: ExpansionTile(
+          leading: Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: parentColor,
+              shape: BoxShape.circle,
+            ),
           ),
-        ),
-        title: Row(
-          children: [
-            Expanded(child: Text(category.name)),
-            IconButton(
-              tooltip: l10n.categoryEditDescriptionTooltip,
-              icon: const Icon(Icons.edit_outlined),
-              visualDensity: VisualDensity.compact,
-              onPressed: () => _openCategoryEditor(context, ref, category),
-            ),
-          ],
-        ),
-        subtitle: catDesc != null && catDesc.isNotEmpty
-            ? Text(
-                catDesc,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              )
-            : null,
-        children: subsAsync.when(
-          data: (subs) {
-            final n = subs.length;
-            return subs.asMap().entries.map((e) {
-              final i = e.key;
-              final s = e.value;
-              final subDesc = s.description?.trim();
-              final tone = subcategoryTonalColor(parentColor, i, n);
-              return ListTile(
-                dense: true,
-                leading: Container(
-                  width: 8,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: tone,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  category.isActive
+                      ? category.name
+                      : '${category.name} ${l10n.taxonomyInactiveLabel}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                title: Text(s.name),
-                subtitle: subDesc != null && subDesc.isNotEmpty
-                    ? Text(
-                        subDesc,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      )
-                    : null,
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      tooltip: l10n.categoryEditDescriptionTooltip,
-                      icon: const Icon(Icons.edit_outlined, size: 20),
-                      visualDensity: VisualDensity.compact,
-                      onPressed: () =>
-                          _openSubcategoryEditor(context, ref, s),
-                    ),
-                    if (!s.isSystemReserved)
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline, size: 20),
-                        visualDensity: VisualDensity.compact,
-                        onPressed: () async {
-                          try {
-                            await ref
-                                .read(categoryRepositoryProvider)
-                                .deleteSubcategory(s.id);
-                          } on ReservedSubcategoryException {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    l10n.cannotDeleteReservedSubcategory,
-                                  ),
-                                ),
-                              );
-                            }
-                          }
-                        },
+              ),
+              IconButton(
+                tooltip: l10n.categoryEditDescriptionTooltip,
+                icon: const Icon(Icons.edit_outlined),
+                visualDensity: VisualDensity.compact,
+                onPressed: () => _openEditor(context, ref, category),
+              ),
+              if (category.isActive)
+                IconButton(
+                  tooltip: l10n.taxonomyDeactivateCategoryTooltip,
+                  icon: const Icon(Icons.visibility_off_outlined),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => _confirmDeactivateCategory(context, ref, category),
+                )
+              else
+                IconButton(
+                  tooltip: l10n.taxonomyReactivateTooltip,
+                  icon: const Icon(Icons.restore_outlined),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () =>
+                      ref.read(categoryRepositoryProvider).reactivateCategory(category.id),
+                ),
+            ],
+          ),
+          subtitle: catDesc != null && catDesc.isNotEmpty
+              ? Text(
+                  catDesc,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                  ],
-                ),
-              );
-            }).toList();
-          },
-          loading: () => [
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          ],
-          error: (e, _) => [
-            ListTile(title: Text('$e')),
-          ],
+                )
+              : null,
+          children: subsAsync.when(
+            data: (subs) {
+              final sorted = [...subs]
+                ..sort(
+                  (a, b) => _cmpTaxonomyActive(
+                    a,
+                    b,
+                    (s) => s.isActive,
+                    (s) => s.sortOrder,
+                  ),
+                );
+              final tiles = sorted.asMap().entries.map((e) {
+                final i = e.key;
+                final s = e.value;
+                final n = sorted.length;
+                final subDesc = s.description?.trim();
+                final tone = subcategoryTonalColor(parentColor, i, n);
+                return ListTile(
+                  dense: true,
+                  leading: Container(
+                    width: 8,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: tone,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  title: Text(
+                    s.isActive ? s.name : '${s.name} ${l10n.taxonomyInactiveLabel}',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: subDesc != null && subDesc.isNotEmpty
+                      ? Text(
+                          subDesc,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      : null,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: l10n.categoryEditDescriptionTooltip,
+                        icon: const Icon(Icons.edit_outlined, size: 20),
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => _openSubEditor(context, ref, s),
+                      ),
+                      if (!s.isSystemReserved)
+                        s.isActive
+                            ? IconButton(
+                                tooltip: l10n.taxonomyDeactivateSubcategoryTooltip,
+                                icon: const Icon(Icons.visibility_off_outlined, size: 20),
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () =>
+                                    _confirmDeactivateSub(context, ref, s),
+                              )
+                            : IconButton(
+                                tooltip: l10n.taxonomyReactivateTooltip,
+                                icon: const Icon(Icons.restore_outlined, size: 20),
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () => ref
+                                    .read(categoryRepositoryProvider)
+                                    .reactivateSubcategory(s.id),
+                              ),
+                    ],
+                  ),
+                );
+              }).toList();
+              return [
+                ...tiles,
+                if (category.isActive)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () =>
+                          _showNewSubcategory(context, ref, category.id),
+                      icon: const Icon(Icons.add, size: 20),
+                      label: Text(l10n.taxonomyAddSubcategoryButton),
+                    ),
+                  ),
+              ];
+            },
+            loading: () => [
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ],
+            error: (e, _) => [
+              ListTile(title: Text('$e')),
+            ],
+          ),
         ),
       ),
     );
@@ -332,7 +583,7 @@ class _IncomeCategoryExpansionTile extends ConsumerWidget {
 
   final IncomeCategory category;
 
-  static Future<void> _openCategoryEditor(
+  static Future<void> _openEditor(
     BuildContext context,
     WidgetRef ref,
     IncomeCategory category,
@@ -340,18 +591,76 @@ class _IncomeCategoryExpansionTile extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     await showDialog<void>(
       context: context,
-      builder: (ctx) => _DescriptionEditorDialog(
-        title: l10n.categoryEditDescriptionTitle,
-        label: l10n.categoryDescriptionLabel,
-        initialText: category.description ?? '',
-        onSave: (text) => ref
-            .read(incomeTaxonomyRepositoryProvider)
-            .setIncomeCategoryDescription(category.id, text),
+      builder: (ctx) => _TaxonomyFieldsDialog(
+        title: l10n.taxonomyEditCategoryTitle,
+        initialName: category.name,
+        initialDescription: category.description ?? '',
+        onSave: (name, description) async {
+          final repo = ref.read(incomeTaxonomyRepositoryProvider);
+          await repo.setIncomeCategoryName(category.id, name);
+          await repo.setIncomeCategoryDescription(
+            category.id,
+            description.isEmpty ? null : description,
+          );
+        },
       ),
     );
   }
 
-  static Future<void> _openSubcategoryEditor(
+  static Future<void> _confirmDeactivateCategory(
+    BuildContext context,
+    WidgetRef ref,
+    IncomeCategory category,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.taxonomyDeactivateIncomeCategoryTitle),
+        content: Text(l10n.taxonomyDeactivateIncomeCategoryMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.confirmDelete),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) {
+      await ref
+          .read(incomeTaxonomyRepositoryProvider)
+          .deactivateIncomeCategory(category.id);
+    }
+  }
+
+  static Future<void> _showNewSubcategory(
+    BuildContext context,
+    WidgetRef ref,
+    String categoryId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => _TaxonomyFieldsDialog(
+        title: l10n.taxonomyNewSubcategoryTitle,
+        initialName: '',
+        initialDescription: '',
+        onSave: (name, description) async {
+          await ref.read(incomeTaxonomyRepositoryProvider).createIncomeSubcategory(
+                categoryId: categoryId,
+                name: name,
+                description: description.isEmpty ? null : description,
+              );
+        },
+      ),
+    );
+  }
+
+  static Future<void> _openSubEditor(
     BuildContext context,
     WidgetRef ref,
     IncomeSubcategory sub,
@@ -359,15 +668,56 @@ class _IncomeCategoryExpansionTile extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     await showDialog<void>(
       context: context,
-      builder: (ctx) => _DescriptionEditorDialog(
-        title: l10n.subcategoryEditDescriptionTitle,
-        label: l10n.categoryDescriptionLabel,
-        initialText: sub.description ?? '',
-        onSave: (text) => ref
-            .read(incomeTaxonomyRepositoryProvider)
-            .setIncomeSubcategoryDescription(sub.id, text),
+      builder: (ctx) => _TaxonomyFieldsDialog(
+        title: l10n.taxonomyEditSubcategoryTitle,
+        initialName: sub.name,
+        initialDescription: sub.description ?? '',
+        onSave: (name, description) async {
+          final repo = ref.read(incomeTaxonomyRepositoryProvider);
+          await repo.setIncomeSubcategoryName(sub.id, name);
+          await repo.setIncomeSubcategoryDescription(
+            sub.id,
+            description.isEmpty ? null : description,
+          );
+        },
       ),
     );
+  }
+
+  static Future<void> _confirmDeactivateSub(
+    BuildContext context,
+    WidgetRef ref,
+    IncomeSubcategory sub,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.taxonomyDeactivateIncomeSubcategoryTitle),
+        content: Text(l10n.taxonomyDeactivateIncomeSubcategoryMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.confirmDelete),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) {
+      try {
+        await ref.read(incomeTaxonomyRepositoryProvider).deleteIncomeSubcategory(sub.id);
+      } on ReservedSubcategoryException {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.cannotDeleteReservedSubcategory)),
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -379,110 +729,158 @@ class _IncomeCategoryExpansionTile extends ConsumerWidget {
     final catDesc = category.description?.trim();
     final parentColor = categoryAccentColor(category.id);
 
-    return Card(
-      margin: EdgeInsets.zero,
-      child: ExpansionTile(
-        leading: Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: parentColor,
-            shape: BoxShape.circle,
+    return Opacity(
+      opacity: category.isActive ? 1 : 0.72,
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: ExpansionTile(
+          leading: Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: parentColor,
+              shape: BoxShape.circle,
+            ),
           ),
-        ),
-        title: Row(
-          children: [
-            Expanded(child: Text(category.name)),
-            IconButton(
-              tooltip: l10n.categoryEditDescriptionTooltip,
-              icon: const Icon(Icons.edit_outlined),
-              visualDensity: VisualDensity.compact,
-              onPressed: () => _openCategoryEditor(context, ref, category),
-            ),
-          ],
-        ),
-        subtitle: catDesc != null && catDesc.isNotEmpty
-            ? Text(
-                catDesc,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              )
-            : null,
-        children: subsAsync.when(
-          data: (subs) {
-            final n = subs.length;
-            return subs.asMap().entries.map((e) {
-              final i = e.key;
-              final s = e.value;
-              final subDesc = s.description?.trim();
-              final tone = subcategoryTonalColor(parentColor, i, n);
-              return ListTile(
-                dense: true,
-                leading: Container(
-                  width: 8,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: tone,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  category.isActive
+                      ? category.name
+                      : '${category.name} ${l10n.taxonomyInactiveLabel}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                title: Text(s.name),
-                subtitle: subDesc != null && subDesc.isNotEmpty
-                    ? Text(
-                        subDesc,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      )
-                    : null,
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      tooltip: l10n.categoryEditDescriptionTooltip,
-                      icon: const Icon(Icons.edit_outlined, size: 20),
-                      visualDensity: VisualDensity.compact,
-                      onPressed: () =>
-                          _openSubcategoryEditor(context, ref, s),
-                    ),
-                    if (!s.isSystemReserved)
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline, size: 20),
-                        visualDensity: VisualDensity.compact,
-                        onPressed: () async {
-                          try {
-                            await ref
-                                .read(incomeTaxonomyRepositoryProvider)
-                                .deleteIncomeSubcategory(s.id);
-                          } on ReservedSubcategoryException {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    l10n.cannotDeleteReservedSubcategory,
-                                  ),
-                                ),
-                              );
-                            }
-                          }
-                        },
+              ),
+              IconButton(
+                tooltip: l10n.categoryEditDescriptionTooltip,
+                icon: const Icon(Icons.edit_outlined),
+                visualDensity: VisualDensity.compact,
+                onPressed: () => _openEditor(context, ref, category),
+              ),
+              if (category.isActive)
+                IconButton(
+                  tooltip: l10n.taxonomyDeactivateCategoryTooltip,
+                  icon: const Icon(Icons.visibility_off_outlined),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () =>
+                      _confirmDeactivateCategory(context, ref, category),
+                )
+              else
+                IconButton(
+                  tooltip: l10n.taxonomyReactivateTooltip,
+                  icon: const Icon(Icons.restore_outlined),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => ref
+                      .read(incomeTaxonomyRepositoryProvider)
+                      .reactivateIncomeCategory(category.id),
+                ),
+            ],
+          ),
+          subtitle: catDesc != null && catDesc.isNotEmpty
+              ? Text(
+                  catDesc,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                  ],
-                ),
-              );
-            }).toList();
-          },
-          loading: () => [
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          ],
-          error: (e, _) => [
-            ListTile(title: Text('$e')),
-          ],
+                )
+              : null,
+          children: subsAsync.when(
+            data: (subs) {
+              final sorted = [...subs]
+                ..sort(
+                  (a, b) => _cmpTaxonomyActive(
+                    a,
+                    b,
+                    (s) => s.isActive,
+                    (s) => s.sortOrder,
+                  ),
+                );
+              final tiles = sorted.asMap().entries.map((e) {
+                final i = e.key;
+                final s = e.value;
+                final n = sorted.length;
+                final subDesc = s.description?.trim();
+                final tone = subcategoryTonalColor(parentColor, i, n);
+                return ListTile(
+                  dense: true,
+                  leading: Container(
+                    width: 8,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: tone,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  title: Text(
+                    s.isActive ? s.name : '${s.name} ${l10n.taxonomyInactiveLabel}',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: subDesc != null && subDesc.isNotEmpty
+                      ? Text(
+                          subDesc,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      : null,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: l10n.categoryEditDescriptionTooltip,
+                        icon: const Icon(Icons.edit_outlined, size: 20),
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => _openSubEditor(context, ref, s),
+                      ),
+                      if (!s.isSystemReserved)
+                        s.isActive
+                            ? IconButton(
+                                tooltip: l10n.taxonomyDeactivateSubcategoryTooltip,
+                                icon: const Icon(Icons.visibility_off_outlined, size: 20),
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () =>
+                                    _confirmDeactivateSub(context, ref, s),
+                              )
+                            : IconButton(
+                                tooltip: l10n.taxonomyReactivateTooltip,
+                                icon: const Icon(Icons.restore_outlined, size: 20),
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () => ref
+                                    .read(incomeTaxonomyRepositoryProvider)
+                                    .reactivateIncomeSubcategory(s.id),
+                              ),
+                    ],
+                  ),
+                );
+              }).toList();
+              return [
+                ...tiles,
+                if (category.isActive)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () =>
+                          _showNewSubcategory(context, ref, category.id),
+                      icon: const Icon(Icons.add, size: 20),
+                      label: Text(l10n.taxonomyAddSubcategoryButton),
+                    ),
+                  ),
+              ];
+            },
+            loading: () => [
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ],
+            error: (e, _) => [
+              ListTile(title: Text('$e')),
+            ],
+          ),
         ),
       ),
     );

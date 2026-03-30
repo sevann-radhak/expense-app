@@ -373,6 +373,7 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
             name: c.name,
             description: Value(c.description),
             sortOrder: Value(c.sortOrder),
+            isActive: Value(c.isActive),
           ),
         );
       }
@@ -387,6 +388,7 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
             slug: s.slug,
             isSystemReserved: Value(s.isSystemReserved),
             sortOrder: Value(s.sortOrder),
+            isActive: Value(s.isActive),
           ),
         );
       }
@@ -398,6 +400,7 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
             name: c.name,
             description: Value(c.description),
             sortOrder: Value(c.sortOrder),
+            isActive: Value(c.isActive),
           ),
         );
       }
@@ -412,6 +415,7 @@ Future<BookBackupSanitizeReport> importBookBackupReplacingAll(
             slug: s.slug,
             isSystemReserved: Value(s.isSystemReserved),
             sortOrder: Value(s.sortOrder),
+            isActive: Value(s.isActive),
           ),
         );
       }

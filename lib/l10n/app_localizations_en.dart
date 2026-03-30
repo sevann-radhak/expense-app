@@ -290,6 +290,73 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryEditDescriptionTooltip => 'Edit note';
 
   @override
+  String get taxonomyNameLabel => 'Name';
+
+  @override
+  String get taxonomyAddCategoryFab => 'Add category';
+
+  @override
+  String get taxonomyAddSubcategoryButton => 'Add subcategory';
+
+  @override
+  String get taxonomyEditCategoryTitle => 'Edit category';
+
+  @override
+  String get taxonomyEditSubcategoryTitle => 'Edit subcategory';
+
+  @override
+  String get taxonomyNewCategoryTitle => 'New category';
+
+  @override
+  String get taxonomyNewSubcategoryTitle => 'New subcategory';
+
+  @override
+  String get taxonomyInactiveLabel => '(inactive)';
+
+  @override
+  String get taxonomyDeactivateCategoryTitle => 'Deactivate category?';
+
+  @override
+  String get taxonomyDeactivateCategoryMessage =>
+      'It will disappear from pickers when adding expenses. Existing expenses and reports still use this category and its subcategories. All subcategories in this group are deactivated too.';
+
+  @override
+  String get taxonomyDeactivateSubcategoryTitle => 'Deactivate subcategory?';
+
+  @override
+  String get taxonomyDeactivateSubcategoryMessage =>
+      'It will disappear from pickers. Existing expenses and reports still use it.';
+
+  @override
+  String get taxonomyDeactivateIncomeCategoryTitle =>
+      'Deactivate income category?';
+
+  @override
+  String get taxonomyDeactivateIncomeCategoryMessage =>
+      'It will disappear from pickers when adding income. Existing income and reports still use this category and its subcategories. All subcategories in this group are deactivated too.';
+
+  @override
+  String get taxonomyDeactivateIncomeSubcategoryTitle =>
+      'Deactivate income subcategory?';
+
+  @override
+  String get taxonomyDeactivateIncomeSubcategoryMessage =>
+      'It will disappear from pickers. Existing income and reports still use it.';
+
+  @override
+  String get taxonomyReactivateTooltip => 'Restore to pickers';
+
+  @override
+  String get taxonomyDeactivateCategoryTooltip => 'Deactivate category';
+
+  @override
+  String get taxonomyDeactivateSubcategoryTooltip => 'Deactivate subcategory';
+
+  @override
+  String get taxonomyMustBeActiveForNewEntry =>
+      'Choose an active category and subcategory for new entries.';
+
+  @override
   String get homeTitle => 'Expenses';
 
   @override

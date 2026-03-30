@@ -50,8 +50,29 @@ class $CategoriesTable extends Categories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, description, sortOrder];
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    description,
+    sortOrder,
+    isActive,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -92,6 +113,12 @@ class $CategoriesTable extends Categories
         sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
       );
     }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
     return context;
   }
 
@@ -117,6 +144,10 @@ class $CategoriesTable extends Categories
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
       )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
     );
   }
 
@@ -131,11 +162,13 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
   final String name;
   final String? description;
   final int sortOrder;
+  final bool isActive;
   const CategoryRow({
     required this.id,
     required this.name,
     this.description,
     required this.sortOrder,
+    required this.isActive,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -146,6 +179,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       map['description'] = Variable<String>(description);
     }
     map['sort_order'] = Variable<int>(sortOrder);
+    map['is_active'] = Variable<bool>(isActive);
     return map;
   }
 
@@ -157,6 +191,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           ? const Value.absent()
           : Value(description),
       sortOrder: Value(sortOrder),
+      isActive: Value(isActive),
     );
   }
 
@@ -170,6 +205,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
     );
   }
   @override
@@ -180,6 +216,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
       'sortOrder': serializer.toJson<int>(sortOrder),
+      'isActive': serializer.toJson<bool>(isActive),
     };
   }
 
@@ -188,11 +225,13 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
     String? name,
     Value<String?> description = const Value.absent(),
     int? sortOrder,
+    bool? isActive,
   }) => CategoryRow(
     id: id ?? this.id,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
     sortOrder: sortOrder ?? this.sortOrder,
+    isActive: isActive ?? this.isActive,
   );
   CategoryRow copyWithCompanion(CategoriesCompanion data) {
     return CategoryRow(
@@ -202,6 +241,7 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           ? data.description.value
           : this.description,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
     );
   }
 
@@ -211,13 +251,14 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
-          ..write('sortOrder: $sortOrder')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isActive: $isActive')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description, sortOrder);
+  int get hashCode => Object.hash(id, name, description, sortOrder, isActive);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -225,7 +266,8 @@ class CategoryRow extends DataClass implements Insertable<CategoryRow> {
           other.id == this.id &&
           other.name == this.name &&
           other.description == this.description &&
-          other.sortOrder == this.sortOrder);
+          other.sortOrder == this.sortOrder &&
+          other.isActive == this.isActive);
 }
 
 class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
@@ -233,12 +275,14 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
   final Value<String> name;
   final Value<String?> description;
   final Value<int> sortOrder;
+  final Value<bool> isActive;
   final Value<int> rowid;
   const CategoriesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.isActive = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CategoriesCompanion.insert({
@@ -246,6 +290,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     required String name,
     this.description = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.isActive = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name);
@@ -254,6 +299,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Expression<String>? name,
     Expression<String>? description,
     Expression<int>? sortOrder,
+    Expression<bool>? isActive,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -261,6 +307,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       if (name != null) 'name': name,
       if (description != null) 'description': description,
       if (sortOrder != null) 'sort_order': sortOrder,
+      if (isActive != null) 'is_active': isActive,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -270,6 +317,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     Value<String>? name,
     Value<String?>? description,
     Value<int>? sortOrder,
+    Value<bool>? isActive,
     Value<int>? rowid,
   }) {
     return CategoriesCompanion(
@@ -277,6 +325,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
       name: name ?? this.name,
       description: description ?? this.description,
       sortOrder: sortOrder ?? this.sortOrder,
+      isActive: isActive ?? this.isActive,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -296,6 +345,9 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -309,6 +361,7 @@ class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('sortOrder: $sortOrder, ')
+          ..write('isActive: $isActive, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -400,6 +453,21 @@ class $SubcategoriesTable extends Subcategories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -409,6 +477,7 @@ class $SubcategoriesTable extends Subcategories
     slug,
     isSystemReserved,
     sortOrder,
+    isActive,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -475,6 +544,12 @@ class $SubcategoriesTable extends Subcategories
         sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
       );
     }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
     return context;
   }
 
@@ -512,6 +587,10 @@ class $SubcategoriesTable extends Subcategories
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
       )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
     );
   }
 
@@ -529,6 +608,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
   final String slug;
   final bool isSystemReserved;
   final int sortOrder;
+  final bool isActive;
   const SubcategoryRow({
     required this.id,
     required this.categoryId,
@@ -537,6 +617,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
     required this.slug,
     required this.isSystemReserved,
     required this.sortOrder,
+    required this.isActive,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -550,6 +631,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
     map['slug'] = Variable<String>(slug);
     map['is_system_reserved'] = Variable<bool>(isSystemReserved);
     map['sort_order'] = Variable<int>(sortOrder);
+    map['is_active'] = Variable<bool>(isActive);
     return map;
   }
 
@@ -564,6 +646,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
       slug: Value(slug),
       isSystemReserved: Value(isSystemReserved),
       sortOrder: Value(sortOrder),
+      isActive: Value(isActive),
     );
   }
 
@@ -580,6 +663,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
       slug: serializer.fromJson<String>(json['slug']),
       isSystemReserved: serializer.fromJson<bool>(json['isSystemReserved']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
     );
   }
   @override
@@ -593,6 +677,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
       'slug': serializer.toJson<String>(slug),
       'isSystemReserved': serializer.toJson<bool>(isSystemReserved),
       'sortOrder': serializer.toJson<int>(sortOrder),
+      'isActive': serializer.toJson<bool>(isActive),
     };
   }
 
@@ -604,6 +689,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
     String? slug,
     bool? isSystemReserved,
     int? sortOrder,
+    bool? isActive,
   }) => SubcategoryRow(
     id: id ?? this.id,
     categoryId: categoryId ?? this.categoryId,
@@ -612,6 +698,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
     slug: slug ?? this.slug,
     isSystemReserved: isSystemReserved ?? this.isSystemReserved,
     sortOrder: sortOrder ?? this.sortOrder,
+    isActive: isActive ?? this.isActive,
   );
   SubcategoryRow copyWithCompanion(SubcategoriesCompanion data) {
     return SubcategoryRow(
@@ -628,6 +715,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
           ? data.isSystemReserved.value
           : this.isSystemReserved,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
     );
   }
 
@@ -640,7 +728,8 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
           ..write('description: $description, ')
           ..write('slug: $slug, ')
           ..write('isSystemReserved: $isSystemReserved, ')
-          ..write('sortOrder: $sortOrder')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isActive: $isActive')
           ..write(')'))
         .toString();
   }
@@ -654,6 +743,7 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
     slug,
     isSystemReserved,
     sortOrder,
+    isActive,
   );
   @override
   bool operator ==(Object other) =>
@@ -665,7 +755,8 @@ class SubcategoryRow extends DataClass implements Insertable<SubcategoryRow> {
           other.description == this.description &&
           other.slug == this.slug &&
           other.isSystemReserved == this.isSystemReserved &&
-          other.sortOrder == this.sortOrder);
+          other.sortOrder == this.sortOrder &&
+          other.isActive == this.isActive);
 }
 
 class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
@@ -676,6 +767,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
   final Value<String> slug;
   final Value<bool> isSystemReserved;
   final Value<int> sortOrder;
+  final Value<bool> isActive;
   final Value<int> rowid;
   const SubcategoriesCompanion({
     this.id = const Value.absent(),
@@ -685,6 +777,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
     this.slug = const Value.absent(),
     this.isSystemReserved = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.isActive = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SubcategoriesCompanion.insert({
@@ -695,6 +788,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
     required String slug,
     this.isSystemReserved = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.isActive = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        categoryId = Value(categoryId),
@@ -708,6 +802,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
     Expression<String>? slug,
     Expression<bool>? isSystemReserved,
     Expression<int>? sortOrder,
+    Expression<bool>? isActive,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -718,6 +813,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
       if (slug != null) 'slug': slug,
       if (isSystemReserved != null) 'is_system_reserved': isSystemReserved,
       if (sortOrder != null) 'sort_order': sortOrder,
+      if (isActive != null) 'is_active': isActive,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -730,6 +826,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
     Value<String>? slug,
     Value<bool>? isSystemReserved,
     Value<int>? sortOrder,
+    Value<bool>? isActive,
     Value<int>? rowid,
   }) {
     return SubcategoriesCompanion(
@@ -740,6 +837,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
       slug: slug ?? this.slug,
       isSystemReserved: isSystemReserved ?? this.isSystemReserved,
       sortOrder: sortOrder ?? this.sortOrder,
+      isActive: isActive ?? this.isActive,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -768,6 +866,9 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -784,6 +885,7 @@ class SubcategoriesCompanion extends UpdateCompanion<SubcategoryRow> {
           ..write('slug: $slug, ')
           ..write('isSystemReserved: $isSystemReserved, ')
           ..write('sortOrder: $sortOrder, ')
+          ..write('isActive: $isActive, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -837,8 +939,29 @@ class $IncomeCategoriesTable extends IncomeCategories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, description, sortOrder];
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    description,
+    sortOrder,
+    isActive,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -879,6 +1002,12 @@ class $IncomeCategoriesTable extends IncomeCategories
         sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
       );
     }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
     return context;
   }
 
@@ -904,6 +1033,10 @@ class $IncomeCategoriesTable extends IncomeCategories
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
       )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
     );
   }
 
@@ -919,11 +1052,13 @@ class IncomeCategoryRow extends DataClass
   final String name;
   final String? description;
   final int sortOrder;
+  final bool isActive;
   const IncomeCategoryRow({
     required this.id,
     required this.name,
     this.description,
     required this.sortOrder,
+    required this.isActive,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -934,6 +1069,7 @@ class IncomeCategoryRow extends DataClass
       map['description'] = Variable<String>(description);
     }
     map['sort_order'] = Variable<int>(sortOrder);
+    map['is_active'] = Variable<bool>(isActive);
     return map;
   }
 
@@ -945,6 +1081,7 @@ class IncomeCategoryRow extends DataClass
           ? const Value.absent()
           : Value(description),
       sortOrder: Value(sortOrder),
+      isActive: Value(isActive),
     );
   }
 
@@ -958,6 +1095,7 @@ class IncomeCategoryRow extends DataClass
       name: serializer.fromJson<String>(json['name']),
       description: serializer.fromJson<String?>(json['description']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
     );
   }
   @override
@@ -968,6 +1106,7 @@ class IncomeCategoryRow extends DataClass
       'name': serializer.toJson<String>(name),
       'description': serializer.toJson<String?>(description),
       'sortOrder': serializer.toJson<int>(sortOrder),
+      'isActive': serializer.toJson<bool>(isActive),
     };
   }
 
@@ -976,11 +1115,13 @@ class IncomeCategoryRow extends DataClass
     String? name,
     Value<String?> description = const Value.absent(),
     int? sortOrder,
+    bool? isActive,
   }) => IncomeCategoryRow(
     id: id ?? this.id,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
     sortOrder: sortOrder ?? this.sortOrder,
+    isActive: isActive ?? this.isActive,
   );
   IncomeCategoryRow copyWithCompanion(IncomeCategoriesCompanion data) {
     return IncomeCategoryRow(
@@ -990,6 +1131,7 @@ class IncomeCategoryRow extends DataClass
           ? data.description.value
           : this.description,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
     );
   }
 
@@ -999,13 +1141,14 @@ class IncomeCategoryRow extends DataClass
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('description: $description, ')
-          ..write('sortOrder: $sortOrder')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isActive: $isActive')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description, sortOrder);
+  int get hashCode => Object.hash(id, name, description, sortOrder, isActive);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1013,7 +1156,8 @@ class IncomeCategoryRow extends DataClass
           other.id == this.id &&
           other.name == this.name &&
           other.description == this.description &&
-          other.sortOrder == this.sortOrder);
+          other.sortOrder == this.sortOrder &&
+          other.isActive == this.isActive);
 }
 
 class IncomeCategoriesCompanion extends UpdateCompanion<IncomeCategoryRow> {
@@ -1021,12 +1165,14 @@ class IncomeCategoriesCompanion extends UpdateCompanion<IncomeCategoryRow> {
   final Value<String> name;
   final Value<String?> description;
   final Value<int> sortOrder;
+  final Value<bool> isActive;
   final Value<int> rowid;
   const IncomeCategoriesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.isActive = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   IncomeCategoriesCompanion.insert({
@@ -1034,6 +1180,7 @@ class IncomeCategoriesCompanion extends UpdateCompanion<IncomeCategoryRow> {
     required String name,
     this.description = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.isActive = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name);
@@ -1042,6 +1189,7 @@ class IncomeCategoriesCompanion extends UpdateCompanion<IncomeCategoryRow> {
     Expression<String>? name,
     Expression<String>? description,
     Expression<int>? sortOrder,
+    Expression<bool>? isActive,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1049,6 +1197,7 @@ class IncomeCategoriesCompanion extends UpdateCompanion<IncomeCategoryRow> {
       if (name != null) 'name': name,
       if (description != null) 'description': description,
       if (sortOrder != null) 'sort_order': sortOrder,
+      if (isActive != null) 'is_active': isActive,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1058,6 +1207,7 @@ class IncomeCategoriesCompanion extends UpdateCompanion<IncomeCategoryRow> {
     Value<String>? name,
     Value<String?>? description,
     Value<int>? sortOrder,
+    Value<bool>? isActive,
     Value<int>? rowid,
   }) {
     return IncomeCategoriesCompanion(
@@ -1065,6 +1215,7 @@ class IncomeCategoriesCompanion extends UpdateCompanion<IncomeCategoryRow> {
       name: name ?? this.name,
       description: description ?? this.description,
       sortOrder: sortOrder ?? this.sortOrder,
+      isActive: isActive ?? this.isActive,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1084,6 +1235,9 @@ class IncomeCategoriesCompanion extends UpdateCompanion<IncomeCategoryRow> {
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1097,6 +1251,7 @@ class IncomeCategoriesCompanion extends UpdateCompanion<IncomeCategoryRow> {
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('sortOrder: $sortOrder, ')
+          ..write('isActive: $isActive, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1188,6 +1343,21 @@ class $IncomeSubcategoriesTable extends IncomeSubcategories
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1197,6 +1367,7 @@ class $IncomeSubcategoriesTable extends IncomeSubcategories
     slug,
     isSystemReserved,
     sortOrder,
+    isActive,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1263,6 +1434,12 @@ class $IncomeSubcategoriesTable extends IncomeSubcategories
         sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
       );
     }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
     return context;
   }
 
@@ -1300,6 +1477,10 @@ class $IncomeSubcategoriesTable extends IncomeSubcategories
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
       )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
     );
   }
 
@@ -1318,6 +1499,7 @@ class IncomeSubcategoryRow extends DataClass
   final String slug;
   final bool isSystemReserved;
   final int sortOrder;
+  final bool isActive;
   const IncomeSubcategoryRow({
     required this.id,
     required this.categoryId,
@@ -1326,6 +1508,7 @@ class IncomeSubcategoryRow extends DataClass
     required this.slug,
     required this.isSystemReserved,
     required this.sortOrder,
+    required this.isActive,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1339,6 +1522,7 @@ class IncomeSubcategoryRow extends DataClass
     map['slug'] = Variable<String>(slug);
     map['is_system_reserved'] = Variable<bool>(isSystemReserved);
     map['sort_order'] = Variable<int>(sortOrder);
+    map['is_active'] = Variable<bool>(isActive);
     return map;
   }
 
@@ -1353,6 +1537,7 @@ class IncomeSubcategoryRow extends DataClass
       slug: Value(slug),
       isSystemReserved: Value(isSystemReserved),
       sortOrder: Value(sortOrder),
+      isActive: Value(isActive),
     );
   }
 
@@ -1369,6 +1554,7 @@ class IncomeSubcategoryRow extends DataClass
       slug: serializer.fromJson<String>(json['slug']),
       isSystemReserved: serializer.fromJson<bool>(json['isSystemReserved']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
     );
   }
   @override
@@ -1382,6 +1568,7 @@ class IncomeSubcategoryRow extends DataClass
       'slug': serializer.toJson<String>(slug),
       'isSystemReserved': serializer.toJson<bool>(isSystemReserved),
       'sortOrder': serializer.toJson<int>(sortOrder),
+      'isActive': serializer.toJson<bool>(isActive),
     };
   }
 
@@ -1393,6 +1580,7 @@ class IncomeSubcategoryRow extends DataClass
     String? slug,
     bool? isSystemReserved,
     int? sortOrder,
+    bool? isActive,
   }) => IncomeSubcategoryRow(
     id: id ?? this.id,
     categoryId: categoryId ?? this.categoryId,
@@ -1401,6 +1589,7 @@ class IncomeSubcategoryRow extends DataClass
     slug: slug ?? this.slug,
     isSystemReserved: isSystemReserved ?? this.isSystemReserved,
     sortOrder: sortOrder ?? this.sortOrder,
+    isActive: isActive ?? this.isActive,
   );
   IncomeSubcategoryRow copyWithCompanion(IncomeSubcategoriesCompanion data) {
     return IncomeSubcategoryRow(
@@ -1417,6 +1606,7 @@ class IncomeSubcategoryRow extends DataClass
           ? data.isSystemReserved.value
           : this.isSystemReserved,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
     );
   }
 
@@ -1429,7 +1619,8 @@ class IncomeSubcategoryRow extends DataClass
           ..write('description: $description, ')
           ..write('slug: $slug, ')
           ..write('isSystemReserved: $isSystemReserved, ')
-          ..write('sortOrder: $sortOrder')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isActive: $isActive')
           ..write(')'))
         .toString();
   }
@@ -1443,6 +1634,7 @@ class IncomeSubcategoryRow extends DataClass
     slug,
     isSystemReserved,
     sortOrder,
+    isActive,
   );
   @override
   bool operator ==(Object other) =>
@@ -1454,7 +1646,8 @@ class IncomeSubcategoryRow extends DataClass
           other.description == this.description &&
           other.slug == this.slug &&
           other.isSystemReserved == this.isSystemReserved &&
-          other.sortOrder == this.sortOrder);
+          other.sortOrder == this.sortOrder &&
+          other.isActive == this.isActive);
 }
 
 class IncomeSubcategoriesCompanion
@@ -1466,6 +1659,7 @@ class IncomeSubcategoriesCompanion
   final Value<String> slug;
   final Value<bool> isSystemReserved;
   final Value<int> sortOrder;
+  final Value<bool> isActive;
   final Value<int> rowid;
   const IncomeSubcategoriesCompanion({
     this.id = const Value.absent(),
@@ -1475,6 +1669,7 @@ class IncomeSubcategoriesCompanion
     this.slug = const Value.absent(),
     this.isSystemReserved = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.isActive = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   IncomeSubcategoriesCompanion.insert({
@@ -1485,6 +1680,7 @@ class IncomeSubcategoriesCompanion
     required String slug,
     this.isSystemReserved = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.isActive = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        categoryId = Value(categoryId),
@@ -1498,6 +1694,7 @@ class IncomeSubcategoriesCompanion
     Expression<String>? slug,
     Expression<bool>? isSystemReserved,
     Expression<int>? sortOrder,
+    Expression<bool>? isActive,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1508,6 +1705,7 @@ class IncomeSubcategoriesCompanion
       if (slug != null) 'slug': slug,
       if (isSystemReserved != null) 'is_system_reserved': isSystemReserved,
       if (sortOrder != null) 'sort_order': sortOrder,
+      if (isActive != null) 'is_active': isActive,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1520,6 +1718,7 @@ class IncomeSubcategoriesCompanion
     Value<String>? slug,
     Value<bool>? isSystemReserved,
     Value<int>? sortOrder,
+    Value<bool>? isActive,
     Value<int>? rowid,
   }) {
     return IncomeSubcategoriesCompanion(
@@ -1530,6 +1729,7 @@ class IncomeSubcategoriesCompanion
       slug: slug ?? this.slug,
       isSystemReserved: isSystemReserved ?? this.isSystemReserved,
       sortOrder: sortOrder ?? this.sortOrder,
+      isActive: isActive ?? this.isActive,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1558,6 +1758,9 @@ class IncomeSubcategoriesCompanion
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1574,6 +1777,7 @@ class IncomeSubcategoriesCompanion
           ..write('slug: $slug, ')
           ..write('isSystemReserved: $isSystemReserved, ')
           ..write('sortOrder: $sortOrder, ')
+          ..write('isActive: $isActive, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6771,6 +6975,7 @@ typedef $$CategoriesTableCreateCompanionBuilder =
       required String name,
       Value<String?> description,
       Value<int> sortOrder,
+      Value<bool> isActive,
       Value<int> rowid,
     });
 typedef $$CategoriesTableUpdateCompanionBuilder =
@@ -6779,6 +6984,7 @@ typedef $$CategoriesTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String?> description,
       Value<int> sortOrder,
+      Value<bool> isActive,
       Value<int> rowid,
     });
 
@@ -6901,6 +7107,11 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7033,6 +7244,11 @@ class $$CategoriesTableOrderingComposer
     column: $table.sortOrder,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CategoriesTableAnnotationComposer
@@ -7057,6 +7273,9 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
 
   Expression<T> subcategoriesRefs<T extends Object>(
     Expression<T> Function($$SubcategoriesTableAnnotationComposer a) f,
@@ -7196,12 +7415,14 @@ class $$CategoriesTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion(
                 id: id,
                 name: name,
                 description: description,
                 sortOrder: sortOrder,
+                isActive: isActive,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7210,12 +7431,14 @@ class $$CategoriesTableTableManager
                 required String name,
                 Value<String?> description = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CategoriesCompanion.insert(
                 id: id,
                 name: name,
                 description: description,
                 sortOrder: sortOrder,
+                isActive: isActive,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -7364,6 +7587,7 @@ typedef $$SubcategoriesTableCreateCompanionBuilder =
       required String slug,
       Value<bool> isSystemReserved,
       Value<int> sortOrder,
+      Value<bool> isActive,
       Value<int> rowid,
     });
 typedef $$SubcategoriesTableUpdateCompanionBuilder =
@@ -7375,6 +7599,7 @@ typedef $$SubcategoriesTableUpdateCompanionBuilder =
       Value<String> slug,
       Value<bool> isSystemReserved,
       Value<int> sortOrder,
+      Value<bool> isActive,
       Value<int> rowid,
     });
 
@@ -7512,6 +7737,11 @@ class $$SubcategoriesTableFilterComposer
 
   ColumnFilters<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7653,6 +7883,11 @@ class $$SubcategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CategoriesTableOrderingComposer get categoryId {
     final $$CategoriesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -7707,6 +7942,9 @@ class $$SubcategoriesTableAnnotationComposer
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
 
   $$CategoriesTableAnnotationComposer get categoryId {
     final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
@@ -7847,6 +8085,7 @@ class $$SubcategoriesTableTableManager
                 Value<String> slug = const Value.absent(),
                 Value<bool> isSystemReserved = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SubcategoriesCompanion(
                 id: id,
@@ -7856,6 +8095,7 @@ class $$SubcategoriesTableTableManager
                 slug: slug,
                 isSystemReserved: isSystemReserved,
                 sortOrder: sortOrder,
+                isActive: isActive,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7867,6 +8107,7 @@ class $$SubcategoriesTableTableManager
                 required String slug,
                 Value<bool> isSystemReserved = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SubcategoriesCompanion.insert(
                 id: id,
@@ -7876,6 +8117,7 @@ class $$SubcategoriesTableTableManager
                 slug: slug,
                 isSystemReserved: isSystemReserved,
                 sortOrder: sortOrder,
+                isActive: isActive,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -8032,6 +8274,7 @@ typedef $$IncomeCategoriesTableCreateCompanionBuilder =
       required String name,
       Value<String?> description,
       Value<int> sortOrder,
+      Value<bool> isActive,
       Value<int> rowid,
     });
 typedef $$IncomeCategoriesTableUpdateCompanionBuilder =
@@ -8040,6 +8283,7 @@ typedef $$IncomeCategoriesTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String?> description,
       Value<int> sortOrder,
+      Value<bool> isActive,
       Value<int> rowid,
     });
 
@@ -8160,6 +8404,11 @@ class $$IncomeCategoriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> incomeSubcategoriesRefs(
     Expression<bool> Function($$IncomeSubcategoriesTableFilterComposer f) f,
   ) {
@@ -8264,6 +8513,11 @@ class $$IncomeCategoriesTableOrderingComposer
     column: $table.sortOrder,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$IncomeCategoriesTableAnnotationComposer
@@ -8288,6 +8542,9 @@ class $$IncomeCategoriesTableAnnotationComposer
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
 
   Expression<T> incomeSubcategoriesRefs<T extends Object>(
     Expression<T> Function($$IncomeSubcategoriesTableAnnotationComposer a) f,
@@ -8404,12 +8661,14 @@ class $$IncomeCategoriesTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => IncomeCategoriesCompanion(
                 id: id,
                 name: name,
                 description: description,
                 sortOrder: sortOrder,
+                isActive: isActive,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -8418,12 +8677,14 @@ class $$IncomeCategoriesTableTableManager
                 required String name,
                 Value<String?> description = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => IncomeCategoriesCompanion.insert(
                 id: id,
                 name: name,
                 description: description,
                 sortOrder: sortOrder,
+                isActive: isActive,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -8548,6 +8809,7 @@ typedef $$IncomeSubcategoriesTableCreateCompanionBuilder =
       required String slug,
       Value<bool> isSystemReserved,
       Value<int> sortOrder,
+      Value<bool> isActive,
       Value<int> rowid,
     });
 typedef $$IncomeSubcategoriesTableUpdateCompanionBuilder =
@@ -8559,6 +8821,7 @@ typedef $$IncomeSubcategoriesTableUpdateCompanionBuilder =
       Value<String> slug,
       Value<bool> isSystemReserved,
       Value<int> sortOrder,
+      Value<bool> isActive,
       Value<int> rowid,
     });
 
@@ -8686,6 +8949,11 @@ class $$IncomeSubcategoriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$IncomeCategoriesTableFilterComposer get categoryId {
     final $$IncomeCategoriesTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -8799,6 +9067,11 @@ class $$IncomeSubcategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$IncomeCategoriesTableOrderingComposer get categoryId {
     final $$IncomeCategoriesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -8853,6 +9126,9 @@ class $$IncomeSubcategoriesTableAnnotationComposer
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
 
   $$IncomeCategoriesTableAnnotationComposer get categoryId {
     final $$IncomeCategoriesTableAnnotationComposer composer = $composerBuilder(
@@ -8975,6 +9251,7 @@ class $$IncomeSubcategoriesTableTableManager
                 Value<String> slug = const Value.absent(),
                 Value<bool> isSystemReserved = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => IncomeSubcategoriesCompanion(
                 id: id,
@@ -8984,6 +9261,7 @@ class $$IncomeSubcategoriesTableTableManager
                 slug: slug,
                 isSystemReserved: isSystemReserved,
                 sortOrder: sortOrder,
+                isActive: isActive,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -8995,6 +9273,7 @@ class $$IncomeSubcategoriesTableTableManager
                 required String slug,
                 Value<bool> isSystemReserved = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => IncomeSubcategoriesCompanion.insert(
                 id: id,
@@ -9004,6 +9283,7 @@ class $$IncomeSubcategoriesTableTableManager
                 slug: slug,
                 isSystemReserved: isSystemReserved,
                 sortOrder: sortOrder,
+                isActive: isActive,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

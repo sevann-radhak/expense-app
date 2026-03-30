@@ -51,6 +51,8 @@ void main() {
     expect(back.expenses.length, 1);
     expect(back.expenses.single.id, 'e1');
     expect(back.expenses.single.paymentInstrumentId, isNull);
+    expect(back.categories.single.isActive, isTrue);
+    expect(back.subcategories.single.isActive, isTrue);
   });
 
   test('decodeBookBackup rejects wrong schemaVersion', () {

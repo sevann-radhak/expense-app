@@ -132,14 +132,20 @@ class DriftExpenseRepository implements ExpenseRepository {
   Future<void> _assertSubcategoryBelongsToCategory({
     required String categoryId,
     required String subcategoryId,
+    bool requireActiveTaxonomy = false,
   }) async {
+    final cat = await (_db.select(_db.categories)..where((c) => c.id.equals(categoryId)))
+        .getSingleOrNull();
     final row = await (_db.select(_db.subcategories)
           ..where((s) => s.id.equals(subcategoryId)))
         .getSingleOrNull();
-    if (row == null || row.categoryId != categoryId) {
+    if (cat == null || row == null || row.categoryId != categoryId) {
       throw InvalidSubcategoryPairingException(
         'Subcategory does not belong to the selected category.',
       );
+    }
+    if (requireActiveTaxonomy && (!cat.isActive || !row.isActive)) {
+      throw InactiveTaxonomyForNewEntryException();
     }
   }
 
@@ -163,6 +169,7 @@ class DriftExpenseRepository implements ExpenseRepository {
     await _assertSubcategoryBelongsToCategory(
       categoryId: expense.categoryId,
       subcategoryId: expense.subcategoryId,
+      requireActiveTaxonomy: true,
     );
     await _assertPaymentInstrumentIfSet(
       expense.paymentInstrumentId,

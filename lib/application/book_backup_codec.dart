@@ -185,6 +185,7 @@ Map<String, dynamic> _categoryToMap(Category c) {
     'name': c.name,
     'description': c.description,
     'sortOrder': c.sortOrder,
+    'isActive': c.isActive,
   };
 }
 
@@ -205,11 +206,13 @@ Category _categoryFromJson(dynamic e) {
     throw const FormatException('category.sortOrder');
   }
   final desc = e['description'];
+  final active = e['isActive'];
   return Category(
     id: id,
     name: name,
     description: desc is String ? desc : null,
     sortOrder: sortOrder,
+    isActive: active is bool ? active : true,
   );
 }
 
@@ -222,6 +225,7 @@ Map<String, dynamic> _subcategoryToMap(Subcategory s) {
     'slug': s.slug,
     'isSystemReserved': s.isSystemReserved,
     'sortOrder': s.sortOrder,
+    'isActive': s.isActive,
   };
 }
 
@@ -231,6 +235,7 @@ Map<String, dynamic> _incomeCategoryToMap(IncomeCategory c) {
     'name': c.name,
     'description': c.description,
     'sortOrder': c.sortOrder,
+    'isActive': c.isActive,
   };
 }
 
@@ -251,11 +256,13 @@ IncomeCategory _incomeCategoryFromJson(dynamic e) {
     throw const FormatException('incomeCategory.sortOrder');
   }
   final desc = e['description'];
+  final active = e['isActive'];
   return IncomeCategory(
     id: id,
     name: name,
     description: desc is String ? desc : null,
     sortOrder: sortOrder,
+    isActive: active is bool ? active : true,
   );
 }
 
@@ -268,6 +275,7 @@ Map<String, dynamic> _incomeSubcategoryToMap(IncomeSubcategory s) {
     'slug': s.slug,
     'isSystemReserved': s.isSystemReserved,
     'sortOrder': s.sortOrder,
+    'isActive': s.isActive,
   };
 }
 
@@ -290,6 +298,7 @@ IncomeSubcategory _incomeSubcategoryFromJson(dynamic e) {
     throw const FormatException('incomeSubcategory required fields');
   }
   final desc = e['description'];
+  final active = e['isActive'];
   return IncomeSubcategory(
     id: id,
     categoryId: categoryId,
@@ -298,6 +307,7 @@ IncomeSubcategory _incomeSubcategoryFromJson(dynamic e) {
     slug: slug,
     isSystemReserved: isRes,
     sortOrder: sortOrder,
+    isActive: active is bool ? active : true,
   );
 }
 
@@ -320,6 +330,7 @@ Subcategory _subcategoryFromJson(dynamic e) {
     throw const FormatException('subcategory fields');
   }
   final desc = e['description'];
+  final active = e['isActive'];
   return Subcategory(
     id: id,
     categoryId: categoryId,
@@ -328,6 +339,7 @@ Subcategory _subcategoryFromJson(dynamic e) {
     slug: slug,
     isSystemReserved: isRes,
     sortOrder: sortOrder,
+    isActive: active is bool ? active : true,
   );
 }
 

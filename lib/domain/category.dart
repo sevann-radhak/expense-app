@@ -5,6 +5,7 @@ class Category {
     required this.name,
     this.description,
     required this.sortOrder,
+    this.isActive = true,
   });
 
   final String id;
@@ -14,11 +15,15 @@ class Category {
   final String? description;
   final int sortOrder;
 
+  /// When false, hidden from pickers but kept for historical labels and FK integrity.
+  final bool isActive;
+
   Category copyWith({
     String? id,
     String? name,
     String? description,
     int? sortOrder,
+    bool? isActive,
     bool clearDescription = false,
   }) {
     return Category(
@@ -26,6 +31,7 @@ class Category {
       name: name ?? this.name,
       description: clearDescription ? null : (description ?? this.description),
       sortOrder: sortOrder ?? this.sortOrder,
+      isActive: isActive ?? this.isActive,
     );
   }
 }
@@ -40,6 +46,7 @@ class Subcategory {
     required this.slug,
     required this.isSystemReserved,
     required this.sortOrder,
+    this.isActive = true,
   });
 
   final String id;
@@ -52,6 +59,9 @@ class Subcategory {
   final bool isSystemReserved;
   final int sortOrder;
 
+  /// When false, hidden from pickers but kept for historical labels and FK integrity.
+  final bool isActive;
+
   bool get isOther => slug == kOtherSubcategorySlug;
 
   Subcategory copyWith({
@@ -62,6 +72,7 @@ class Subcategory {
     String? slug,
     bool? isSystemReserved,
     int? sortOrder,
+    bool? isActive,
     bool clearDescription = false,
   }) {
     return Subcategory(
@@ -72,6 +83,7 @@ class Subcategory {
       slug: slug ?? this.slug,
       isSystemReserved: isSystemReserved ?? this.isSystemReserved,
       sortOrder: sortOrder ?? this.sortOrder,
+      isActive: isActive ?? this.isActive,
     );
   }
 }

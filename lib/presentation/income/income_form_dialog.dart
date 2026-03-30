@@ -425,6 +425,12 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
           SnackBar(content: Text(l10n.invalidSubcategoryPairing)),
         );
       }
+    } on InactiveTaxonomyForNewEntryException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.taxonomyMustBeActiveForNewEntry)),
+        );
+      }
     }
   }
 
@@ -498,21 +504,57 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final localeName = Localizations.localeOf(context).toString();
-    final categories = ref.watch(incomeCategoriesStreamProvider).valueOrNull ?? [];
+    final allCats =
+        ref.watch(incomeCategoriesStreamProvider).valueOrNull ?? [];
+    int cmpIncCat(IncomeCategory a, IncomeCategory b) {
+      if (a.isActive != b.isActive) {
+        return a.isActive ? -1 : 1;
+      }
+      return a.sortOrder.compareTo(b.sortOrder);
+    }
+
+    final categories = allCats
+        .where(
+          (c) =>
+              c.isActive ||
+              (widget.initial != null && c.id == widget.initial!.incomeCategoryId),
+        )
+        .toList()
+      ..sort(cmpIncCat);
+
     final subsAsync = _incomeCategoryId == null
         ? const AsyncValue<List<IncomeSubcategory>>.data([])
         : ref.watch(incomeSubcategoriesForCategoryProvider(_incomeCategoryId!));
-    final subs = subsAsync.valueOrNull ?? [];
 
-    if (widget.initial == null &&
-        _incomeCategoryId == null &&
-        categories.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() => _incomeCategoryId = categories.first.id);
-        }
-      });
+    if (widget.initial == null && _incomeCategoryId == null) {
+      final activeOnly = allCats.where((c) => c.isActive).toList()
+        ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      if (activeOnly.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() => _incomeCategoryId = activeOnly.first.id);
+          }
+        });
+      }
     }
+
+    int cmpIncSub(IncomeSubcategory a, IncomeSubcategory b) {
+      if (a.isActive != b.isActive) {
+        return a.isActive ? -1 : 1;
+      }
+      return a.sortOrder.compareTo(b.sortOrder);
+    }
+
+    final allSubs = subsAsync.valueOrNull ?? [];
+    final subs = allSubs
+        .where(
+          (s) =>
+              s.isActive ||
+              (widget.initial != null &&
+                  s.id == widget.initial!.incomeSubcategoryId),
+        )
+        .toList()
+      ..sort(cmpIncSub);
     if (_incomeCategoryId != null &&
         subs.isNotEmpty &&
         (_incomeSubcategoryId == null ||
@@ -708,7 +750,16 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
                   const SizedBox(height: 4),
                   subsAsync.when(
                     data: (list) {
-                      if (list.isEmpty) {
+                      final pickSubs = list
+                          .where(
+                            (s) =>
+                                s.isActive ||
+                                (widget.initial != null &&
+                                    s.id == widget.initial!.incomeSubcategoryId),
+                          )
+                          .toList()
+                        ..sort(cmpIncSub);
+                      if (pickSubs.isEmpty) {
                         return Text(
                           l10n.expenseNoSubcategories,
                           style: Theme.of(context).textTheme.bodySmall,
@@ -739,20 +790,20 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
                         suggestionsBuilder: (context, controller) {
                           final q = controller.text.trim().toLowerCase();
                           final filtered = q.isEmpty
-                              ? list
-                              : list
+                              ? pickSubs
+                              : pickSubs
                                   .where((s) => s.name.toLowerCase().contains(q))
                                   .toList();
                           return filtered
                               .map(
                                 (s) {
-                                  final i = list.indexOf(s);
+                                  final i = pickSubs.indexOf(s);
                                   final parent =
                                       categoryAccentColor(_incomeCategoryId!);
                                   final tone = subcategoryTonalColor(
                                     parent,
                                     i,
-                                    list.length,
+                                    pickSubs.length,
                                   );
                                   return ListTile(
                                     leading: CircleAvatar(

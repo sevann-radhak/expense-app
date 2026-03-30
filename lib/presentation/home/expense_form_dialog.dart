@@ -571,6 +571,12 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
           SnackBar(content: Text(l10n.invalidSubcategoryPairing)),
         );
       }
+    } on InactiveTaxonomyForNewEntryException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.taxonomyMustBeActiveForNewEntry)),
+        );
+      }
     }
   }
 
@@ -665,26 +671,58 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
       },
     );
 
-    final categories = ref.watch(categoriesStreamProvider).valueOrNull ?? [];
+    final allCats = ref.watch(categoriesStreamProvider).valueOrNull ?? [];
+    int cmpCat(Category a, Category b) {
+      if (a.isActive != b.isActive) {
+        return a.isActive ? -1 : 1;
+      }
+      return a.sortOrder.compareTo(b.sortOrder);
+    }
+
+    final categories = allCats
+        .where(
+          (c) =>
+              c.isActive || (widget.initial != null && c.id == widget.initial!.categoryId),
+        )
+        .toList()
+      ..sort(cmpCat);
+
     final activeInstruments =
         ref.watch(activePaymentInstrumentsStreamProvider).valueOrNull ?? [];
     final subsAsync = _categoryId == null
         ? const AsyncValue<List<Subcategory>>.data([])
         : ref.watch(subcategoriesForCategoryProvider(_categoryId!));
 
-    if (widget.initial == null &&
-        _categoryId == null &&
-        categories.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _categoryId = categories.first.id;
-          });
-        }
-      });
+    if (widget.initial == null && _categoryId == null) {
+      final activeOnly = allCats.where((c) => c.isActive).toList()
+        ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+      if (activeOnly.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _categoryId = activeOnly.first.id;
+            });
+          }
+        });
+      }
     }
 
-    final subs = subsAsync.valueOrNull ?? [];
+    int cmpSub(Subcategory a, Subcategory b) {
+      if (a.isActive != b.isActive) {
+        return a.isActive ? -1 : 1;
+      }
+      return a.sortOrder.compareTo(b.sortOrder);
+    }
+
+    final allSubs = subsAsync.valueOrNull ?? [];
+    final subs = allSubs
+        .where(
+          (s) =>
+              s.isActive ||
+              (widget.initial != null && s.id == widget.initial!.subcategoryId),
+        )
+        .toList()
+      ..sort(cmpSub);
     if (_categoryId != null &&
         subs.isNotEmpty &&
         (_subcategoryId == null || !subs.any((s) => s.id == _subcategoryId))) {
@@ -880,7 +918,16 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                   const SizedBox(height: 4),
                   subsAsync.when(
                     data: (list) {
-                      if (list.isEmpty) {
+                      final pickSubs = list
+                          .where(
+                            (s) =>
+                                s.isActive ||
+                                (widget.initial != null &&
+                                    s.id == widget.initial!.subcategoryId),
+                          )
+                          .toList()
+                        ..sort(cmpSub);
+                      if (pickSubs.isEmpty) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: Text(
@@ -910,19 +957,19 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                         suggestionsBuilder: (context, controller) {
                           final q = controller.text.trim().toLowerCase();
                           final filtered = q.isEmpty
-                              ? list
-                              : list
+                              ? pickSubs
+                              : pickSubs
                                   .where((s) => s.name.toLowerCase().contains(q))
                                   .toList();
                           return filtered
                               .map(
                                 (s) {
-                                  final i = list.indexOf(s);
+                                  final i = pickSubs.indexOf(s);
                                   final parent = categoryAccentColor(_categoryId!);
                                   final tone = subcategoryTonalColor(
                                     parent,
                                     i,
-                                    list.length,
+                                    pickSubs.length,
                                   );
                                   return ListTile(
                                     leading: CircleAvatar(

@@ -255,7 +255,12 @@ abstract final class IncomeCategorySeeder {
   static List<IncomeCategory> builtInIncomeCategories() {
     return [
       for (final c in _categories)
-        IncomeCategory(id: c.id, name: c.name, sortOrder: c.sortOrder),
+        IncomeCategory(
+          id: c.id,
+          name: c.name,
+          sortOrder: c.sortOrder,
+          isActive: true,
+        ),
     ];
   }
 
@@ -273,6 +278,7 @@ abstract final class IncomeCategorySeeder {
             slug: s.slug,
             isSystemReserved: s.isSystemReserved,
             sortOrder: s.sortOrder,
+            isActive: true,
           ),
         );
       }

@@ -7,6 +7,7 @@ class IncomeCategory {
     required this.name,
     this.description,
     required this.sortOrder,
+    this.isActive = true,
   });
 
   final String id;
@@ -14,11 +15,15 @@ class IncomeCategory {
   final String? description;
   final int sortOrder;
 
+  /// When false, hidden from pickers but kept for historical labels and FK integrity.
+  final bool isActive;
+
   IncomeCategory copyWith({
     String? id,
     String? name,
     String? description,
     int? sortOrder,
+    bool? isActive,
     bool clearDescription = false,
   }) {
     return IncomeCategory(
@@ -26,6 +31,7 @@ class IncomeCategory {
       name: name ?? this.name,
       description: clearDescription ? null : (description ?? this.description),
       sortOrder: sortOrder ?? this.sortOrder,
+      isActive: isActive ?? this.isActive,
     );
   }
 }
@@ -40,6 +46,7 @@ class IncomeSubcategory {
     required this.slug,
     required this.isSystemReserved,
     required this.sortOrder,
+    this.isActive = true,
   });
 
   final String id;
@@ -49,6 +56,9 @@ class IncomeSubcategory {
   final String slug;
   final bool isSystemReserved;
   final int sortOrder;
+
+  /// When false, hidden from pickers but kept for historical labels and FK integrity.
+  final bool isActive;
 
   bool get isOther => slug == kOtherSubcategorySlug;
 
@@ -60,6 +70,7 @@ class IncomeSubcategory {
     String? slug,
     bool? isSystemReserved,
     int? sortOrder,
+    bool? isActive,
     bool clearDescription = false,
   }) {
     return IncomeSubcategory(
@@ -70,6 +81,7 @@ class IncomeSubcategory {
       slug: slug ?? this.slug,
       isSystemReserved: isSystemReserved ?? this.isSystemReserved,
       sortOrder: sortOrder ?? this.sortOrder,
+      isActive: isActive ?? this.isActive,
     );
   }
 }

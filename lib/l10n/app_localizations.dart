@@ -602,6 +602,126 @@ abstract class AppLocalizations {
   /// **'Edit note'**
   String get categoryEditDescriptionTooltip;
 
+  /// No description provided for @taxonomyNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get taxonomyNameLabel;
+
+  /// No description provided for @taxonomyAddCategoryFab.
+  ///
+  /// In en, this message translates to:
+  /// **'Add category'**
+  String get taxonomyAddCategoryFab;
+
+  /// No description provided for @taxonomyAddSubcategoryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add subcategory'**
+  String get taxonomyAddSubcategoryButton;
+
+  /// No description provided for @taxonomyEditCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit category'**
+  String get taxonomyEditCategoryTitle;
+
+  /// No description provided for @taxonomyEditSubcategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit subcategory'**
+  String get taxonomyEditSubcategoryTitle;
+
+  /// No description provided for @taxonomyNewCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New category'**
+  String get taxonomyNewCategoryTitle;
+
+  /// No description provided for @taxonomyNewSubcategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New subcategory'**
+  String get taxonomyNewSubcategoryTitle;
+
+  /// No description provided for @taxonomyInactiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'(inactive)'**
+  String get taxonomyInactiveLabel;
+
+  /// No description provided for @taxonomyDeactivateCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate category?'**
+  String get taxonomyDeactivateCategoryTitle;
+
+  /// No description provided for @taxonomyDeactivateCategoryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will disappear from pickers when adding expenses. Existing expenses and reports still use this category and its subcategories. All subcategories in this group are deactivated too.'**
+  String get taxonomyDeactivateCategoryMessage;
+
+  /// No description provided for @taxonomyDeactivateSubcategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate subcategory?'**
+  String get taxonomyDeactivateSubcategoryTitle;
+
+  /// No description provided for @taxonomyDeactivateSubcategoryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will disappear from pickers. Existing expenses and reports still use it.'**
+  String get taxonomyDeactivateSubcategoryMessage;
+
+  /// No description provided for @taxonomyDeactivateIncomeCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate income category?'**
+  String get taxonomyDeactivateIncomeCategoryTitle;
+
+  /// No description provided for @taxonomyDeactivateIncomeCategoryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will disappear from pickers when adding income. Existing income and reports still use this category and its subcategories. All subcategories in this group are deactivated too.'**
+  String get taxonomyDeactivateIncomeCategoryMessage;
+
+  /// No description provided for @taxonomyDeactivateIncomeSubcategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate income subcategory?'**
+  String get taxonomyDeactivateIncomeSubcategoryTitle;
+
+  /// No description provided for @taxonomyDeactivateIncomeSubcategoryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will disappear from pickers. Existing income and reports still use it.'**
+  String get taxonomyDeactivateIncomeSubcategoryMessage;
+
+  /// No description provided for @taxonomyReactivateTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore to pickers'**
+  String get taxonomyReactivateTooltip;
+
+  /// No description provided for @taxonomyDeactivateCategoryTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate category'**
+  String get taxonomyDeactivateCategoryTooltip;
+
+  /// No description provided for @taxonomyDeactivateSubcategoryTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate subcategory'**
+  String get taxonomyDeactivateSubcategoryTooltip;
+
+  /// Snack bar when create is blocked because taxonomy was deactivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an active category and subcategory for new entries.'**
+  String get taxonomyMustBeActiveForNewEntry;
+
   /// App bar title on the monthly expenses route.
   ///
   /// In en, this message translates to:

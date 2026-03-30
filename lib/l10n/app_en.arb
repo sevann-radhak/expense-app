@@ -285,6 +285,29 @@
   "@categoryEditDescriptionTooltip": {
     "description": "Tooltip for edit actions on category and subcategory rows."
   },
+  "taxonomyNameLabel": "Name",
+  "taxonomyAddCategoryFab": "Add category",
+  "taxonomyAddSubcategoryButton": "Add subcategory",
+  "taxonomyEditCategoryTitle": "Edit category",
+  "taxonomyEditSubcategoryTitle": "Edit subcategory",
+  "taxonomyNewCategoryTitle": "New category",
+  "taxonomyNewSubcategoryTitle": "New subcategory",
+  "taxonomyInactiveLabel": "(inactive)",
+  "taxonomyDeactivateCategoryTitle": "Deactivate category?",
+  "taxonomyDeactivateCategoryMessage": "It will disappear from pickers when adding expenses. Existing expenses and reports still use this category and its subcategories. All subcategories in this group are deactivated too.",
+  "taxonomyDeactivateSubcategoryTitle": "Deactivate subcategory?",
+  "taxonomyDeactivateSubcategoryMessage": "It will disappear from pickers. Existing expenses and reports still use it.",
+  "taxonomyDeactivateIncomeCategoryTitle": "Deactivate income category?",
+  "taxonomyDeactivateIncomeCategoryMessage": "It will disappear from pickers when adding income. Existing income and reports still use this category and its subcategories. All subcategories in this group are deactivated too.",
+  "taxonomyDeactivateIncomeSubcategoryTitle": "Deactivate income subcategory?",
+  "taxonomyDeactivateIncomeSubcategoryMessage": "It will disappear from pickers. Existing income and reports still use it.",
+  "taxonomyReactivateTooltip": "Restore to pickers",
+  "taxonomyDeactivateCategoryTooltip": "Deactivate category",
+  "taxonomyDeactivateSubcategoryTooltip": "Deactivate subcategory",
+  "taxonomyMustBeActiveForNewEntry": "Choose an active category and subcategory for new entries.",
+  "@taxonomyMustBeActiveForNewEntry": {
+    "description": "Snack bar when create is blocked because taxonomy was deactivated."
+  },
   "homeTitle": "Expenses",
   "@homeTitle": {
     "description": "App bar title on the monthly expenses route."

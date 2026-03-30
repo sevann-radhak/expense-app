@@ -20,7 +20,7 @@ final class BookBackupSnapshot {
     required this.partialPayments,
   });
 
-  static const int currentSchemaVersion = 8;
+  static const int currentSchemaVersion = 9;
 
   final int schemaVersion;
   final DateTime exportedAt;

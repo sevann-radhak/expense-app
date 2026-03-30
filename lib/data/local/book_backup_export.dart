@@ -58,6 +58,7 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
           name: r.name,
           description: r.description,
           sortOrder: r.sortOrder,
+          isActive: r.isActive,
         ),
       )
       .toList();
@@ -72,6 +73,7 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
           slug: r.slug,
           isSystemReserved: r.isSystemReserved,
           sortOrder: r.sortOrder,
+          isActive: r.isActive,
         ),
       )
       .toList();
@@ -136,6 +138,7 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
           name: r.name,
           description: r.description,
           sortOrder: r.sortOrder,
+          isActive: r.isActive,
         ),
       )
       .toList();
@@ -149,6 +152,7 @@ Future<BookBackupSnapshot> exportFullBookSnapshot(AppDatabase db) async {
           slug: r.slug,
           isSystemReserved: r.isSystemReserved,
           sortOrder: r.sortOrder,
+          isActive: r.isActive,
         ),
       )
       .toList();

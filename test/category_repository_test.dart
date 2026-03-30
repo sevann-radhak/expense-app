@@ -53,6 +53,33 @@ void main() {
     );
   });
 
+  test('deleteSubcategory soft-deactivates user subcategory', () async {
+    final row = await (db.select(db.subcategories)
+          ..where((t) => t.slug.equals('formation_courses'))
+          ..limit(1))
+        .getSingle();
+    await repo.deleteSubcategory(row.id);
+    final after = await (db.select(db.subcategories)
+          ..where((t) => t.id.equals(row.id)))
+        .getSingle();
+    expect(after.isActive, isFalse);
+  });
+
+  test('createCategory inserts category and Other subcategory', () async {
+    final id = await repo.createCategory(name: 'Custom QA', description: 'd');
+    final cat = await (db.select(db.categories)..where((c) => c.id.equals(id)))
+        .getSingle();
+    expect(cat.name, 'Custom QA');
+    expect(cat.description, 'd');
+    expect(cat.isActive, isTrue);
+    final subs = await (db.select(db.subcategories)
+          ..where((s) => s.categoryId.equals(id)))
+        .get();
+    expect(subs.length, 1);
+    expect(subs.single.slug, kOtherSubcategorySlug);
+    expect(subs.single.isSystemReserved, isTrue);
+  });
+
   test('setCategoryDescription trims, persists, and clears', () async {
     await repo.setCategoryDescription('cat_formation', '  Hello  ');
     var row = await (db.select(db.categories)

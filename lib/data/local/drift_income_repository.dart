@@ -88,14 +88,21 @@ class DriftIncomeRepository implements IncomeRepository {
   Future<void> _assertIncomeSubcategoryBelongsToCategory({
     required String incomeCategoryId,
     required String incomeSubcategoryId,
+    bool requireActiveTaxonomy = false,
   }) async {
+    final cat = await (_db.select(_db.incomeCategories)
+          ..where((c) => c.id.equals(incomeCategoryId)))
+        .getSingleOrNull();
     final row = await (_db.select(_db.incomeSubcategories)
           ..where((s) => s.id.equals(incomeSubcategoryId)))
         .getSingleOrNull();
-    if (row == null || row.categoryId != incomeCategoryId) {
+    if (cat == null || row == null || row.categoryId != incomeCategoryId) {
       throw InvalidSubcategoryPairingException(
         'Income subcategory does not belong to the selected income category.',
       );
+    }
+    if (requireActiveTaxonomy && (!cat.isActive || !row.isActive)) {
+      throw InactiveTaxonomyForNewEntryException();
     }
   }
 
@@ -111,6 +118,7 @@ class DriftIncomeRepository implements IncomeRepository {
     await _assertIncomeSubcategoryBelongsToCategory(
       incomeCategoryId: entry.incomeCategoryId,
       incomeSubcategoryId: entry.incomeSubcategoryId,
+      requireActiveTaxonomy: true,
     );
     final e = _withUsd(entry);
     await _db.into(_db.incomeEntries).insert(

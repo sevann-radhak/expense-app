@@ -19,6 +19,8 @@ class Categories extends Table {
 
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -43,6 +45,8 @@ class Subcategories extends Table {
 
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }
@@ -59,6 +63,8 @@ class IncomeCategories extends Table {
   TextColumn get description => text().nullable()();
 
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -86,6 +92,8 @@ class IncomeSubcategories extends Table {
   BoolColumn get isSystemReserved => boolean().withDefault(const Constant(false))();
 
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -385,7 +393,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -458,6 +466,9 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(incomeEntries, incomeEntries.expectationConfirmedOn);
             await ensureIncomeSeriesReceivedUniqueIndex();
           }
+          if (from < 16) {
+            await ensureTaxonomyIsActiveColumns();
+          }
         },
         beforeOpen: (OpeningDetails details) async {
           await ensureExpenseDescriptionColumn();
@@ -472,6 +483,7 @@ class AppDatabase extends _$AppDatabase {
           await ensureIncomeTaxonomyDescriptionColumns();
           await ensureIncomeRecurringSeriesColumns();
           await ensureIncomeSeriesReceivedUniqueIndex();
+          await ensureTaxonomyIsActiveColumns();
           await IncomeCategorySeeder.ensureSeedData(this);
         },
       );
@@ -562,6 +574,30 @@ class AppDatabase extends _$AppDatabase {
     const stmts = <String>[
       'ALTER TABLE income_categories ADD COLUMN description TEXT',
       'ALTER TABLE income_subcategories ADD COLUMN description TEXT',
+    ];
+    for (final sql in stmts) {
+      try {
+        await customStatement(sql);
+      } catch (e) {
+        final msg = e.toString().toLowerCase();
+        if (msg.contains('duplicate column') || msg.contains('already exists')) {
+          continue;
+        }
+        if (msg.contains('no such table')) {
+          continue;
+        }
+        rethrow;
+      }
+    }
+  }
+
+  /// Soft-delete flag for expense and income taxonomy (v16+).
+  Future<void> ensureTaxonomyIsActiveColumns() async {
+    const stmts = <String>[
+      'ALTER TABLE categories ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1',
+      'ALTER TABLE subcategories ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1',
+      'ALTER TABLE income_categories ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1',
+      'ALTER TABLE income_subcategories ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1',
     ];
     for (final sql in stmts) {
       try {

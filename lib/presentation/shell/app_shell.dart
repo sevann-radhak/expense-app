@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/router/app_router.dart';
+import 'package:expense_app/presentation/theme/app_icons.dart';
 
 void _onShellBranchSelected(
   StatefulNavigationShell navigationShell,
@@ -42,28 +43,28 @@ class AppShell extends StatelessWidget {
                   : NavigationRailLabelType.selected,
               destinations: [
                 NavigationRailDestination(
-                  icon: const Icon(Icons.receipt_long_outlined),
-                  selectedIcon: const Icon(Icons.receipt_long),
+                  icon: Icon(AppIcons.navExpenses),
+                  selectedIcon: Icon(AppIcons.navExpensesSelected),
                   label: Text(l10n.navHome),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.payments_outlined),
-                  selectedIcon: const Icon(Icons.payments),
+                  icon: Icon(AppIcons.navIncome),
+                  selectedIcon: Icon(AppIcons.navIncomeSelected),
                   label: Text(l10n.navIncome),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.bar_chart_outlined),
-                  selectedIcon: const Icon(Icons.bar_chart),
+                  icon: Icon(AppIcons.navReports),
+                  selectedIcon: Icon(AppIcons.navReportsSelected),
                   label: Text(l10n.navReports),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.category_outlined),
-                  selectedIcon: const Icon(Icons.category),
+                  icon: Icon(AppIcons.navCategories),
+                  selectedIcon: Icon(AppIcons.navCategoriesSelected),
                   label: Text(l10n.navCategories),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.settings_outlined),
-                  selectedIcon: const Icon(Icons.settings),
+                  icon: Icon(AppIcons.navSettings),
+                  selectedIcon: Icon(AppIcons.navSettingsSelected),
                   label: Text(l10n.navSettings),
                 ),
               ],
@@ -85,28 +86,28 @@ class AppShell extends StatelessWidget {
         ),
         destinations: [
           NavigationDestination(
-            icon: const Icon(Icons.receipt_long_outlined),
-            selectedIcon: const Icon(Icons.receipt_long),
+            icon: Icon(AppIcons.navExpenses),
+            selectedIcon: Icon(AppIcons.navExpensesSelected),
             label: l10n.navHome,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.payments_outlined),
-            selectedIcon: const Icon(Icons.payments),
+            icon: Icon(AppIcons.navIncome),
+            selectedIcon: Icon(AppIcons.navIncomeSelected),
             label: l10n.navIncome,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.bar_chart_outlined),
-            selectedIcon: const Icon(Icons.bar_chart),
+            icon: Icon(AppIcons.navReports),
+            selectedIcon: Icon(AppIcons.navReportsSelected),
             label: l10n.navReports,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.category_outlined),
-            selectedIcon: const Icon(Icons.category),
+            icon: Icon(AppIcons.navCategories),
+            selectedIcon: Icon(AppIcons.navCategoriesSelected),
             label: l10n.navCategories,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.settings_outlined),
-            selectedIcon: const Icon(Icons.settings),
+            icon: Icon(AppIcons.navSettings),
+            selectedIcon: Icon(AppIcons.navSettingsSelected),
             label: l10n.navSettings,
           ),
         ],

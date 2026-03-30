@@ -5,6 +5,7 @@ import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 import 'package:expense_app/presentation/settings/payment_instrument_form_dialog.dart';
+import 'package:expense_app/presentation/theme/app_icons.dart';
 
 class SettingsCardProfilesSection extends ConsumerWidget {
   const SettingsCardProfilesSection({super.key});
@@ -57,7 +58,7 @@ class SettingsCardProfilesSection extends ConsumerWidget {
               builder: (ctx) => const PaymentInstrumentFormDialog(),
             );
           },
-          icon: const Icon(Icons.add_card_outlined),
+          icon: Icon(AppIcons.creditCard),
           label: Text(l10n.settingsPaymentInstrumentAdd),
         ),
         const SizedBox(height: 12),
@@ -152,7 +153,7 @@ class SettingsCardProfilesSection extends ConsumerWidget {
                                 ),
                               IconButton(
                                 tooltip: l10n.settingsPaymentInstrumentEditTitle,
-                                icon: const Icon(Icons.edit_outlined),
+                                icon: Icon(AppIcons.edit),
                                 onPressed: () async {
                                   await showDialog<bool>(
                                     context: context,
@@ -163,7 +164,7 @@ class SettingsCardProfilesSection extends ConsumerWidget {
                               ),
                               IconButton(
                                 tooltip: l10n.deleteExpenseAction,
-                                icon: const Icon(Icons.delete_outline),
+                                icon: Icon(AppIcons.delete),
                                 onPressed: () async {
                                   final ok = await showDialog<bool>(
                                     context: context,

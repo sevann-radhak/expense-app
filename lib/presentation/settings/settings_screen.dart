@@ -7,6 +7,7 @@ import 'package:expense_app/presentation/providers/providers.dart';
 import 'package:expense_app/presentation/settings/recurring_series_list_screen.dart';
 import 'package:expense_app/presentation/settings/settings_backup_section.dart';
 import 'package:expense_app/presentation/settings/settings_card_profiles_section.dart';
+import 'package:expense_app/presentation/theme/app_icons.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -115,10 +116,10 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.repeat_outlined),
+                  leading: Icon(AppIcons.recurring),
                   title: Text(l10n.settingsRecurringSeriesTileTitle),
                   subtitle: Text(l10n.settingsRecurringSeriesTileSubtitle),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: Icon(AppIcons.caretRight),
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
@@ -175,7 +176,7 @@ class SettingsScreen extends ConsumerWidget {
                       }
                     }
                   },
-                  icon: const Icon(Icons.delete_forever_outlined),
+                  icon: Icon(AppIcons.destructiveReset),
                   label: Text(l10n.settingsResetDataButton),
                 ),
                 const SizedBox(height: 24),
@@ -229,7 +230,7 @@ class SettingsScreen extends ConsumerWidget {
                       }
                     }
                   },
-                  icon: const Icon(Icons.playlist_add_outlined),
+                  icon: Icon(AppIcons.listAdd),
                   label: Text(l10n.settingsPopulateExampleDataButton),
                 ),
               ],

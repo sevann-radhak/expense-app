@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:expense_app/domain/domain.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
+import 'package:expense_app/presentation/theme/app_icons.dart';
 import 'package:expense_app/presentation/theme/category_accent_colors.dart';
 
 class CategoriesScreen extends ConsumerWidget {
@@ -40,7 +41,7 @@ class CategoriesScreen extends ConsumerWidget {
                       _showNewIncomeCategoryDialog(ctx2, ref);
                     }
                   },
-                  icon: const Icon(Icons.add),
+                  icon: Icon(AppIcons.add),
                   label: Text(l10n.taxonomyAddCategoryFab),
                 ),
                 body: TabBarView(
@@ -273,10 +274,14 @@ class _IncomeCategoriesTabBody extends ConsumerWidget {
   }
 }
 
-class _ExpenseCategoryExpansionTile extends ConsumerWidget {
+class _ExpenseCategoryExpansionTile extends ConsumerStatefulWidget {
   const _ExpenseCategoryExpansionTile({required this.category});
 
   final Category category;
+
+  @override
+  ConsumerState<_ExpenseCategoryExpansionTile> createState() =>
+      _ExpenseCategoryExpansionTileState();
 
   static Future<void> _openEditor(
     BuildContext context,
@@ -412,21 +417,35 @@ class _ExpenseCategoryExpansionTile extends ConsumerWidget {
       }
     }
   }
+}
+
+class _ExpenseCategoryExpansionTileState
+    extends ConsumerState<_ExpenseCategoryExpansionTile> {
+  bool _expanded = false;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final category = widget.category;
     final l10n = AppLocalizations.of(context)!;
     final subsAsync = ref.watch(
       subcategoriesForCategoryProvider(category.id),
     );
     final catDesc = category.description?.trim();
     final parentColor = categoryAccentColor(category.id);
+    final chevronColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return Opacity(
       opacity: category.isActive ? 1 : 0.72,
       child: Card(
         margin: EdgeInsets.zero,
         child: ExpansionTile(
+          onExpansionChanged: (expanded) => setState(() => _expanded = expanded),
+          trailing: AnimatedRotation(
+            turns: _expanded ? 0.5 : 0,
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            child: Icon(AppIcons.caretDown, size: 22, color: chevronColor),
+          ),
           leading: Container(
             width: 12,
             height: 12,
@@ -448,21 +467,26 @@ class _ExpenseCategoryExpansionTile extends ConsumerWidget {
               ),
               IconButton(
                 tooltip: l10n.categoryEditDescriptionTooltip,
-                icon: const Icon(Icons.edit_outlined),
+                icon: Icon(AppIcons.edit),
                 visualDensity: VisualDensity.compact,
-                onPressed: () => _openEditor(context, ref, category),
+                onPressed: () =>
+                    _ExpenseCategoryExpansionTile._openEditor(context, ref, category),
               ),
               if (category.isActive)
                 IconButton(
                   tooltip: l10n.taxonomyDeactivateCategoryTooltip,
-                  icon: const Icon(Icons.visibility_off_outlined),
+                  icon: Icon(AppIcons.hideDeactivate),
                   visualDensity: VisualDensity.compact,
-                  onPressed: () => _confirmDeactivateCategory(context, ref, category),
+                  onPressed: () => _ExpenseCategoryExpansionTile._confirmDeactivateCategory(
+                        context,
+                        ref,
+                        category,
+                      ),
                 )
               else
                 IconButton(
                   tooltip: l10n.taxonomyReactivateTooltip,
-                  icon: const Icon(Icons.restore_outlined),
+                  icon: Icon(AppIcons.restore),
                   visualDensity: VisualDensity.compact,
                   onPressed: () =>
                       ref.read(categoryRepositoryProvider).reactivateCategory(category.id),
@@ -523,22 +547,23 @@ class _ExpenseCategoryExpansionTile extends ConsumerWidget {
                     children: [
                       IconButton(
                         tooltip: l10n.categoryEditDescriptionTooltip,
-                        icon: const Icon(Icons.edit_outlined, size: 20),
+                        icon: Icon(AppIcons.edit, size: 20),
                         visualDensity: VisualDensity.compact,
-                        onPressed: () => _openSubEditor(context, ref, s),
+                        onPressed: () =>
+                            _ExpenseCategoryExpansionTile._openSubEditor(context, ref, s),
                       ),
                       if (!s.isSystemReserved)
                         s.isActive
                             ? IconButton(
                                 tooltip: l10n.taxonomyDeactivateSubcategoryTooltip,
-                                icon: const Icon(Icons.visibility_off_outlined, size: 20),
+                                icon: Icon(AppIcons.hideDeactivate, size: 20),
                                 visualDensity: VisualDensity.compact,
-                                onPressed: () =>
-                                    _confirmDeactivateSub(context, ref, s),
+                                onPressed: () => _ExpenseCategoryExpansionTile
+                                    ._confirmDeactivateSub(context, ref, s),
                               )
                             : IconButton(
                                 tooltip: l10n.taxonomyReactivateTooltip,
-                                icon: const Icon(Icons.restore_outlined, size: 20),
+                                icon: Icon(AppIcons.restore, size: 20),
                                 visualDensity: VisualDensity.compact,
                                 onPressed: () => ref
                                     .read(categoryRepositoryProvider)
@@ -554,9 +579,12 @@ class _ExpenseCategoryExpansionTile extends ConsumerWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: TextButton.icon(
-                      onPressed: () =>
-                          _showNewSubcategory(context, ref, category.id),
-                      icon: const Icon(Icons.add, size: 20),
+                      onPressed: () => _ExpenseCategoryExpansionTile._showNewSubcategory(
+                            context,
+                            ref,
+                            category.id,
+                          ),
+                      icon: Icon(AppIcons.add, size: 20),
                       label: Text(l10n.taxonomyAddSubcategoryButton),
                     ),
                   ),
@@ -578,10 +606,14 @@ class _ExpenseCategoryExpansionTile extends ConsumerWidget {
   }
 }
 
-class _IncomeCategoryExpansionTile extends ConsumerWidget {
+class _IncomeCategoryExpansionTile extends ConsumerStatefulWidget {
   const _IncomeCategoryExpansionTile({required this.category});
 
   final IncomeCategory category;
+
+  @override
+  ConsumerState<_IncomeCategoryExpansionTile> createState() =>
+      _IncomeCategoryExpansionTileState();
 
   static Future<void> _openEditor(
     BuildContext context,
@@ -719,21 +751,35 @@ class _IncomeCategoryExpansionTile extends ConsumerWidget {
       }
     }
   }
+}
+
+class _IncomeCategoryExpansionTileState
+    extends ConsumerState<_IncomeCategoryExpansionTile> {
+  bool _expanded = false;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final category = widget.category;
     final l10n = AppLocalizations.of(context)!;
     final subsAsync = ref.watch(
       incomeSubcategoriesForCategoryProvider(category.id),
     );
     final catDesc = category.description?.trim();
     final parentColor = categoryAccentColor(category.id);
+    final chevronColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return Opacity(
       opacity: category.isActive ? 1 : 0.72,
       child: Card(
         margin: EdgeInsets.zero,
         child: ExpansionTile(
+          onExpansionChanged: (expanded) => setState(() => _expanded = expanded),
+          trailing: AnimatedRotation(
+            turns: _expanded ? 0.5 : 0,
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            child: Icon(AppIcons.caretDown, size: 22, color: chevronColor),
+          ),
           leading: Container(
             width: 12,
             height: 12,
@@ -755,22 +801,26 @@ class _IncomeCategoryExpansionTile extends ConsumerWidget {
               ),
               IconButton(
                 tooltip: l10n.categoryEditDescriptionTooltip,
-                icon: const Icon(Icons.edit_outlined),
+                icon: Icon(AppIcons.edit),
                 visualDensity: VisualDensity.compact,
-                onPressed: () => _openEditor(context, ref, category),
+                onPressed: () =>
+                    _IncomeCategoryExpansionTile._openEditor(context, ref, category),
               ),
               if (category.isActive)
                 IconButton(
                   tooltip: l10n.taxonomyDeactivateCategoryTooltip,
-                  icon: const Icon(Icons.visibility_off_outlined),
+                  icon: Icon(AppIcons.hideDeactivate),
                   visualDensity: VisualDensity.compact,
-                  onPressed: () =>
-                      _confirmDeactivateCategory(context, ref, category),
+                  onPressed: () => _IncomeCategoryExpansionTile._confirmDeactivateCategory(
+                        context,
+                        ref,
+                        category,
+                      ),
                 )
               else
                 IconButton(
                   tooltip: l10n.taxonomyReactivateTooltip,
-                  icon: const Icon(Icons.restore_outlined),
+                  icon: Icon(AppIcons.restore),
                   visualDensity: VisualDensity.compact,
                   onPressed: () => ref
                       .read(incomeTaxonomyRepositoryProvider)
@@ -832,22 +882,23 @@ class _IncomeCategoryExpansionTile extends ConsumerWidget {
                     children: [
                       IconButton(
                         tooltip: l10n.categoryEditDescriptionTooltip,
-                        icon: const Icon(Icons.edit_outlined, size: 20),
+                        icon: Icon(AppIcons.edit, size: 20),
                         visualDensity: VisualDensity.compact,
-                        onPressed: () => _openSubEditor(context, ref, s),
+                        onPressed: () =>
+                            _IncomeCategoryExpansionTile._openSubEditor(context, ref, s),
                       ),
                       if (!s.isSystemReserved)
                         s.isActive
                             ? IconButton(
                                 tooltip: l10n.taxonomyDeactivateSubcategoryTooltip,
-                                icon: const Icon(Icons.visibility_off_outlined, size: 20),
+                                icon: Icon(AppIcons.hideDeactivate, size: 20),
                                 visualDensity: VisualDensity.compact,
-                                onPressed: () =>
-                                    _confirmDeactivateSub(context, ref, s),
+                                onPressed: () => _IncomeCategoryExpansionTile
+                                    ._confirmDeactivateSub(context, ref, s),
                               )
                             : IconButton(
                                 tooltip: l10n.taxonomyReactivateTooltip,
-                                icon: const Icon(Icons.restore_outlined, size: 20),
+                                icon: Icon(AppIcons.restore, size: 20),
                                 visualDensity: VisualDensity.compact,
                                 onPressed: () => ref
                                     .read(incomeTaxonomyRepositoryProvider)
@@ -863,9 +914,12 @@ class _IncomeCategoryExpansionTile extends ConsumerWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: TextButton.icon(
-                      onPressed: () =>
-                          _showNewSubcategory(context, ref, category.id),
-                      icon: const Icon(Icons.add, size: 20),
+                      onPressed: () => _IncomeCategoryExpansionTile._showNewSubcategory(
+                            context,
+                            ref,
+                            category.id,
+                          ),
+                      icon: Icon(AppIcons.add, size: 20),
                       label: Text(l10n.taxonomyAddSubcategoryButton),
                     ),
                   ),

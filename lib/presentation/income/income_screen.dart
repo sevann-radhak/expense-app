@@ -8,6 +8,7 @@ import 'package:expense_app/presentation/income/income_form_dialog.dart';
 import 'package:expense_app/presentation/incomes/income_summary_list_tile.dart';
 import 'package:expense_app/presentation/incomes/recurring_income_menu_handler.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
+import 'package:expense_app/presentation/theme/app_icons.dart';
 import 'package:expense_app/presentation/widgets/month_cashflow_summary_card.dart';
 
 class IncomeScreen extends ConsumerWidget {
@@ -39,7 +40,7 @@ class IncomeScreen extends ConsumerWidget {
                 );
               },
         tooltip: l10n.incomeAddTooltip,
-        child: const Icon(Icons.add),
+        child: Icon(AppIcons.add),
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
@@ -54,7 +55,7 @@ class IncomeScreen extends ConsumerWidget {
                     month.month - 1,
                   );
                 },
-                icon: const Icon(Icons.chevron_left),
+                icon: Icon(AppIcons.caretLeft),
               ),
               Expanded(
                 child: Text(
@@ -71,7 +72,7 @@ class IncomeScreen extends ConsumerWidget {
                     month.month + 1,
                   );
                 },
-                icon: const Icon(Icons.chevron_right),
+                icon: Icon(AppIcons.caretRight),
               ),
             ],
           ),

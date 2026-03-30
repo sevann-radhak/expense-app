@@ -9,6 +9,7 @@ import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 import 'package:expense_app/presentation/recurring/recurring_occurrence_scope_dialogs.dart';
+import 'package:expense_app/presentation/theme/app_icons.dart';
 import 'package:expense_app/presentation/theme/category_accent_colors.dart';
 
 enum _IncomeRecurrenceFormKind { monthly, weekly }
@@ -675,7 +676,7 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
                     alignment: Alignment.centerRight,
                     child: TextButton.icon(
                       onPressed: _confirmDelete,
-                      icon: const Icon(Icons.delete_outline),
+                      icon: Icon(AppIcons.delete),
                       label: Text(l10n.deleteExpenseAction),
                     ),
                   ),
@@ -684,7 +685,7 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
                   title: Text(l10n.expenseDateLabel),
                   subtitle: Text(ExpenseDates.toStorageDate(_receivedOn)),
                   trailing: IconButton(
-                    icon: const Icon(Icons.calendar_today),
+                    icon: Icon(AppIcons.calendar),
                     onPressed:
                         _dateLockedForRecurringBulk ? null : _pickDate,
                   ),
@@ -709,7 +710,7 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
                                     categoryAccentColor(_incomeCategoryId!),
                               ),
                             )
-                          : const Icon(Icons.search),
+                          : Icon(AppIcons.search),
                       onTap: () => controller.openView(),
                       onChanged: (_) => controller.openView(),
                     );
@@ -782,7 +783,7 @@ class _IncomeFormLoadedState extends ConsumerState<_IncomeFormLoaded> {
                                       ),
                                     ),
                                   )
-                                : const Icon(Icons.search),
+                                : Icon(AppIcons.search),
                             onTap: () => controller.openView(),
                             onChanged: (_) => controller.openView(),
                           );

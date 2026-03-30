@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'package:expense_app/presentation/formatting/currency_display.dart';
+import 'package:expense_app/presentation/theme/app_icons.dart';
 import 'package:expense_app/presentation/theme/category_accent_colors.dart';
 
-const Widget kListRowOverflowMenuIconChild = SizedBox(
+final Widget kListRowOverflowMenuIconChild = SizedBox(
   width: 36,
   height: 36,
   child: Center(
-    child: Icon(Icons.more_vert, size: 22),
+    child: Icon(AppIcons.moreVert, size: 22),
   ),
 );
 

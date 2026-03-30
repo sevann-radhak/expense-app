@@ -10,6 +10,7 @@ import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/formatting/currency_display.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 import 'package:expense_app/presentation/recurring/recurring_occurrence_scope_dialogs.dart';
+import 'package:expense_app/presentation/theme/app_icons.dart';
 import 'package:expense_app/presentation/theme/category_accent_colors.dart';
 
 enum _RecurrenceFormKind { monthly, weekly }
@@ -844,7 +845,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                     alignment: Alignment.centerRight,
                     child: TextButton.icon(
                       onPressed: _confirmDelete,
-                      icon: const Icon(Icons.delete_outline),
+                      icon: Icon(AppIcons.delete),
                       label: Text(l10n.deleteExpenseAction),
                     ),
                   ),
@@ -853,7 +854,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                   title: Text(l10n.expenseDateLabel),
                   subtitle: Text(ExpenseDates.toStorageDate(_occurredOn)),
                   trailing: IconButton(
-                    icon: const Icon(Icons.calendar_today),
+                    icon: Icon(AppIcons.calendar),
                     onPressed:
                         _dateLockedForRecurringBulk ? null : _pickDate,
                   ),
@@ -877,7 +878,7 @@ class _ExpenseFormLoadedState extends ConsumerState<_ExpenseFormLoaded> {
                                 backgroundColor: categoryAccentColor(_categoryId!),
                               ),
                             )
-                          : const Icon(Icons.search),
+                          : Icon(AppIcons.search),
                       onTap: () => controller.openView(),
                       onChanged: (_) => controller.openView(),
                     );

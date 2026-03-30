@@ -19,6 +19,7 @@ import 'package:expense_app/presentation/widgets/month_cashflow_summary_card.dar
 import 'package:expense_app/presentation/reports/report_file_download.dart';
 import 'package:expense_app/presentation/reports/reports_category_pie_chart.dart';
 import 'package:expense_app/presentation/reports/reports_monthly_cashflow_bar_chart.dart';
+import 'package:expense_app/presentation/theme/app_icons.dart';
 
 String _reportCsvFilename({
   required int tabIndex,
@@ -187,7 +188,7 @@ class _ReportsExportMenuButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     return PopupMenuButton<_ReportsExportFormat>(
-      icon: const Icon(Icons.download_outlined),
+      icon: Icon(AppIcons.download),
       tooltip: l10n.reportsExportMenuTooltip,
       onSelected: (format) async {
         if (format == _ReportsExportFormat.csv) {
@@ -344,7 +345,7 @@ class _ReportYearStrip extends ConsumerWidget {
         IconButton(
           tooltip: l10n.reportsYearPickerPrevious,
           onPressed: () => bumpReportYear(ref, -1),
-          icon: const Icon(Icons.chevron_left),
+          icon: Icon(AppIcons.caretLeft),
         ),
         Expanded(
           child: Text(
@@ -357,7 +358,7 @@ class _ReportYearStrip extends ConsumerWidget {
         IconButton(
           tooltip: l10n.reportsYearPickerNext,
           onPressed: () => bumpReportYear(ref, 1),
-          icon: const Icon(Icons.chevron_right),
+          icon: Icon(AppIcons.caretRight),
         ),
       ],
     );
@@ -616,7 +617,7 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                 ref.read(selectedReportDetailMonthProvider.notifier).state =
                     m > 1 ? m - 1 : 12;
               },
-              icon: const Icon(Icons.chevron_left),
+              icon: Icon(AppIcons.caretLeft),
             ),
             Expanded(
               child: Text(
@@ -632,7 +633,7 @@ class _ReportsByMonthTabBody extends ConsumerWidget {
                 ref.read(selectedReportDetailMonthProvider.notifier).state =
                     m < 12 ? m + 1 : 1;
               },
-              icon: const Icon(Icons.chevron_right),
+              icon: Icon(AppIcons.caretRight),
             ),
           ],
         ),
@@ -886,7 +887,7 @@ class _ReportsByCategoryTabBody extends ConsumerWidget {
                   ref.read(selectedReportDetailMonthProvider.notifier).state =
                       m > 1 ? m - 1 : 12;
                 },
-                icon: const Icon(Icons.chevron_left),
+                icon: Icon(AppIcons.caretLeft),
               ),
               Expanded(
                 child: Text(
@@ -902,7 +903,7 @@ class _ReportsByCategoryTabBody extends ConsumerWidget {
                   ref.read(selectedReportDetailMonthProvider.notifier).state =
                       m < 12 ? m + 1 : 1;
                 },
-                icon: const Icon(Icons.chevron_right),
+                icon: Icon(AppIcons.caretRight),
               ),
             ],
           ),

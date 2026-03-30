@@ -7,6 +7,7 @@ import 'package:expense_app/data/local/book_backup_importer.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
 import 'package:expense_app/presentation/settings/book_backup_pick.dart';
+import 'package:expense_app/presentation/theme/app_icons.dart';
 
 class SettingsBackupSection extends ConsumerWidget {
   const SettingsBackupSection({super.key});
@@ -91,7 +92,7 @@ class SettingsBackupSection extends ConsumerWidget {
               }
             }
           },
-          icon: const Icon(Icons.upload_file_outlined),
+          icon: Icon(AppIcons.upload),
           label: Text(l10n.settingsBackupImportButton),
         ),
       ],

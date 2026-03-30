@@ -8,6 +8,7 @@ import 'package:expense_app/presentation/expenses/expense_summary_list_tile.dart
 import 'package:expense_app/presentation/home/expense_form_dialog.dart';
 import 'package:expense_app/presentation/home/recurring_expense_menu_handler.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
+import 'package:expense_app/presentation/theme/app_icons.dart';
 import 'package:expense_app/presentation/widgets/month_cashflow_summary_card.dart';
 
 class ExpensesScreen extends ConsumerWidget {
@@ -40,7 +41,7 @@ class ExpensesScreen extends ConsumerWidget {
                 );
               },
         tooltip: l10n.addExpenseTooltip,
-        child: const Icon(Icons.add),
+        child: Icon(AppIcons.add),
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
@@ -55,7 +56,7 @@ class ExpensesScreen extends ConsumerWidget {
                     month.month - 1,
                   );
                 },
-                icon: const Icon(Icons.chevron_left),
+                icon: Icon(AppIcons.caretLeft),
               ),
               Expanded(
                 child: Text(
@@ -73,7 +74,7 @@ class ExpensesScreen extends ConsumerWidget {
                     month.month + 1,
                   );
                 },
-                icon: const Icon(Icons.chevron_right),
+                icon: Icon(AppIcons.caretRight),
               ),
             ],
           ),

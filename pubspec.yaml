@@ -47,6 +47,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.6.0+eol
   fl_chart: ^1.2.0
   shared_preferences: ^2.5.3
+  phosphor_flutter: ^2.1.0
 
 dev_dependencies:
   flutter_test:

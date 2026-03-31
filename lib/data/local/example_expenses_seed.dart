@@ -51,6 +51,8 @@ Future<void> syncDemoExpectationsWithLocalToday(AppDatabase db) async {
   }
 }
 
+int _dim(int month) => DateTime(kExampleDemoExpenseYear, month + 1, 0).day;
+
 List<ExpensesCompanion> _buildExampleExpenseRows() {
   final out = <ExpensesCompanion>[];
   var seq = 0;
@@ -67,7 +69,7 @@ List<ExpensesCompanion> _buildExampleExpenseRows() {
     String description,
   ) {
     seq++;
-    final id = 'exp_demo_${seq.toString().padLeft(3, '0')}';
+    final id = 'exp_demo_${seq.toString().padLeft(4, '0')}';
     final usd = amountOriginal * manualFxRateToUsd;
     final rowDate = DateTime(kExampleDemoExpenseYear, month, day);
     final today = calendarTodayLocal();
@@ -98,118 +100,489 @@ List<ExpensesCompanion> _buildExampleExpenseRows() {
   }
 
   for (var m = 1; m <= 12; m++) {
+    final last = _dim(m);
+
     add(
       m,
       3,
       'cat_fixed_expenses',
       'cat_fixed_expenses_rent',
-      450000 + m * 1500,
+      520000 + m * 2000,
       'ARS',
       _fxArsToUsd,
       false,
       'Monthly rent',
     );
+
     add(
       m,
-      9,
+      5,
       'cat_fixed_expenses',
-      'cat_fixed_expenses_groceries',
-      140000 + m * 2200,
-      'ARS',
-      _fxArsToUsd,
-      false,
-      'Groceries & supermarket',
-    );
-    add(
-      m,
-      20,
-      'cat_fixed_expenses',
-      'cat_fixed_expenses_subscriptions',
-      8999 + m * 50,
+      'cat_fixed_expenses_cellphone',
+      18900 + m * 350,
       'ARS',
       _fxArsToUsd,
       true,
-      'Apps & cloud subscriptions',
+      'Mobile plan',
     );
-  }
 
-  for (final m in [1, 3, 5, 7, 9, 11]) {
+    for (final d in [6, 13, 20, 27]) {
+      if (d <= last) {
+        add(
+          m,
+          d,
+          'cat_fixed_expenses',
+          'cat_fixed_expenses_groceries',
+          38000 + (m + d) * 420 + (d % 4) * 1800,
+          'ARS',
+          _fxArsToUsd,
+          false,
+          'Supermarket run',
+        );
+      }
+    }
+
     add(
       m,
-      15,
+      14,
       'cat_fixed_expenses',
       'cat_fixed_expenses_electricity',
-      18000 + m * 400,
+      21500 + (m % 4) * 2200,
       'ARS',
       _fxArsToUsd,
       false,
-      'Electricity bill',
+      'Electricity',
     );
-  }
 
-  for (var m = 1; m <= 12; m++) {
-    if (m == 8) {
-      continue;
+    if (m != 8) {
+      add(
+        m,
+        11,
+        'cat_fixed_expenses',
+        'cat_fixed_expenses_internet_tv',
+        14200 + m * 90,
+        'ARS',
+        _fxArsToUsd,
+        true,
+        'Internet & TV',
+      );
     }
+
+    if (m % 2 == 1) {
+      final w = m == 1 ? 28 : 16;
+      if (w <= last) {
+        add(
+          m,
+          w,
+          'cat_fixed_expenses',
+          'cat_fixed_expenses_water',
+          9200 + m * 200,
+          'ARS',
+          _fxArsToUsd,
+          false,
+          'Water utility',
+        );
+      }
+    }
+
+    if (m >= 5 && m <= 9) {
+      add(
+        m,
+        18,
+        'cat_fixed_expenses',
+        'cat_fixed_expenses_gas',
+        11000 + (9 - m).abs() * 800,
+        'ARS',
+        _fxArsToUsd,
+        false,
+        'Natural gas (winter)',
+      );
+    }
+
+    if (m % 3 == 0) {
+      add(
+        m,
+        22,
+        'cat_fixed_expenses',
+        'cat_fixed_expenses_hoa',
+        28500,
+        'ARS',
+        _fxArsToUsd,
+        false,
+        'Building & HOA fees',
+      );
+    }
+
     add(
       m,
-      12,
-      'cat_fixed_expenses',
-      'cat_fixed_expenses_internet_tv',
-      12999 + m * 100,
+      4,
+      'cat_subscriptions_digital',
+      'cat_subscriptions_digital_streaming',
+      5200 + (m % 3) * 400,
       'ARS',
       _fxArsToUsd,
       true,
-      'Internet & TV',
+      'Streaming (video)',
     );
-  }
-
-  for (final m in [1, 2, 3, 4, 10, 11]) {
     add(
       m,
-      18,
+      7,
+      'cat_subscriptions_digital',
+      'cat_subscriptions_digital_music',
+      3299,
+      'ARS',
+      _fxArsToUsd,
+      true,
+      'Music & podcasts',
+    );
+    add(
+      m,
+      8,
+      'cat_subscriptions_digital',
+      'cat_subscriptions_digital_cloud',
+      4100 + m * 50,
+      'ARS',
+      _fxArsToUsd,
+      true,
+      'Cloud storage',
+    );
+    if (m % 2 == 0) {
+      add(
+        m,
+        9,
+        'cat_subscriptions_digital',
+        'cat_subscriptions_digital_software',
+        11500 + m * 200,
+        'ARS',
+        _fxArsToUsd,
+        true,
+        'Productivity software',
+      );
+    }
+    if (m % 4 == 0) {
+      add(
+        m,
+        10,
+        'cat_subscriptions_digital',
+        'cat_subscriptions_digital_gaming',
+        4500,
+        'ARS',
+        _fxArsToUsd,
+        true,
+        'Online gaming pass',
+      );
+    }
+    if (m == 6 || m == 12) {
+      add(
+        m,
+        12,
+        'cat_subscriptions_digital',
+        'cat_subscriptions_digital_news',
+        2500,
+        'ARS',
+        _fxArsToUsd,
+        true,
+        'Digital news',
+      );
+    }
+
+    for (final d in [2, 4, 8, 10, 15, 17, 21, 24, 26]) {
+      if (d <= last) {
+        add(
+          m,
+          d,
+          'cat_delivery_convenience',
+          'cat_delivery_convenience_meal_delivery',
+          11200 + (m + d) * 180 + (d % 5) * 900,
+          'ARS',
+          _fxArsToUsd,
+          true,
+          'Meal delivery',
+        );
+      }
+    }
+
+    for (final d in [9, 23]) {
+      if (d <= last) {
+        add(
+          m,
+          d,
+          'cat_delivery_convenience',
+          'cat_delivery_convenience_grocery_quick',
+          6200 + m * 250,
+          'ARS',
+          _fxArsToUsd,
+          true,
+          'Quick commerce / market delivery',
+        );
+      }
+    }
+
+    add(
+      m,
+      last >= 19 ? 19 : last,
+      'cat_delivery_convenience',
+      'cat_delivery_convenience_courier',
+      4200 + m * 120,
+      'ARS',
+      _fxArsToUsd,
+      true,
+      'Courier / errands',
+    );
+
+    if (m % 2 == 0) {
+      final d = 16 <= last ? 16 : last;
+      add(
+        m,
+        d,
+        'cat_delivery_convenience',
+        'cat_delivery_convenience_laundry',
+        9800,
+        'ARS',
+        _fxArsToUsd,
+        false,
+        'Laundry & dry cleaning',
+      );
+    }
+
+    add(
+      m,
+      1,
       'cat_transport',
-      'cat_transport_fuel',
-      28000 + m * 800,
+      'cat_transport_public',
+      16800 + m * 450,
       'ARS',
       _fxArsToUsd,
-      true,
-      'Fuel',
+      false,
+      'Transit pass / SUBE',
+    );
+
+    for (final d in [3, 6, 11, 14, 18, 22, 25, 28]) {
+      if (d <= last) {
+        add(
+          m,
+          d,
+          'cat_transport',
+          'cat_transport_rideshare',
+          4800 + m * 40 + (d % 6) * 350,
+          'ARS',
+          _fxArsToUsd,
+          true,
+          'Rideshare / taxi',
+        );
+      }
+    }
+
+    for (final d in [7, 21]) {
+      if (d <= last && m != 8) {
+        add(
+          m,
+          d,
+          'cat_transport',
+          'cat_transport_fuel',
+          31000 + m * 700,
+          'ARS',
+          _fxArsToUsd,
+          true,
+          'Fuel',
+        );
+      }
+    }
+
+    if (m % 3 == 0) {
+      add(
+        m,
+        12,
+        'cat_transport',
+        'cat_transport_parking',
+        4500,
+        'ARS',
+        _fxArsToUsd,
+        true,
+        'Parking',
+      );
+    }
+
+    add(
+      m,
+      13,
+      'cat_pets',
+      'cat_pets_food',
+      26500 + m * 500,
+      'ARS',
+      _fxArsToUsd,
+      false,
+      'Pet food & litter',
+    );
+
+    if (m == 3) {
+      add(
+        3,
+        25,
+        'cat_pets',
+        'cat_pets_vet',
+        195000,
+        'ARS',
+        _fxArsToUsd,
+        true,
+        'Vet — annual checkup & vaccines',
+      );
+    }
+    if (m == 9) {
+      add(
+        9,
+        16,
+        'cat_pets',
+        'cat_pets_vet',
+        52000,
+        'ARS',
+        _fxArsToUsd,
+        true,
+        'Vet — follow-up',
+      );
+    }
+
+    if (m % 3 == 0) {
+      add(
+        m,
+        11,
+        'cat_pets',
+        'cat_pets_grooming',
+        13500 + m * 400,
+        'ARS',
+        _fxArsToUsd,
+        true,
+        'Pet grooming',
+      );
+    }
+
+    if (m % 4 == 0) {
+      add(
+        m,
+        20,
+        'cat_pets',
+        'cat_pets_toys',
+        16800,
+        'ARS',
+        _fxArsToUsd,
+        true,
+        'Toys & accessories',
+      );
+    }
+
+    if (m == 6) {
+      add(
+        6,
+        29,
+        'cat_pets',
+        'cat_pets_insurance',
+        8900,
+        'ARS',
+        _fxArsToUsd,
+        true,
+        'Pet liability add-on',
+      );
+    }
+
+    for (final d in [7, 14, 21]) {
+      if (d <= last) {
+        add(
+          m,
+          d,
+          'cat_leisure',
+          'cat_leisure_dining',
+          32000 + d * 900 + m * 200,
+          'ARS',
+          _fxArsToUsd,
+          true,
+          'Dining out',
+        );
+      }
+    }
+
+    if (m % 2 == 1) {
+      final d = 19 <= last ? 19 : last;
+      add(
+        m,
+        d,
+        'cat_leisure',
+        'cat_leisure_entertainment',
+        18500 + m * 300,
+        'ARS',
+        _fxArsToUsd,
+        true,
+        'Cinema / events',
+      );
+    }
+
+    if (m % 3 == 0) {
+      add(
+        m,
+        15,
+        'cat_health',
+        'cat_health_personal_care',
+        12000,
+        'ARS',
+        _fxArsToUsd,
+        false,
+        'Personal care',
+      );
+    }
+
+    add(
+      m,
+      17,
+      'cat_health',
+      'cat_health_pharmacy',
+      6500 + (m % 5) * 1800,
+      'ARS',
+      _fxArsToUsd,
+      m.isEven,
+      'Pharmacy',
     );
   }
 
-  add(4, 8, 'cat_taxes', 'cat_taxes_national', 95000, 'ARS', _fxArsToUsd, false, 'National tax installment');
-  add(8, 10, 'cat_taxes', 'cat_taxes_provincial', 42000, 'ARS', _fxArsToUsd, false, 'Provincial fees');
+  add(3, 7, 'cat_health', 'cat_health_gym', 36999, 'ARS', _fxArsToUsd, true, 'Gym membership');
+  add(9, 7, 'cat_health', 'cat_health_gym', 38999, 'ARS', _fxArsToUsd, true, 'Gym renewal');
 
-  add(3, 7, 'cat_health', 'cat_health_gym', 35999, 'ARS', _fxArsToUsd, true, 'Gym membership');
-  add(9, 7, 'cat_health', 'cat_health_gym', 37999, 'ARS', _fxArsToUsd, true, 'Gym membership renewal');
+  add(4, 8, 'cat_taxes', 'cat_taxes_national', 98000, 'ARS', _fxArsToUsd, false, 'National tax installment');
+  add(8, 10, 'cat_taxes', 'cat_taxes_provincial', 44500, 'ARS', _fxArsToUsd, false, 'Provincial & municipal');
+  add(11, 5, 'cat_taxes', 'cat_taxes_vehicle', 32000, 'ARS', _fxArsToUsd, false, 'Vehicle registration');
 
-  add(5, 22, 'cat_leisure', 'cat_leisure_travel', 185000, 'ARS', _fxArsToUsd, true, 'Long weekend — domestic flights');
+  add(5, 22, 'cat_leisure', 'cat_leisure_travel', 198000, 'ARS', _fxArsToUsd, true, 'Long weekend — domestic flights');
 
-  add(6, 2, 'cat_leisure', 'cat_leisure_travel', 1180, 'EUR', _fxEurToUsd, true, 'International flight (summer trip)');
-  add(6, 3, 'cat_leisure', 'cat_leisure_travel', 920, 'EUR', _fxEurToUsd, true, 'Hotel — four nights abroad');
+  add(6, 2, 'cat_leisure', 'cat_leisure_travel', 1180, 'EUR', _fxEurToUsd, true, 'International flight');
+  add(6, 3, 'cat_leisure', 'cat_leisure_travel', 940, 'EUR', _fxEurToUsd, true, 'Hotel — four nights');
   add(6, 5, 'cat_leisure', 'cat_leisure_dining', 185, 'EUR', _fxEurToUsd, false, 'Restaurants on trip');
-  add(6, 6, 'cat_transport', 'cat_transport_public', 45, 'EUR', _fxEurToUsd, false, 'Local transit passes');
-  add(6, 14, 'cat_leisure', 'cat_leisure_entertainment', 60, 'EUR', _fxEurToUsd, true, 'Museum entries');
+  add(6, 6, 'cat_transport', 'cat_transport_public', 45, 'EUR', _fxEurToUsd, false, 'Local transit');
+  add(6, 8, 'cat_transport', 'cat_transport_rideshare', 32, 'EUR', _fxEurToUsd, true, 'Airport rideshare');
+  add(6, 14, 'cat_leisure', 'cat_leisure_entertainment', 62, 'EUR', _fxEurToUsd, true, 'Museums');
   add(6, 18, 'cat_fixed_expenses', 'cat_fixed_expenses_cellphone', 25, 'USD', _fxUsd, true, 'Travel eSIM top-up');
 
-  add(7, 11, 'cat_housing', 'cat_housing_repairs', 125000, 'ARS', _fxArsToUsd, false, 'AC service & minor repair');
+  add(7, 11, 'cat_housing', 'cat_housing_repairs', 132000, 'ARS', _fxArsToUsd, false, 'AC service & minor repair');
 
-  add(10, 6, 'cat_formation', 'cat_formation_courses', 89000, 'ARS', _fxArsToUsd, true, 'Online certification course');
+  add(10, 6, 'cat_formation', 'cat_formation_courses', 92000, 'ARS', _fxArsToUsd, true, 'Online certification');
 
-  add(11, 14, 'cat_investments', 'cat_investments_funds', 250000, 'ARS', _fxArsToUsd, true, 'Fund contribution');
+  add(11, 14, 'cat_investments', 'cat_investments_funds', 265000, 'ARS', _fxArsToUsd, true, 'Fund contribution');
 
-  add(2, 25, 'cat_health', 'cat_health_pharmacy', 12450, 'ARS', _fxArsToUsd, false, 'Pharmacy');
-  add(10, 19, 'cat_health', 'cat_health_pharmacy', 18900, 'ARS', _fxArsToUsd, true, 'Pharmacy — card');
+  add(2, 25, 'cat_health', 'cat_health_pharmacy', 13200, 'ARS', _fxArsToUsd, false, 'Pharmacy');
+  add(10, 19, 'cat_health', 'cat_health_pharmacy', 20100, 'ARS', _fxArsToUsd, true, 'Pharmacy — card');
 
-  add(12, 20, 'cat_leisure', 'cat_leisure_travel', 680, 'EUR', _fxEurToUsd, true, 'Year-end regional flight');
-  add(12, 22, 'cat_leisure', 'cat_leisure_dining', 195, 'EUR', _fxEurToUsd, false, 'Holiday dinner (EUR)');
-  add(12, 24, 'cat_housing', 'cat_housing_decoration', 140, 'USD', _fxUsd, true, 'Decor gifts — USD store');
-  add(12, 26, 'cat_leisure', 'cat_leisure_travel', 420000, 'ARS', _fxArsToUsd, false, 'Intercity bus — family visit');
-  add(12, 28, 'cat_health', 'cat_health_pharmacy', 55, 'USD', _fxUsd, true, 'Travel health supplies (USD)');
+  add(1, 10, 'cat_formation', 'cat_formation_books', 18500, 'ARS', _fxArsToUsd, true, 'Technical books');
 
-  add(1, 28, 'cat_fixed_expenses', 'cat_fixed_expenses_water', 8900, 'ARS', _fxArsToUsd, false, 'Water utility');
-  add(8, 8, 'cat_leisure', 'cat_leisure_dining', 67000, 'ARS', _fxArsToUsd, true, 'Dining while on leave');
+  add(4, 14, 'cat_transport', 'cat_transport_maintenance', 78000, 'ARS', _fxArsToUsd, true, 'Vehicle service');
+
+  add(12, 20, 'cat_leisure', 'cat_leisure_travel', 695, 'EUR', _fxEurToUsd, true, 'Regional flight');
+  add(12, 22, 'cat_leisure', 'cat_leisure_dining', 198, 'EUR', _fxEurToUsd, false, 'Holiday dinner');
+  add(12, 24, 'cat_housing', 'cat_housing_decoration', 145, 'USD', _fxUsd, true, 'Decor — USD');
+  add(12, 26, 'cat_leisure', 'cat_leisure_travel', 445000, 'ARS', _fxArsToUsd, false, 'Intercity travel');
+  add(12, 28, 'cat_health', 'cat_health_pharmacy', 58, 'USD', _fxUsd, true, 'Travel health supplies');
+
+  add(8, 8, 'cat_leisure', 'cat_leisure_dining', 72000, 'ARS', _fxArsToUsd, true, 'Dining while on leave');
+
+  add(3, 22, 'cat_leisure', 'cat_leisure_hobbies', 24000, 'ARS', _fxArsToUsd, true, 'Hobby supplies');
+
+  add(5, 8, 'cat_investments', 'cat_investments_brokerage', 150000, 'ARS', _fxArsToUsd, true, 'Brokerage contribution');
 
   return out;
 }

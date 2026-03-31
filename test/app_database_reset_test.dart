@@ -47,6 +47,6 @@ void main() {
     expect(await db.select(db.expenses).get(), isEmpty);
     expect(await db.select(db.paymentInstruments).get(), isEmpty);
     final cats = await db.select(db.categories).get();
-    expect(cats.length, 8);
+    expect(cats.length, 11);
   });
 }

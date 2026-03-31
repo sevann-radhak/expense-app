@@ -19,9 +19,9 @@ void main() {
     await db.close();
   });
 
-  test('seed creates eight categories each with exactly one Other subcategory', () async {
+  test('seed creates built-in categories each with exactly one Other subcategory', () async {
     final cats = await db.select(db.categories).get();
-    expect(cats.length, 8);
+    expect(cats.length, 11);
 
     for (final c in cats) {
       final subs = await (db.select(db.subcategories)

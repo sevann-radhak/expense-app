@@ -3,23 +3,31 @@ import 'package:drift/drift.dart';
 import 'package:expense_app/data/local/app_database.dart';
 import 'package:expense_app/domain/category.dart';
 
-/// Built-in default taxonomy for **Argentina-style** everyday expenses.
+/// Built-in default taxonomy for **Argentina-style** professional / urban household
+/// expenses, aligned with common patterns in apps like Mint, YNAB, and Monzo:
+/// **fixed bills** grouped together; **subscriptions** as their own bucket;
+/// **delivery & convenience** for variable-but-frequent spend (meal delivery, quick
+/// commerce, errands); **pets** separated from human **health**; **rideshare/taxi**
+/// under **Transport** alongside fuel and public transit.
 ///
 /// Template id: [kDefaultTaxonomyTemplateId]. Future: load a different template
 /// from settings / remote config while keeping the same schema.
-const String kDefaultTaxonomyTemplateId = 'argent_basic_v1';
+const String kDefaultTaxonomyTemplateId = 'argent_professional_v2';
 
 /// English labels in DB (UI can map via i18n later).
 abstract final class CategorySeeder {
   static const _categories = <({String id, String name, int sortOrder})>[
     (id: 'cat_formation', name: 'Formation', sortOrder: 0),
     (id: 'cat_fixed_expenses', name: 'Fixed expenses', sortOrder: 1),
-    (id: 'cat_taxes', name: 'Taxes', sortOrder: 2),
-    (id: 'cat_investments', name: 'Investments', sortOrder: 3),
-    (id: 'cat_leisure', name: 'Leisure', sortOrder: 4),
-    (id: 'cat_health', name: 'Health', sortOrder: 5),
-    (id: 'cat_transport', name: 'Transport', sortOrder: 6),
-    (id: 'cat_housing', name: 'Housing', sortOrder: 7),
+    (id: 'cat_subscriptions_digital', name: 'Subscriptions & digital', sortOrder: 2),
+    (id: 'cat_delivery_convenience', name: 'Delivery & convenience', sortOrder: 3),
+    (id: 'cat_pets', name: 'Pets', sortOrder: 4),
+    (id: 'cat_taxes', name: 'Taxes', sortOrder: 5),
+    (id: 'cat_investments', name: 'Investments', sortOrder: 6),
+    (id: 'cat_leisure', name: 'Leisure', sortOrder: 7),
+    (id: 'cat_health', name: 'Health', sortOrder: 8),
+    (id: 'cat_transport', name: 'Transport', sortOrder: 9),
+    (id: 'cat_housing', name: 'Housing', sortOrder: 10),
   ];
 
   /// (localKey, display name, slug, sortOrder). [isOther] marks the reserved row.
@@ -33,8 +41,20 @@ abstract final class CategorySeeder {
       })> _subsForCategory(String categoryId) {
     return switch (categoryId) {
       'cat_formation' => [
-          (key: 'courses', name: 'Courses & training', slug: 'formation_courses', sortOrder: 0, isOther: false),
-          (key: 'books', name: 'Books & materials', slug: 'formation_books', sortOrder: 1, isOther: false),
+          (
+            key: 'courses',
+            name: 'Courses & training',
+            slug: 'formation_courses',
+            sortOrder: 0,
+            isOther: false,
+          ),
+          (
+            key: 'books',
+            name: 'Books & materials',
+            slug: 'formation_books',
+            sortOrder: 1,
+            isOther: false,
+          ),
           _otherRow(),
         ],
       'cat_fixed_expenses' => [
@@ -46,8 +66,108 @@ abstract final class CategorySeeder {
           (key: 'internet_tv', name: 'Internet & TV', slug: 'fixed_internet_tv', sortOrder: 5, isOther: false),
           (key: 'electricity', name: 'Electricity', slug: 'fixed_electricity', sortOrder: 6, isOther: false),
           (key: 'groceries', name: 'Groceries & supermarket', slug: 'fixed_groceries', sortOrder: 7, isOther: false),
-          (key: 'education', name: 'Education & tuition', slug: 'fixed_education', sortOrder: 8, isOther: false),
-          (key: 'subscriptions', name: 'Subscriptions & apps', slug: 'fixed_subscriptions', sortOrder: 9, isOther: false),
+          _otherRow(),
+        ],
+      'cat_subscriptions_digital' => [
+          (
+            key: 'streaming',
+            name: 'Streaming video',
+            slug: 'dig_streaming',
+            sortOrder: 0,
+            isOther: false,
+          ),
+          (
+            key: 'music',
+            name: 'Music & podcasts',
+            slug: 'dig_music',
+            sortOrder: 1,
+            isOther: false,
+          ),
+          (
+            key: 'cloud',
+            name: 'Cloud storage & sync',
+            slug: 'dig_cloud',
+            sortOrder: 2,
+            isOther: false,
+          ),
+          (
+            key: 'software',
+            name: 'Software & productivity',
+            slug: 'dig_software',
+            sortOrder: 3,
+            isOther: false,
+          ),
+          (
+            key: 'gaming',
+            name: 'Gaming & online passes',
+            slug: 'dig_gaming',
+            sortOrder: 4,
+            isOther: false,
+          ),
+          (
+            key: 'news',
+            name: 'News & reading',
+            slug: 'dig_news',
+            sortOrder: 5,
+            isOther: false,
+          ),
+          _otherRow(),
+        ],
+      'cat_delivery_convenience' => [
+          (
+            key: 'meal_delivery',
+            name: 'Meal delivery',
+            slug: 'del_meal',
+            sortOrder: 0,
+            isOther: false,
+          ),
+          (
+            key: 'grocery_quick',
+            name: 'Grocery delivery & quick commerce',
+            slug: 'del_grocery_quick',
+            sortOrder: 1,
+            isOther: false,
+          ),
+          (
+            key: 'courier',
+            name: 'Courier & errands',
+            slug: 'del_courier',
+            sortOrder: 2,
+            isOther: false,
+          ),
+          (
+            key: 'laundry',
+            name: 'Laundry & dry cleaning',
+            slug: 'del_laundry',
+            sortOrder: 3,
+            isOther: false,
+          ),
+          _otherRow(),
+        ],
+      'cat_pets' => [
+          (key: 'vet', name: 'Veterinary', slug: 'pets_vet', sortOrder: 0, isOther: false),
+          (
+            key: 'food',
+            name: 'Food & supplies',
+            slug: 'pets_food',
+            sortOrder: 1,
+            isOther: false,
+          ),
+          (
+            key: 'toys',
+            name: 'Toys & accessories',
+            slug: 'pets_toys',
+            sortOrder: 2,
+            isOther: false,
+          ),
+          (key: 'grooming', name: 'Grooming', slug: 'pets_grooming', sortOrder: 3, isOther: false),
+          (
+            key: 'insurance',
+            name: 'Insurance & registration',
+            slug: 'pets_insurance',
+            sortOrder: 4,
+            isOther: false,
+          ),
           _otherRow(),
         ],
       'cat_taxes' => [
@@ -72,18 +192,49 @@ abstract final class CategorySeeder {
           _otherRow(),
         ],
       'cat_health' => [
-          (key: 'personal_care', name: 'Personal care', slug: 'health_personal_care', sortOrder: 0, isOther: false),
+          (
+            key: 'personal_care',
+            name: 'Personal care',
+            slug: 'health_personal_care',
+            sortOrder: 0,
+            isOther: false,
+          ),
           (key: 'pharmacy', name: 'Pharmacy', slug: 'health_pharmacy', sortOrder: 1, isOther: false),
           (key: 'gym', name: 'Gym & sports', slug: 'health_gym', sortOrder: 2, isOther: false),
-          (key: 'health_plan', name: 'Health plan & prepaid medicine', slug: 'health_plan', sortOrder: 3, isOther: false),
+          (
+            key: 'health_plan',
+            name: 'Health plan & prepaid medicine',
+            slug: 'health_plan',
+            sortOrder: 3,
+            isOther: false,
+          ),
           _otherRow(),
         ],
       'cat_transport' => [
           (key: 'public', name: 'Public transport', slug: 'transport_public', sortOrder: 0, isOther: false),
-          (key: 'private_vehicle', name: 'Private vehicle', slug: 'transport_private_vehicle', sortOrder: 1, isOther: false),
-          (key: 'fuel', name: 'Fuel', slug: 'transport_fuel', sortOrder: 2, isOther: false),
-          (key: 'parking', name: 'Parking & tolls', slug: 'transport_parking', sortOrder: 3, isOther: false),
-          (key: 'maintenance', name: 'Vehicle maintenance', slug: 'transport_maintenance', sortOrder: 4, isOther: false),
+          (
+            key: 'rideshare',
+            name: 'Rideshare & taxi',
+            slug: 'transport_rideshare',
+            sortOrder: 1,
+            isOther: false,
+          ),
+          (
+            key: 'private_vehicle',
+            name: 'Private vehicle',
+            slug: 'transport_private_vehicle',
+            sortOrder: 2,
+            isOther: false,
+          ),
+          (key: 'fuel', name: 'Fuel', slug: 'transport_fuel', sortOrder: 3, isOther: false),
+          (key: 'parking', name: 'Parking & tolls', slug: 'transport_parking', sortOrder: 4, isOther: false),
+          (
+            key: 'maintenance',
+            name: 'Vehicle maintenance',
+            slug: 'transport_maintenance',
+            sortOrder: 5,
+            isOther: false,
+          ),
           _otherRow(),
         ],
       'cat_housing' => [

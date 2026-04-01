@@ -391,8 +391,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAccountSectionTitle => 'Account';
 
   @override
-  String get settingsAccountPlaceholder =>
-      'Sign-in and multi-device sync are planned for a later phase.';
+  String get settingsAccountLocalOnlyBody =>
+      'Cloud account and sync are not enabled in this build. Your data stays on this device (local-first). The next Phase 5 slices add Microsoft Entra sign-in and Azure sync; see docs/05-implementation-phase-5-plan.md.';
 
   @override
   String get settingsPaymentInstrumentsSectionTitle => 'Card profiles';

@@ -1,12 +1,9 @@
 # =============================================================================
 # What belongs in Git: Dart/app code under lib/, tests, web/, pubspec, analysis
-# options, README. Platform folders below are ignored on purpose (web-first);
-# regenerate locally when you need mobile/desktop (see README).
+# options, README, docs/, and .cursor/rules (versioned). Platform folders below
+# are ignored on purpose (web-first); regenerate locally when you need
+# mobile/desktop (see README).
 # =============================================================================
-
-# --- This repo (local-only) ---
-.cursor/
-docs/
 
 # --- Flutter tool metadata (SDK revision/channel; regenerated per machine) ---
 .metadata

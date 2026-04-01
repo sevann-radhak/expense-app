@@ -17,8 +17,7 @@ void main() {
     return db;
   }
 
-  /// [appRouter] is process-singleton; shell branch survives across tests unless
-  /// we reset the location.
+  /// Resets shell branch location between tests via [goRouterProvider].
   Future<void> pumpExpenseApp(
     WidgetTester tester, {
     required AppDatabase db,
@@ -26,17 +25,21 @@ void main() {
   }) async {
     SharedPreferences.setMockInitialValues({});
     final p = prefs ?? await SharedPreferences.getInstance();
+    final container = ProviderContainer(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        sharedPreferencesProvider.overrideWithValue(p),
+      ],
+    );
+    addTearDown(container.dispose);
     await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          appDatabaseProvider.overrideWithValue(db),
-          sharedPreferencesProvider.overrideWithValue(p),
-        ],
+      UncontrolledProviderScope(
+        container: container,
         child: const ExpenseApp(),
       ),
     );
     await tester.pumpAndSettle();
-    appRouter.go('/expenses');
+    container.read(goRouterProvider).go('/expenses');
     await tester.pumpAndSettle();
   }
 
@@ -84,7 +87,9 @@ void main() {
     }
   });
 
-  testWidgets('categories screen lists seeded taxonomy', (WidgetTester tester) async {
+  testWidgets('categories screen lists seeded taxonomy', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(400, 800);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -94,7 +99,10 @@ void main() {
     try {
       await pumpExpenseApp(tester, db: db);
       final l10n = await AppLocalizations.delegate.load(const Locale('en'));
-      expect(find.byKey(const ValueKey<String>('selected-month-label')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('selected-month-label')),
+        findsOneWidget,
+      );
       await tester.tap(
         find.descendant(
           of: find.byType(NavigationBar),
@@ -109,7 +117,9 @@ void main() {
     }
   });
 
-  testWidgets('navigates to settings with bottom bar', (WidgetTester tester) async {
+  testWidgets('navigates to settings with bottom bar', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(400, 800);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -130,7 +140,9 @@ void main() {
     }
   });
 
-  testWidgets('navigates with navigation rail on wide layout', (WidgetTester tester) async {
+  testWidgets('navigates with navigation rail on wide layout', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(1200, 800);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);

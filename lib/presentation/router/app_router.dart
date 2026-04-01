@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:expense_app/presentation/categories/categories_screen.dart';
@@ -28,69 +29,68 @@ void popShellBranchOverlayRoutes() {
   }
 }
 
-final GoRouter appRouter = GoRouter(
-  initialLocation: '/expenses',
-  routes: [
-    GoRoute(
-      path: '/home',
-      redirect: (context, state) => '/expenses',
-    ),
-    StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) {
-        return AppShell(navigationShell: navigationShell);
-      },
-      branches: [
-        StatefulShellBranch(
-          navigatorKey: kShellBranchNavigatorKeys[0],
-          routes: [
-            GoRoute(
-              path: '/expenses',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage<void>(child: ExpensesScreen()),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          navigatorKey: kShellBranchNavigatorKeys[1],
-          routes: [
-            GoRoute(
-              path: '/income',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage<void>(child: IncomeScreen()),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          navigatorKey: kShellBranchNavigatorKeys[2],
-          routes: [
-            GoRoute(
-              path: '/reports',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage<void>(child: ReportsScreen()),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          navigatorKey: kShellBranchNavigatorKeys[3],
-          routes: [
-            GoRoute(
-              path: '/categories',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage<void>(child: CategoriesScreen()),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          navigatorKey: kShellBranchNavigatorKeys[4],
-          routes: [
-            GoRoute(
-              path: '/settings',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage<void>(child: SettingsScreen()),
-            ),
-          ],
-        ),
-      ],
-    ),
-  ],
-);
+final goRouterProvider = Provider<GoRouter>((ref) {
+  return GoRouter(
+    initialLocation: '/expenses',
+    routes: [
+      GoRoute(path: '/home', redirect: (context, state) => '/expenses'),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return AppShell(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            navigatorKey: kShellBranchNavigatorKeys[0],
+            routes: [
+              GoRoute(
+                path: '/expenses',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage<void>(child: ExpensesScreen()),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: kShellBranchNavigatorKeys[1],
+            routes: [
+              GoRoute(
+                path: '/income',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage<void>(child: IncomeScreen()),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: kShellBranchNavigatorKeys[2],
+            routes: [
+              GoRoute(
+                path: '/reports',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage<void>(child: ReportsScreen()),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: kShellBranchNavigatorKeys[3],
+            routes: [
+              GoRoute(
+                path: '/categories',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage<void>(child: CategoriesScreen()),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: kShellBranchNavigatorKeys[4],
+            routes: [
+              GoRoute(
+                path: '/settings',
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage<void>(child: SettingsScreen()),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+});

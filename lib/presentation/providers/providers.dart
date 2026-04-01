@@ -17,6 +17,7 @@ import 'package:expense_app/data/local/drift_recurring_income_series_repository.
 import 'package:expense_app/domain/domain.dart';
 
 export 'app_user_settings_provider.dart';
+export 'auth_session_provider.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   throw StateError('Override appDatabaseProvider in main() or tests.');

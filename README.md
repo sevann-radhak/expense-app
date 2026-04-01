@@ -122,9 +122,9 @@ Keep `.cursor/rules/` aligned with the codebase.
 
 ## Rules index
 
-- `expense-app-project-context.mdc` — stack defaults  
-- `expense-app-business-domain.mdc` — categories, expenses, recurring, alerts  
-- `expense-app-architecture.mdc` — clean architecture  
-- `expense-app-data-persistence.mdc` — SQLite, migrations, export  
-- `expense-app-implementation.mdc` — style, i18n, money, tests  
-- `expense-app-ui-ux.mdc` — charts, a11y, navigation  
+- `expense-app-project-context.md` — stack defaults  
+- `expense-app-business-domain.md` — categories, expenses, recurring, alerts  
+- `expense-app-architecture.md` — clean architecture  
+- `expense-app-data-persistence.md` — SQLite, migrations, export  
+- `expense-app-implementation.md` — style, i18n, money, tests  
+- `expense-app-ui-ux.md` — charts, a11y, navigation  

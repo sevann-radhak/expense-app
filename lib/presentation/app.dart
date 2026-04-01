@@ -14,11 +14,11 @@ final class _AppScrollBehavior extends MaterialScrollBehavior {
 
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.stylus,
-        PointerDeviceKind.mouse,
-        PointerDeviceKind.trackpad,
-      };
+    PointerDeviceKind.touch,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+  };
 }
 
 class ExpenseApp extends ConsumerWidget {
@@ -27,6 +27,7 @@ class ExpenseApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userSettings = ref.watch(appUserSettingsProvider);
+    final router = ref.watch(goRouterProvider);
     return MaterialApp.router(
       scrollBehavior: const _AppScrollBehavior(),
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
@@ -55,7 +56,7 @@ class ExpenseApp extends ConsumerWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }

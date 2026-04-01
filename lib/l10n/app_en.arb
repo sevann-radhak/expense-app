@@ -351,11 +351,11 @@
   },
   "settingsAccountSectionTitle": "Account",
   "@settingsAccountSectionTitle": {
-    "description": "Heading for future sign-in / sync (placeholder)."
+    "description": "Heading for sign-in / sync."
   },
-  "settingsAccountPlaceholder": "Sign-in and multi-device sync are planned for a later phase.",
-  "@settingsAccountPlaceholder": {
-    "description": "Short note under Account while auth is out of scope."
+  "settingsAccountLocalOnlyBody": "Cloud account and sync are not enabled in this build. Your data stays on this device (local-first). The next Phase 5 slices add Microsoft Entra sign-in and Azure sync; see docs/05-implementation-phase-5-plan.md.",
+  "@settingsAccountLocalOnlyBody": {
+    "description": "Explains local-only mode until Entra + Azure sync are implemented."
   },
   "settingsPaymentInstrumentsSectionTitle": "Card profiles",
   "@settingsPaymentInstrumentsSectionTitle": {

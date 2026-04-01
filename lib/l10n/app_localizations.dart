@@ -776,17 +776,17 @@ abstract class AppLocalizations {
   /// **'Use table default ({code})'**
   String settingsDefaultCurrencyCatalogDefault(String code);
 
-  /// Heading for future sign-in / sync (placeholder).
+  /// Heading for sign-in / sync.
   ///
   /// In en, this message translates to:
   /// **'Account'**
   String get settingsAccountSectionTitle;
 
-  /// Short note under Account while auth is out of scope.
+  /// Explains local-only mode until Entra + Azure sync are implemented.
   ///
   /// In en, this message translates to:
-  /// **'Sign-in and multi-device sync are planned for a later phase.'**
-  String get settingsAccountPlaceholder;
+  /// **'Cloud account and sync are not enabled in this build. Your data stays on this device (local-first). The next Phase 5 slices add Microsoft Entra sign-in and Azure sync; see docs/05-implementation-phase-5-plan.md.'**
+  String get settingsAccountLocalOnlyBody;
 
   /// Heading for credit card metadata list (no card numbers).
   ///

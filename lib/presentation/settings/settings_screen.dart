@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:expense_app/data/local/default_fx_rates_loader.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 import 'package:expense_app/presentation/providers/providers.dart';
@@ -43,7 +42,9 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  key: ValueKey<String>('settings_lang_${settings.localeLanguageCode}'),
+                  key: ValueKey<String>(
+                    'settings_lang_${settings.localeLanguageCode}',
+                  ),
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: l10n.settingsLanguageLabel,
@@ -136,12 +137,7 @@ class SettingsScreen extends ConsumerWidget {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  l10n.settingsAccountPlaceholder,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
+                _AccountSection(l10n: l10n),
                 const SizedBox(height: 32),
                 Text(
                   l10n.settingsResetDataButton,
@@ -171,7 +167,9 @@ class SettingsScreen extends ConsumerWidget {
                       await resetLocalAppDatabase(ref);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.settingsResetDataSuccess)),
+                          SnackBar(
+                            content: Text(l10n.settingsResetDataSuccess),
+                          ),
                         );
                       }
                     }
@@ -188,8 +186,8 @@ class SettingsScreen extends ConsumerWidget {
                 Text(
                   l10n.settingsPopulateExampleDataDescription,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
@@ -206,7 +204,9 @@ class SettingsScreen extends ConsumerWidget {
                           ),
                           FilledButton(
                             onPressed: () => Navigator.pop(ctx, true),
-                            child: Text(l10n.settingsPopulateExampleDataConfirm),
+                            child: Text(
+                              l10n.settingsPopulateExampleDataConfirm,
+                            ),
                           ),
                         ],
                       ),
@@ -217,15 +217,17 @@ class SettingsScreen extends ConsumerWidget {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(l10n.settingsPopulateExampleDataSuccess),
+                              content: Text(
+                                l10n.settingsPopulateExampleDataSuccess,
+                              ),
                             ),
                           );
                         }
                       } on Object catch (e) {
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('$e')),
-                          );
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text('$e')));
                         }
                       }
                     }
@@ -242,10 +244,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-String _currencyDropdownValue(
-  String? stored,
-  DefaultFxCatalog catalog,
-) {
+String _currencyDropdownValue(String? stored, DefaultFxCatalog catalog) {
   if (stored == null || stored.isEmpty) {
     return SettingsScreen._currencyCatalogDefaultValue;
   }
@@ -253,4 +252,19 @@ String _currencyDropdownValue(
     return SettingsScreen._currencyCatalogDefaultValue;
   }
   return stored.toUpperCase();
+}
+
+class _AccountSection extends StatelessWidget {
+  const _AccountSection({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final variant = Theme.of(context).colorScheme.onSurfaceVariant;
+    return Text(
+      l10n.settingsAccountLocalOnlyBody,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: variant),
+    );
+  }
 }

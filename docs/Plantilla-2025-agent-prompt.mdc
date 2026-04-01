@@ -1,0 +1,112 @@
+---
+description: Specification and reusable agent prompt for Plantilla 2025.xlsx (expense workbook)
+---
+
+# Plantilla 2025.xlsx — Especificación y prompt para agentes
+
+## Nota de origen del análisis
+
+El análisis se realizó descomprimiendo el OOXML del `.xlsx` (sin Python en el entorno; sin abrir Excel). Eso permite ver hojas, tablas, nombres definidos, fórmulas en XML, validaciones y metadatos, pero **no** reproduce al 100% la experiencia visual (formato condicional detallado, gráficos, impresión exacta de cada estilo).
+
+---
+
+## Prompt para otro agente (copiar desde aquí)
+
+### Introduction
+
+You are working with **`Plantilla 2025.xlsx`**, a Spanish-language **personal/family expense tracking workbook** (legacy file: created 2011, last modified 2025-12-10). It is a standard **Excel `.xlsx`** (not macro-enabled). The workbook’s saved **absolute path hint** points to Google Drive: `G:\My Drive\Documents\Plantilla Gastos\`. The file contains **real sample transactions** in shared strings (names, merchants, amounts, dates); treat as **sensitive personal data** if exporting or quoting.
+
+Your job when given this prompt is to **maintain, extend, migrate, or explain** the workbook while preserving: **table names** (they match sheet names for months), **defined names** used in validation and `INDIRECT`, and **cross-sheet formulas** on **`Reporte `** (note trailing space in sheet tab name).
+
+---
+
+### Context
+
+**Purpose:** Register expenses by month in structured **Excel tables**, classify by **category / subcategory** from a configurable matrix, optionally store **ARS**, **USD** (derived from **COTIZACION**), and aggregate to **annual / multi-month dashboards** with **consistency checks**.
+
+**Sheets (17 tabs, order as in file):**
+
+| Tab name | Role |
+|----------|------|
+| `- AYUDA -` | Help / onboarding UI (mostly static content + drawing); **no formulas** in XML. |
+| `Reporte ` | **Central dashboard**: pulls per-month totals via **`INDIRECT`**, builds **annual sums**, **category blocks**, **proportion of annual** (`IFERROR(x/$AB$63,"")`), and **reconciliation** formulas that show `"Ok"` vs `"Error: Sumas no coinciden"` when two sum lines disagree. **~615 formula cells** (many are range-specific `SUM(...)` so “unique formula text” is high). |
+| `Tipo de Gastos` | **Master taxonomy**: row of main categories (columns B–I), columns of subcategories per main category. **No formulas**. Feeds validations and names. |
+| `Enero` … `Diciembre` | **One sheet per month**; each uses an **Excel ListObject table** named like the month (`Enero`, `Febrero`, …). |
+| `Auxiliar` | **Hidden**, **empty grid** (placeholder / scratch). |
+| `Sheet1` | **Secondary block** (not a month): uses a **single FX cell `H1`** (e.g. 1180) and formulas `En/H1` for USD; **SUM** subtotals for blocks; appears to be an alternate “control” layout, not the main monthly tables. **~22 formulas**. |
+
+**Excel tables (12 months):** Each month table has **7 columns** (order consistent across months):  
+`CATEGORÍA`, `SUBCATEGORÍA`, `FECHA`, `DETALLE`, `ARS`, **`USD` (calculated column)**, `COTIZACION`.
+
+**Calculated column pattern (all months):**  
+`IF(MonthTable[[#This Row],[COTIZACION]]="", "", MonthTable[[#This Row],[ARS]]/MonthTable[[#This Row],[COTIZACION]])`  
+So **USD is ARS divided by row-specific exchange rate** when `COTIZACION` is non-empty.
+
+**`Enero` nuance:** Table ref **`B5:H99`**. The worksheet also contains **duplicate per-row USD logic** in column **H** (same `IF(...)` pattern as the calculated column) in addition to the table’s `USD` column—likely legacy or auxiliary; be careful not to break references.
+
+**Table size varies by month** (examples from XML): `Abril` `B5:H59`, `Junio` `B5:H79`, `Marzo` `B5:H96`, `Mayo`/`Septiembre` up to **`H100`**, etc. **`Febrero`** has **`totalsRowCount="1"`** (total row enabled); others mostly `totalsRowShown="0"`.
+
+**Defined names (workbook scope, from `workbook.xml`):**
+
+- **`Categorías`** → `'Tipo de Gastos'!$B$6:$I$6` (header row of main categories for the year matrix).
+- Per-column lists (subcategories under each main category): **`Formación`**, **`Gastos_Fijos`**, **`Impuestos`**, **`Inversiones`**, **`Ocio`**, **`Salud`**, **`Transporte`**, **`Vivienda`** — ranges on `'Tipo de Gastos'` column B through I from row 8 downward (each name maps to one column’s list).
+- Hidden **`_xlnm._FilterDatabase`** names: **AutoFilter** database ranges per sheet (Excel-internal).
+
+**Data validation (typical monthly sheet pattern, e.g. `Enero`):**
+
+- Column **B** (category): **List** → `=Categorías` (stored as name `Categorías`; watch accented character in name).
+- Column **C** (subcategory): **List** → `=INDIRECT($B6)` so options **depend on category** (category text must match a **defined name** exactly).
+
+**Cross-sheet links:**
+
+- **`Reporte `** uses patterns like **`INDIRECT(C5&"!"&"F2")`** and **`INDIRECT(C5&"!"&"G2")`** (and similar across columns) to read **per-month summary cells** `F2` / `G2` on each month sheet (month name in row 5 cells like `C5`, `E5`, …). **Month tab names must stay consistent** with those text values.
+- **No external workbook links** were present in `workbook.xml` (`externalReferences` absent). `docProps` reports `LinksUpToDate=false` (informational).
+
+**Other package parts:**
+
+- **`customXml` / DataMashup**: Power Query / Data mashup container (minimal stub visible); not the main calculation path.
+- **Drawings** on several sheets (help / headers).
+- **`calcChain.xml`**: large dependency chain (heavy **`Reporte `** + month sheets).
+
+**Excel calculation features flagged:** modern features (e.g. LET/LAMBDA-related flags in `extLst`) — workbook may have been saved with a recent Excel build; core logic observed is **`SUM`, `IF`, `IFERROR`, `INDIRECT`, structured references**.
+
+---
+
+### Input indicators (what humans or systems feed in)
+
+1. **`Tipo de Gastos`**: Edit **category labels** (row 6) and **subcategory lists** (rows 8+ per column). Changes propagate to **defined names**; **category text in column B of month tables** must remain a **valid name** for **`INDIRECT($B6)`** (e.g. `Gastos_Fijos` not `Gastos Fijos` unless you adjust names).
+2. **Each month sheet table**: User-entered rows for **`CATEGORÍA`**, **`SUBCATEGORÍA`**, **`FECHA`**, **`DETALLE`**, **`ARS`**, **`COTIZACION`** (and optionally relying on calculated **`USD`**).
+3. **`Sheet1`**: **`H1`** acts as **FX rate** for that sheet’s `En/H1` conversions; block inputs in columns C–E (and related rows).
+4. **`Reporte `**: Row cells that hold **month names** driving **`INDIRECT`** (e.g. `C5`, `E5`, …) — if renamed, formulas must be updated or those cells must match **exact sheet names**.
+5. **Optional filters**: AutoFilter active ranges (hidden defined names) — user filtering does not change formulas but changes visible rows.
+
+---
+
+### Output indicators (what the workbook produces)
+
+1. **Per-month table:** **`USD`** column (calculated) and **row-level** ARS/USD consistency via **`COTIZACION`**.
+2. **Per-month summary cells** (used by dashboard): values in **`F2`** / **`G2`** (and analogous layout) that **`Reporte `** aggregates — **must stay aligned** with table structure and any edits to summary rows.
+3. **`Reporte ` dashboard:**  
+   - **Monthly and annual totals** (`SUM` across many ranges).  
+   - **Category section totals** (e.g. patterns like `SUM(C24,C28,…)` combining specific blocks).  
+   - **Share of annual** via **`IFERROR(AB…/$AB$63,"")`**.  
+   - **Validation messages**: **`Ok`** vs **`Error: Sumas no coinciden`** when paired totals (`…63` vs `…66` pattern) differ and are non-zero.
+4. **`Sheet1`:** **Block sums** (`SUM(E2:E16)`, etc.) and **USD column** using **`H1`** rate.
+5. **UX:** Dropdowns for category/subcategory; frozen panes on month sheets (row 5 split); **hidden** `Auxiliar`.
+
+**Non-goals / constraints for agents:** Do not invent **external API** links; preserve **Spanish column headers** and **table `displayName`** equal to sheet month names unless migrating deliberately; avoid breaking **`INDIRECT`** by renaming sheets without updating **`Reporte `**; respect **privacy** of embedded transaction strings.
+
+---
+
+### Limitations of this specification
+
+This description was derived from **OOXML** (worksheets, workbook, tables, shared strings), **not** from opening Excel. It does **not** enumerate every **conditional formatting** rule, **chart** series, or **print area** in prose. For pixel-perfect UI or full formula grid, re-read the file with **openpyxl / Excel** or diff XML after edits.
+
+---
+
+## Respuesta directa (alcance del análisis)
+
+**¿Se puede analizar “por completo”?**  
+Se puede cubrir **estructura, tablas, nombres, validaciones, tipos de fórmulas, enlaces entre hojas y lógica de negocio** con alto detalle, como en las secciones anteriores. Un análisis “total” al nivel de **cada celda, cada regla de formato condicional y cada objeto gráfico** es otro orden de magnitud y conviene hacerlo con **Excel + inspección visual** o una librería que exponga esos objetos.
+
+**Archivo fuente:** `Plantilla 2025.xlsx` (en la misma carpeta `docs/` que este documento).

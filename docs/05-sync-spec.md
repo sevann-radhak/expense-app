@@ -1,6 +1,6 @@
 # Sync specification — Phase 5 v1 (document only)
 
-**Status:** Normative for Phase 5 implementation. **Scope:** One **book** per authenticated **user** in v1 (aligned with [`PROJECT_MASTER_PLAN.md`](PROJECT_MASTER_PLAN.md) §6 and [`05-phase-5-analysis.md`](05-phase-5-analysis.md) §5). **Non-goals here:** concrete SQL, RPC names, or Flutter commits — those belong to subphases 5.3–5.5.
+**Status:** Normative for Phase 5 implementation. **Scope:** One **book** per authenticated **user** in v1 (aligned with [`PROJECT_MASTER_PLAN.md`](PROJECT_MASTER_PLAN.md) §6 and [`05-phase-5-analysis.md`](05-phase-5-analysis.md) §5). **Non-goals here:** concrete SQL, RPC names, or Flutter commits — those belong to subphases 5.3–5.5. **Restructure / deeper data design:** [`05-phase-5b-data-platform-restructure.md`](05-phase-5b-data-platform-restructure.md) may amend this document after decisions (book row, seed, boundaries).
 
 **Code anchors (as-built):**
 

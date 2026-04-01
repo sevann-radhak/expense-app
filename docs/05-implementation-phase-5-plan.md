@@ -4,7 +4,7 @@
 
 **Purpose:** Move from **local-only** Drift to **authenticated multi-device** use with **Azure-hosted** persistence, **CI/CD**, and **store-ready** builds—after a **local MVP** is complete on the developer machine.
 
-**Phase 5 status:** `in progress` (**5.1**–**5.3** done; **5.4** next).
+**Phase 5 status:** `in progress` (**5.1**–**5.3** done; **5.b** planned before final DDL + **5.4**; see [`05-phase-5b-data-platform-restructure.md`](05-phase-5b-data-platform-restructure.md)).
 
 **Repositories:** **Flutter** = this repo (`expense-app`). **HTTP API** = separate clone `**expense-app-backend`** (ASP.NET Core, Swagger). On disk, clone both next to each other (e.g. `../expense-app-backend`) and run `dotnet` commands from the API repo root—see its `README.md`.
 
@@ -79,6 +79,7 @@ When approved, order of operations (see `[05-azure-hosting-strategy.md](05-azure
 | 5.1      | Product scope: single book per user, `[05-sync-spec.md](05-sync-spec.md)` | `done`        |
 | 5.2      | **Local** dev environment: tooling, SQL optional, API skeleton, checklist | `done`        |
 | 5.3      | **Azure SQL** schema + migrations (developed & tested **locally** first)  | `done`        |
+| **5.b**  | **Data platform restructure:** users/books taxonomy, backend ownership, dev reset/seed — see dedicated doc | `planned`     |
 | 5.4      | Sync **REST** contract + implementation in **ASP.NET Core** API           | `pending`     |
 | 5.5      | Flutter: **MSAL** (Entra External ID) + `BookSyncGateway` / offline queue | `pending`     |
 | 5.6      | Provision **Azure Dev** + wire CI deploy (optional)                       | `pending`     |
@@ -156,13 +157,36 @@ When approved, order of operations (see `[05-azure-hosting-strategy.md](05-azure
 
 **Suggested commit subject:** `05-Add Azure SQL schema and migrations`
 
+**Note:** Initial DDL remains **changeable** until you apply migrations to a long-lived database. Subphase **5.b** may supersede or extend this script before **5.4**.
+
+---
+
+## Phase 5.b — Data platform restructure (users, books, taxonomy, seed, boundaries)
+
+**Status:** `planned`
+
+**Goal:** Pause and **redesign** the server-side data model and responsibilities **before** locking migrations and sync APIs—without abandoning **local-first** Drift or the **one book per `user_id`** rule from **5.1**.
+
+**Normative plan:** [`05-phase-5b-data-platform-restructure.md`](05-phase-5b-data-platform-restructure.md) (analysis, architecture split Flutter vs backend, dev-only reset/seed endpoints, ordered implementation steps, open questions).
+
+**Outcomes when 5.b completes:**
+
+- Decided: implicit vs explicit **book** representation in SQL; **taxonomy template** source of truth shared between backend seed and Flutter seeds.
+- Revised migrations (if needed) in **`expense-app-backend`**; `05-sync-spec.md` updated if the entity list or bootstrap order changes.
+- Backend exposes **development-scoped** endpoints to **reset** and **repopulate** seed data (never unauthenticated in production); seed reflects post-5.b taxonomy rules.
+- Clear boundary: **server** owns authoritative persisted book for authenticated sync; **Flutter** keeps domain + Drift + UI; repositories gain HTTP implementations per **5.4** / **5.5**.
+
+**Gate:** Close **5.b** before implementing **5.4** against “final” DDL, or explicitly document any overlap if you iterate in parallel on a throwaway database.
+
+**Suggested commit subject:** `05-Phase 5b data platform restructure plan`
+
 ---
 
 ## Phase 5.4 — Sync API
 
 **Status:** `pending`
 
-**Goal:** Implement REST endpoints aligned with `[05-sync-spec.md](05-sync-spec.md)`; idempotent writes; JWT validation on routes.
+**Goal:** Implement REST endpoints aligned with `[05-sync-spec.md](05-sync-spec.md)` (as amended after **5.b** if applicable); idempotent writes; JWT validation on routes.
 
 **Acceptance:** Contract tests against **local** API + DB; two-device scenario documented or automated.
 
@@ -247,6 +271,7 @@ When approved, order of operations (see `[05-azure-hosting-strategy.md](05-azure
 ## Reference
 
 - `[PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN.md)` §6  
+- `[05-phase-5b-data-platform-restructure.md](05-phase-5b-data-platform-restructure.md)` — **5.b** analysis and implementation sequence  
 - `[05-azure-hosting-strategy.md](05-azure-hosting-strategy.md)`  
 - `[05-sync-spec.md](05-sync-spec.md)`  
 - `[05-phase-5-analysis.md](05-phase-5-analysis.md)`  

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:expense_app/data/local/default_fx_rates_loader.dart';
@@ -6,6 +7,7 @@ import 'package:expense_app/presentation/providers/providers.dart';
 import 'package:expense_app/presentation/settings/recurring_series_list_screen.dart';
 import 'package:expense_app/presentation/settings/settings_backup_section.dart';
 import 'package:expense_app/presentation/settings/settings_card_profiles_section.dart';
+import 'package:expense_app/presentation/settings/settings_dev_backend_section.dart';
 import 'package:expense_app/presentation/theme/app_icons.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -131,6 +133,10 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 32),
                 const SettingsBackupSection(),
+                if (kDebugMode) ...[
+                  const SizedBox(height: 32),
+                  const SettingsDevBackendSection(),
+                ],
                 const SizedBox(height: 32),
                 Text(
                   l10n.settingsAccountSectionTitle,

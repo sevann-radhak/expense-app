@@ -1,0 +1,5 @@
+{
+  "AZURE_API_BASE_URL": "http://localhost:5057",
+  "DEV_DATA_SECRET": "",
+  "DEV_TEST_USER_ID": "dev-local-test-user"
+}

@@ -1897,6 +1897,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search subcategories'**
   String get taxonomySearchSubcategoryHint;
+
+  /// Settings section for calling the local expense-app-backend dev endpoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Local API (debug)'**
+  String get settingsDevBackendSectionTitle;
+
+  /// Explains which host and tenant id are used for dev book API calls.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses base URL {url} and user id {userId}. Configure dart_defines/local.json or --dart-define (see README).'**
+  String settingsDevBackendDescription(String url, String userId);
+
+  /// No description provided for @settingsDevBackendResetBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset server book'**
+  String get settingsDevBackendResetBook;
+
+  /// No description provided for @settingsDevBackendSeedTaxonomy.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed taxonomy on server'**
+  String get settingsDevBackendSeedTaxonomy;
+
+  /// No description provided for @settingsDevBackendSeedDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed demo on server'**
+  String get settingsDevBackendSeedDemo;
+
+  /// No description provided for @settingsDevBackendOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Server request completed.'**
+  String get settingsDevBackendOk;
+
+  /// No description provided for @settingsDevBackendNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'API base URL is not configured.'**
+  String get settingsDevBackendNotConfigured;
 }
 
 class _AppLocalizationsDelegate

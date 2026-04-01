@@ -26,6 +26,17 @@ flutter pub get
 flutter run -d chrome
 ```
 
+### Local API (`expense-app-backend`, Phase 5.b)
+
+In **debug**, the app defaults the remote base URL to **http://localhost:5057** if `AZURE_API_BASE_URL` is unset (see [`lib/application/cloud_backend_env.dart`](lib/application/cloud_backend_env.dart)).
+
+Optional compile-time overrides (recommended when you need `DEV_DATA_SECRET` or a custom test user id):
+
+1. Copy [`dart_defines/local.example.json`](dart_defines/local.example.json) to **`dart_defines/local.json`** (gitignored).
+2. Run with `--dart-define-from-file=dart_defines/local.json`, or use the VS Code launch configuration **expense-app (web, local API defines)** in [`.vscode/launch.json`](.vscode/launch.json).
+
+With the backend running and SQL configured, open **Settings** in the app (debug builds only): section **Local API (debug)** calls `reset` / `seed-taxonomy` / `seed-demo` via [`lib/data/remote/dev_backend_api_client.dart`](lib/data/remote/dev_backend_api_client.dart).
+
 Release build for deployment:
 
 ```bash

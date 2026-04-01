@@ -785,5 +785,22 @@
     }
   },
   "taxonomySearchCategoryHint": "Search categories",
-  "taxonomySearchSubcategoryHint": "Search subcategories"
+  "taxonomySearchSubcategoryHint": "Search subcategories",
+  "settingsDevBackendSectionTitle": "Local API (debug)",
+  "@settingsDevBackendSectionTitle": {
+    "description": "Settings section for calling the local expense-app-backend dev endpoints."
+  },
+  "settingsDevBackendDescription": "Uses base URL {url} and user id {userId}. Configure dart_defines/local.json or --dart-define (see README).",
+  "@settingsDevBackendDescription": {
+    "description": "Explains which host and tenant id are used for dev book API calls.",
+    "placeholders": {
+      "url": {"type": "String"},
+      "userId": {"type": "String"}
+    }
+  },
+  "settingsDevBackendResetBook": "Reset server book",
+  "settingsDevBackendSeedTaxonomy": "Seed taxonomy on server",
+  "settingsDevBackendSeedDemo": "Seed demo on server",
+  "settingsDevBackendOk": "Server request completed.",
+  "settingsDevBackendNotConfigured": "API base URL is not configured."
 }

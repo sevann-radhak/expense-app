@@ -64,6 +64,9 @@ pubspec_overrides.yaml
 .env.*
 !.env.example
 
+# Flutter compile-time defines (copy from dart_defines/local.example.json)
+dart_defines/local.json
+
 Thumbs.db
 
 # Signing (if you re-enable android/ in Git later)

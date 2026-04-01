@@ -1017,4 +1017,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taxonomySearchSubcategoryHint => 'Search subcategories';
+
+  @override
+  String get settingsDevBackendSectionTitle => 'Local API (debug)';
+
+  @override
+  String settingsDevBackendDescription(String url, String userId) {
+    return 'Uses base URL $url and user id $userId. Configure dart_defines/local.json or --dart-define (see README).';
+  }
+
+  @override
+  String get settingsDevBackendResetBook => 'Reset server book';
+
+  @override
+  String get settingsDevBackendSeedTaxonomy => 'Seed taxonomy on server';
+
+  @override
+  String get settingsDevBackendSeedDemo => 'Seed demo on server';
+
+  @override
+  String get settingsDevBackendOk => 'Server request completed.';
+
+  @override
+  String get settingsDevBackendNotConfigured =>
+      'API base URL is not configured.';
 }

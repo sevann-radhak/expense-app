@@ -41,7 +41,7 @@ For **consistency and durable user data** (aligned with [`05-sync-spec.md`](05-s
 
 | Environment | Intent | Azure consumption | Data / compute |
 |-------------|--------|-------------------|----------------|
-| **Local** | Implementation on your machine (primary dev). | **$0** Azure infrastructure. | **Drift/SQLite** (Flutter repo); **`expense-app-backend`** `ExpenseTracker.Api` on **Kestrel** (Swagger at `/swagger`); optional **Docker SQL Server** / LocalDB; **Azurite** if needed. JWT: mock middleware or dev-only keys until MSAL is wired. |
+| **Local** | Implementation on your machine (primary dev). | **$0** Azure infrastructure. | **Drift/SQLite** (Flutter repo); **`expense-app-backend`** `ExpenseTracker.Api` on **Kestrel** (Swagger at `/swagger`); **SQL Server Express** (Windows) or **Docker SQL Server** / **LocalDB** for Phase 5.3+ — see backend `README.md`; **Azurite** if needed. JWT: mock middleware or dev-only keys until MSAL is wired. |
 | **Azure Dev** | Hosted mirror for integration testing and shared QA. | **Billable** (use smallest SKUs). | **Only after** the [**Local MVP gate**](05-implementation-phase-5-plan.md#local-mvp-gate) in the implementation plan. Typical: `rg-expense-tracker-dev`, non-prod **Azure SQL**, API host (**Functions** consumption or **App Service**), **Entra External ID** redirects to dev URLs. |
 | **Azure Prod** | End users and durable production data. | **Billable**. | **After** Dev smoke tests and the [**Azure provisioning gate**](05-implementation-phase-5-plan.md#azure-provisioning-gate-after-local-mvp). Typical: `rg-expense-tracker-prod`, **Static Web Apps** for Flutter web, production SQL + API. |
 

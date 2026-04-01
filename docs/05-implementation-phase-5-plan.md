@@ -122,15 +122,15 @@ When approved, order of operations (see `[05-azure-hosting-strategy.md](05-azure
 
 **Checklist (acceptance):**
 
-- [x] **.NET SDK** installed; in `**expense-app-backend`**: `dotnet build ExpenseTracker.sln -c Release` succeeds (0 warnings in last verification run).
-- [x] **API run:** `dotnet run --project ExpenseTracker.Api` → **Swagger UI** at `/swagger` loads; `**GET /api/health`** returns JSON `status` **ok**; `**GET /api/hello`** returns `message` (see that repo’s `README.md`).
+- [x] **.NET SDK** installed; in **expense-app-backend**: `dotnet build ExpenseTracker.sln -c Release` succeeds (0 warnings in last verification run).
+- [x] **API run:** `dotnet run --project ExpenseTracker.Api` → **Swagger UI** at `/swagger` loads; **GET /api/health** returns JSON `status` **ok**; **GET /api/hello** returns `message` (see that repo’s `README.md`).
 - [x] **Flutter:** `flutter pub get`, `flutter analyze`, `flutter test` green (same verification run).
 - [x] **`flutter doctor`:** **[√] Flutter** and **Chrome** (web) sufficient for Phase 5 local work per [`PROJECT_MASTER_PLAN.md`](PROJECT_MASTER_PLAN.md) web-first order; **Android SDK** / **Windows desktop C++** workloads are optional until mobile/native-desktop release work (e.g. 5.5 / 5.9). Address those toolchains when you target those platforms.
-- [x] **Optional SQL:** Documented in `**expense-app-backend`** `README.md` (Docker **SQL Server** example with placeholder credentials, **no** secrets in git). Store real connection strings in **`dotnet user-secrets`** or a **gitignored** local file — **never** commit secrets.
+- [x] **Optional SQL:** Documented in **expense-app-backend** `README.md`: **SQL Server Express** on Windows (step-by-step), plus Docker and LocalDB alternatives; **no** secrets in git. Store real connection strings in **`dotnet user-secrets`** or a **gitignored** local file.
 - [ ] **Optional:** Install **Azure Functions Core Tools** only if you migrate the host to Functions (`dotnet new func` requires the Functions worker template). Not required for the current Kestrel API.
 - [x] **Docs:** This checklist checked off when 5.2 closed.
 
-**Code anchors:** `**expense-app-backend`** / `ExpenseTracker.Api`; this repo → `[lib/application/cloud_backend_env.dart](../lib/application/cloud_backend_env.dart)`.
+**Code anchors:** **expense-app-backend** / `ExpenseTracker.Api`; this repo → [`lib/application/cloud_backend_env.dart`](../lib/application/cloud_backend_env.dart).
 
 **Suggested commit subject:** `05-Add local backend skeleton and dev checklist`
 
@@ -142,7 +142,9 @@ When approved, order of operations (see `[05-azure-hosting-strategy.md](05-azure
 
 **Goal:** **Azure SQL** schema; **per-user** isolation (API enforces `user_id` from validated JWT; optional DB constraints).
 
-**Steps:** Versioned SQL in `**expense-app-backend`**; map Entra `**oid` / `sub**` to `**user_id**`; apply migrations **locally** first.
+**Local engine (documented):** **SQL Server Express** on Windows for first-time setup; same steps work with **Developer** edition. Alternatives: Docker SQL Server image or **LocalDB**. Full walkthrough: **expense-app-backend** [`README.md`](../../expense-app-backend/README.md) section *Local database (Phase 5.3+)*.
+
+**Steps:** Versioned SQL/migrations in **expense-app-backend**; map Entra `oid` / `sub` to `user_id`; apply migrations against **local** SQL Server **before** any billable Azure SQL.
 
 **Acceptance:** Second test user cannot access first user’s data (test or script).
 

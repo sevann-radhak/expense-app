@@ -6,6 +6,7 @@
 
 - Drift tables: [`lib/data/local/app_database.dart`](../lib/data/local/app_database.dart) — `schemaVersion` **16**.
 - Export shape: [`lib/application/book_backup_snapshot.dart`](../lib/application/book_backup_snapshot.dart) — JSON `schemaVersion` **9** via [`lib/application/book_backup_codec.dart`](../lib/application/book_backup_codec.dart).
+- Server DDL (separate repo): `expense-app-backend` → `ExpenseTracker.Migrations/Scripts/` — book tables + `user_id` + `user_preferences`; applied via `ExpenseTracker.DbMigrate` (see that repo’s `README.md`).
 
 ---
 

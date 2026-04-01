@@ -4,7 +4,7 @@
 
 **Purpose:** Move from **local-only** Drift to **authenticated multi-device** use with **Azure-hosted** persistence, **CI/CD**, and **store-ready** builds—after a **local MVP** is complete on the developer machine.
 
-**Phase 5 status:** `in progress` (**5.1**–**5.2** done; **5.3** next).
+**Phase 5 status:** `in progress` (**5.1**–**5.3** done; **5.4** next).
 
 **Repositories:** **Flutter** = this repo (`expense-app`). **HTTP API** = separate clone `**expense-app-backend`** (ASP.NET Core, Swagger). On disk, clone both next to each other (e.g. `../expense-app-backend`) and run `dotnet` commands from the API repo root—see its `README.md`.
 
@@ -78,7 +78,7 @@ When approved, order of operations (see `[05-azure-hosting-strategy.md](05-azure
 | -------- | ------------------------------------------------------------------------- | ------------- |
 | 5.1      | Product scope: single book per user, `[05-sync-spec.md](05-sync-spec.md)` | `done`        |
 | 5.2      | **Local** dev environment: tooling, SQL optional, API skeleton, checklist | `done`        |
-| 5.3      | **Azure SQL** schema + migrations (developed & tested **locally** first)  | `pending`     |
+| 5.3      | **Azure SQL** schema + migrations (developed & tested **locally** first)  | `done`        |
 | 5.4      | Sync **REST** contract + implementation in **ASP.NET Core** API           | `pending`     |
 | 5.5      | Flutter: **MSAL** (Entra External ID) + `BookSyncGateway` / offline queue | `pending`     |
 | 5.6      | Provision **Azure Dev** + wire CI deploy (optional)                       | `pending`     |
@@ -138,15 +138,21 @@ When approved, order of operations (see `[05-azure-hosting-strategy.md](05-azure
 
 ## Phase 5.3 — Server schema and authorization
 
-**Status:** `pending`
+**Status:** `done`
 
-**Goal:** **Azure SQL** schema; **per-user** isolation (API enforces `user_id` from validated JWT; optional DB constraints).
+**Goal:** **Azure SQL** schema; **per-user** isolation (API enforces `user_id` from validated JWT in **5.4**; schema uses composite keys `(user_id, id)` and FKs scoped by `user_id`).
 
 **Local engine (documented):** **SQL Server Express** on Windows for first-time setup; same steps work with **Developer** edition. Alternatives: Docker SQL Server image or **LocalDB**. Full walkthrough: **expense-app-backend** [`README.md`](../../expense-app-backend/README.md) section *Local database (Phase 5.3+)*.
 
-**Steps:** Versioned SQL/migrations in **expense-app-backend**; map Entra `oid` / `sub` to `user_id`; apply migrations against **local** SQL Server **before** any billable Azure SQL.
+**As-built (backend repo):**
 
-**Acceptance:** Second test user cannot access first user’s data (test or script).
+- `ExpenseTracker.Migrations/Scripts/` — versioned T-SQL (DbUp journal: `dbo.schemaversions`).
+- `ExpenseTracker.DbMigrate` — `dotnet run --project ExpenseTracker.DbMigrate` (+ connection string; see README).
+- `ExpenseTracker.Migrations.Tests` — embedded-script smoke test always runs; set `EXPENSE_TRACKER_TEST_SQL` to run tenant isolation check against a real SQL instance.
+
+**Steps completed:** Initial book DDL aligned with [`05-sync-spec.md`](05-sync-spec.md) entity list + `user_preferences` (sync spec §2.8 recommendation A); `updated_at_utc` on book tables for future LWW. **Entra** `oid` / `sub` → `user_id` string at API layer in **5.4**.
+
+**Acceptance:** Schema supports per-user isolation; optional integration test with `EXPENSE_TRACKER_TEST_SQL` validates `user_id` filtering. **API-level** cross-tenant denial is required for [Local MVP gate](#local-mvp-gate) item 3 and is implemented with JWT in **5.4**.
 
 **Suggested commit subject:** `05-Add Azure SQL schema and migrations`
 

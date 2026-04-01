@@ -4,7 +4,9 @@ import 'package:expense_app/application/cloud_backend_env.dart';
 import 'package:expense_app/data/remote/dev_backend_api_client.dart';
 import 'package:expense_app/l10n/app_localizations.dart';
 
-/// Debug-only controls for Phase 5.b dev book endpoints on **expense-app-backend**.
+typedef DevBackendAction =
+    Future<void> Function(DevBackendApiClient client, String userId);
+
 class SettingsDevBackendSection extends StatefulWidget {
   const SettingsDevBackendSection({super.key});
 
@@ -62,6 +64,12 @@ class _SettingsDevBackendSectionState extends State<SettingsDevBackendSection> {
         : '(not set)';
     final userId = CloudBackendEnv.devTestUserId;
 
+    final actions = <(String label, DevBackendAction)>[
+      (l10n.settingsDevBackendResetBook, (c, u) => c.resetBook(userId: u)),
+      (l10n.settingsDevBackendSeedTaxonomy, (c, u) => c.seedTaxonomy(userId: u)),
+      (l10n.settingsDevBackendSeedDemo, (c, u) => c.seedDemo(userId: u)),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -81,36 +89,11 @@ class _SettingsDevBackendSectionState extends State<SettingsDevBackendSection> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            OutlinedButton(
-              onPressed: _busy
-                  ? null
-                  : () => _run(
-                        context,
-                        l10n,
-                        (c, u) => c.resetBook(userId: u),
-                      ),
-              child: Text(l10n.settingsDevBackendResetBook),
-            ),
-            OutlinedButton(
-              onPressed: _busy
-                  ? null
-                  : () => _run(
-                        context,
-                        l10n,
-                        (c, u) => c.seedTaxonomy(userId: u),
-                      ),
-              child: Text(l10n.settingsDevBackendSeedTaxonomy),
-            ),
-            OutlinedButton(
-              onPressed: _busy
-                  ? null
-                  : () => _run(
-                        context,
-                        l10n,
-                        (c, u) => c.seedDemo(userId: u),
-                      ),
-              child: Text(l10n.settingsDevBackendSeedDemo),
-            ),
+            for (final (label, fn) in actions)
+              OutlinedButton(
+                onPressed: _busy ? null : () => _run(context, l10n, fn),
+                child: Text(label),
+              ),
           ],
         ),
       ],

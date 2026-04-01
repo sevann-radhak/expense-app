@@ -47,8 +47,8 @@ Synchronize **book data** that is already modeled in Drift and exported in `Book
 
 | Drift table | Domain / notes |
 |-------------|----------------|
-| `expense_recurring_series` | `recurrence_json`, anchors, amounts, FKs to expense taxonomy / optional `payment_instrument_id`. |
-| `income_recurring_series` | Same pattern for income taxonomy. |
+| `expense_recurring_series` | `recurrence_json`, anchors, amounts, FKs to expense taxonomy / optional `payment_instrument_id`. Dart table class: `RecExpenseSeries` with explicit `tableName` → `expense_recurring_series`. |
+| `income_recurring_series` | Same pattern for income taxonomy. Dart: `IncomeRecSeries` → `income_recurring_series`. |
 
 ### 2.5 Installments
 
